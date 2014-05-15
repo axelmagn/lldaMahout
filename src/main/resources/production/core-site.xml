@@ -18,6 +18,10 @@
         <name>fs.viewfs.mounttable.nsX.link./user</name>
         <value>hdfs://node7:19000/user</value>
     </property>
+    <property>
+        <name>fs.viewfs.mounttable.nsX.link./data</name>
+        <value>hdfs://node7:19000/data</value>
+    </property>
 
     <property>
         <name>fs.defaultFS</name>
