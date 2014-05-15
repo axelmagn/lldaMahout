@@ -26,9 +26,11 @@ public class UpdateDictDriver extends AbstractJob{
   public static final String DICT_SIZE_PATH="dict_size_path";
   public static final String TMP_DICT_PATH="tmp_dict_path";
   @Override
-  public int run(String[] strings) throws Exception {
+  public int run(String[] args) throws Exception {
     addInputOption();
     addOption(PrepareInfDocsDriver.DICT_OPTION_NAME,"dict","dictionary root Path");
+    if(parseArguments(args)==null)
+      return -1;
     Path textInputPath=getInputPath();
     String dictRoot=getOption(PrepareInfDocsDriver.DICT_OPTION_NAME);
     String dictPath=dictRoot+ File.separator+"dict";
