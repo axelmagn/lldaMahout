@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+    <property>
+        <name>fs.viewfs.mounttable.nsX.link./share</name>
+        <value>hdfs://node6:19000/share</value>
+    </property>
+    <property>
+        <name>fs.viewfs.mounttable.nsX.link./hbase</name>
+        <value>hdfs://node6:19000/hbase</value>
+    </property>
+    <property>
+        <name>fs.viewfs.mounttable.nsX.link./tmp</name>
+        <value>hdfs://node6:19000/tmp</value>
+    </property>
+    <property>
+        <name>fs.viewfs.mounttable.nsX.link./user</name>
+        <value>hdfs://node7:19000/user</value>
+    </property>
+
+    <property>
+        <name>fs.defaultFS</name>
+        <value>viewfs://nsX</value>
+        <description>整个Federation集群对外提供服务的NS逻辑名称，
+            注意，这里的协议不再是hdfs，而是新引入的viewfs
+            这个逻辑名称会在下面的挂载表中用到
+        </description>
+    </property>
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/data/hadoop/cache/hadoop</value>
+    </property>
+
+</configuration>
+

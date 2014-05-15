@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+  <property>
+    <name>mapred.job.tracker</name>
+    <value>namenode:19001</value>
+  </property>
+  <property>   
+    <name>ipc.server.listen.queue.size</name>
+    <value>256</value>
+  </property>
+  <property>
+    <name>mapred.child.java.opts</name>
+    <value>-Xmx128m -Xss256k -XX:+UseParallelGC</value>
+  </property>   
+  <property>
+    <name>mapred.job.reuse.jvm.num.tasks</name>
+    <value>8</value>
+  </property>
+  <property>
+    <name>io.file.buffer.size</name>
+    <value>65536</value>
+  </property>
+  <property>
+   <name>mapred.local.dir</name>
+   <value>/data/hadoop/cache/hadoop/mapred/local/</value>
+  </property>
+
+<!-- Map side -->
+  <property>
+    <name>mapred.map.tasks.maximum</name>
+    <value>2</value>
+  </property> 
+  <property>
+    <name>mapred.tasktracker.map.tasks.maximum</name>
+    <value>2</value>
+  </property>    
+  <property>   
+    <name>tasktracker.http.threads</name>
+    <value>70</value>
+  </property>
+  <property>   
+    <name>io.sort.factor</name>
+    <value>100</value>
+  </property>        
+  <property>   
+    <name>io.sort.mb</name>
+    <value>300</value>
+  </property>        
+  <property>
+    <name>mapred.compress.map.output</name>
+    <value>true</value>
+  </property>
+<!-- Reduce side -->   
+  <property>   
+    <name>mapred.reduce.tasks.maximum</name>
+    <value>2</value>
+  </property>
+  <property>
+    <name>mapred.tasktracker.reduce.tasks.maximum</name>
+    <value>2</value>
+  </property>
+  <property>   
+    <name>mapred.reduce.parallel.copies</name>
+    <value>20</value>
+  </property>         
+  <property>
+    <name>mapred.job.shuffle.input.buffer.percent</name>
+    <value>0.7</value>
+  </property>
+  <property>
+    <name>mapred.job.shuffle.merge.percent</name>
+    <value>0.66</value>
+  </property>
+  <property>
+    <name>mapred.reduce.slowstart.completed.maps</name>
+    <value>0.75</value>
+  </property>
+  <property>
+    <name>mapreduce.reduce.merge.memtomem.enabled</name>
+    <value>true</value>
+  </property>
+  <property>
+    <name>fs.inmemory.size.mb</name>
+    <value>200</value>
+  </property>	 
+  <property>
+    <name>mapred.jobtracker.retirejob.interval</name>
+    <value>10</value>
+  </property>   
+  <property>
+      <name>mapred.hosts.exclude</name>
+      <value>/etc/hadoop/conf/excludes</value>
+  </property>
+<!-- Enable Hue plugins -->
+  <!--property>
+    <name>mapred.jobtracker.plugins</name>
+    <value>org.apache.hadoop.thriftfs.ThriftJobTrackerPlugin</value>
+    <description>Comma-separated list of jobtracker plug-ins to be activated.
+    </description>
+  </property>
+  <property>
+    <name>jobtracker.thrift.address</name>
+    <value>0.0.0.0:9290</value>
+  </property-->
+</configuration>
