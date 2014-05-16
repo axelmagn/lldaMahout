@@ -19,6 +19,9 @@ import java.io.IOException;
  */
 public class LabeledDocumentWritable implements Writable {
   private LabeledDocument labeledDocument;
+  public LabeledDocumentWritable(){
+
+  }
   public LabeledDocumentWritable(LabeledDocument labeledDocument){
      this.labeledDocument=labeledDocument;
   }
