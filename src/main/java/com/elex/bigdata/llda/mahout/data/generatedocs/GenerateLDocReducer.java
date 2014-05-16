@@ -103,7 +103,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,LabeledDocumentW
   }
 
   public void cleanup(Context context) throws IOException {
-    uidWriter.sync();
+    uidWriter.hflush();
     uidWriter.close();
   }
 }

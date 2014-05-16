@@ -7,8 +7,6 @@ import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocMapper;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
-import com.elex.bigdata.llda.mahout.dictionary.UpdateDictMapper;
-import com.elex.bigdata.llda.mahout.dictionary.UpdateDictReducer;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
@@ -33,57 +31,51 @@ import java.io.File;
  * To change this template use File | Settings | File Templates.
  */
 public class PrepareInfDocsDriver extends AbstractJob{
-  public static final String DICT_OPTION_NAME="dictionary";
+
   public static final String PRE_LDOC_OPTION_NAME="leftInput";
-  public static final String DOC_ROOT_OPTION_NAME="docsRoot";
-  public static final String DOC_OPTION_NAME="docsDir";
-  public static final String RESOURCE_OPTION_NAME="resourceDir";
+
+
+
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
     /*
       dictRoot--dict,dictSize,tmpDict
      */
-    addOption(DICT_OPTION_NAME,"dict","dictionary root Path",true);
+    addOption(UpdateDictDriver.DICT_OPTION_NAME,"dict","dictionary root Path",true);
 
     /*
       lDocRoot:day--sequenceFile(uidUrlCount seperated by day),total(_day)(total url info to day),inf(the docs to inf)
      */
-    addOption(DOC_ROOT_OPTION_NAME,"docsRoot","specify the lDocs Root Directory");
+    addOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME,"docsRoot","specify the lDocs Root Directory");
     addOption(PRE_LDOC_OPTION_NAME,"lIn","InputPath for previous lDocs");
-    addOption(DOC_OPTION_NAME,"docsDir","specify the lDocs directory");
+    addOption(GenerateLDocDriver.DOC_OPTION_NAME,"docsDir","specify the lDocs directory");
     /*
       resources:url_category,category_label
 
      */
-    addOption(RESOURCE_OPTION_NAME,"rDir","specify the resources Dir");
+    addOption(GenerateLDocDriver.RESOURCE_OPTION_NAME,"rDir","specify the resources Dir");
     if(parseArguments(args)==null){
       return -1;
     }
-    Path textInputPath=getInputPath();
-    String dictRoot=getOption(DICT_OPTION_NAME);
-    String dictPath=dictRoot+ File.separator+"dict";
-    String tmpDictPath=dictRoot+File.separator+"tmpDict";
-    String dictSizePath=dictRoot+File.separator+"dictSize";
-    Configuration conf=getConf();
-    conf.set(UpdateDictDriver.DICT_PATH,dictPath);
-    conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
-    conf.set(UpdateDictDriver.TMP_DICT_PATH,tmpDictPath);
-    setConf(conf);
-    Path dictOutputPath=new Path(dictRoot+File.separator+"updateDictOut");
-    Job updateDictJob=prepareJob(textInputPath,dictOutputPath, TextInputFormat.class, UpdateDictMapper.class, LongWritable.class,Text.class, UpdateDictReducer.class,Text.class, IntWritable.class, SequenceFileOutputFormat.class);
-    updateDictJob.setJobName("updateDict");
     JobControl jobControl=new JobControl("prepareInfDocs");
+
+    Path textInputPath=getInputPath();
+    String dictRoot=getOption(UpdateDictDriver.DICT_OPTION_NAME);
+    Configuration conf=getConf();
+    setConf(conf);
+    Job updateDictJob=UpdateDictDriver.prepareJob(conf,textInputPath,dictRoot);
+    updateDictJob.setJobName("updateDict");
     ControlledJob controlledDictJob=new ControlledJob(conf);
     controlledDictJob.setJob(updateDictJob);
     jobControl.addJob(controlledDictJob);
 
-    String docsRoot=getOption(DOC_ROOT_OPTION_NAME);
-    String docsDir=getOption(PrepareInfDocsDriver.DOC_OPTION_NAME);
+    String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME);
+    String docsDir=getOption(GenerateLDocDriver.DOC_OPTION_NAME);
     String docsPath=docsRoot+File.separator+docsDir;
     String uidPath=docsRoot+File.separator+"uid";
 
-    String resourceDir=getOption(RESOURCE_OPTION_NAME);
+    String resourceDir=getOption(GenerateLDocDriver.RESOURCE_OPTION_NAME);
     String urlCategoryPath=resourceDir+File.separator+"url_category";
     String categoryLabelPath=resourceDir+File.separator+"category_label";
 

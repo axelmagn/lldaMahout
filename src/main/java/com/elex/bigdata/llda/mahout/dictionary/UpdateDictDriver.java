@@ -13,6 +13,7 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
 import java.io.File;
+import java.io.IOException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,24 +26,34 @@ public class UpdateDictDriver extends AbstractJob{
   public static final String DICT_PATH="dict_path";
   public static final String DICT_SIZE_PATH="dict_size_path";
   public static final String TMP_DICT_PATH="tmp_dict_path";
+  public static final String DICT_OPTION_NAME="dictionary";
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
-    addOption(PrepareInfDocsDriver.DICT_OPTION_NAME,"dict","dictionary root Path");
+    addOption(DICT_OPTION_NAME,"dict","dictionary root Path");
     if(parseArguments(args)==null)
       return -1;
     Path textInputPath=getInputPath();
-    String dictRoot=getOption(PrepareInfDocsDriver.DICT_OPTION_NAME);
+    String dictRoot=getOption(DICT_OPTION_NAME);
+    Configuration conf=new Configuration();
+    Job updateDictJob=prepareJob(conf,textInputPath,dictRoot);
+    updateDictJob.submit();
+    updateDictJob.waitForCompletion(true);
+    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+  }
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new Configuration(),new UpdateDictDriver(),args);
+  }
+
+  public static Job  prepareJob(Configuration conf,Path inputPath,String dictRoot) throws IOException {
     String dictPath=dictRoot+ File.separator+"dict";
     String tmpDictPath=dictRoot+File.separator+"tmpDict";
     String dictSizePath=dictRoot+File.separator+"dictSize";
-    Configuration conf=new Configuration();
     conf.setLong("mapred.max.split.size", 22485760); // 10m
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize",22485760);
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 22485760);
     conf.set(UpdateDictDriver.DICT_PATH,dictPath);
     conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
-    conf.set(UpdateDictDriver.TMP_DICT_PATH,tmpDictPath);
-    setConf(conf);
+    conf.set(UpdateDictDriver.TMP_DICT_PATH, tmpDictPath);
     Path dictOutputPath=new Path(dictRoot+File.separator+"updateDictOut");
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(dictOutputPath))
@@ -52,17 +63,13 @@ public class UpdateDictDriver extends AbstractJob{
     updateDictJob.setInputFormatClass(CombineTextInputFormat.class);
     updateDictJob.setMapperClass(UpdateDictMapper.class);
     updateDictJob.setReducerClass(UpdateDictReducer.class);
-    FileInputFormat.addInputPath(updateDictJob, textInputPath);
+    FileInputFormat.addInputPath(updateDictJob, inputPath);
     SequenceFileOutputFormat.setOutputPath(updateDictJob, dictOutputPath);
     updateDictJob.setOutputFormatClass(SequenceFileOutputFormat.class);
     updateDictJob.setMapOutputKeyClass(Text.class);
     updateDictJob.setMapOutputValueClass(NullWritable.class);
     updateDictJob.setJarByClass(UpdateDictDriver.class);
-    updateDictJob.submit();
-    updateDictJob.waitForCompletion(true);
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
-  }
-  public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new UpdateDictDriver(),args);
+    updateDictJob.setJobName("update Dict");
+    return updateDictJob;
   }
 }
