@@ -14,8 +14,8 @@ import java.io.IOException;
  * Time: 10:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UpdateDictMapper extends Mapper<LongWritable,Text,Text,NullWritable> {
-  public void map(LongWritable key,Text value ,Context context) throws IOException, InterruptedException {
+public class UpdateDictMapper extends Mapper<Object,Text,Text,NullWritable> {
+  public void map(Object key,Text value ,Context context) throws IOException, InterruptedException {
      String[] uidUrlCount=value.toString().split("\t");
      String url=uidUrlCount[1];
      context.write(new Text(url), NullWritable.get());

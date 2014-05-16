@@ -13,8 +13,8 @@ import java.io.IOException;
  * Time: 10:36 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GenerateLDocMapper extends Mapper<LongWritable,Text,Text,Text> {
-  public void map(LongWritable key,Text value,Context context) throws IOException, InterruptedException {
+public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
+  public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
     /*
         extract uid and url-count from value
         while loopCount < count
