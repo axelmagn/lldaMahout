@@ -86,7 +86,7 @@ public class PrepareInfDocsDriver extends AbstractJob{
     String preLDocPath=docsRoot+File.separator+getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
     String infLDocPath=docsRoot+File.separator+"inf";
     String currentDocPath=docsPath;
-    Job complementDocsJob= ComplementLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(infLDocPath),uidPath);
+    Job complementDocsJob= ComplementLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(infLDocPath),uidPath,dictRoot);
     ControlledJob controlledCompDocsJob=new ControlledJob(conf);
     controlledCompDocsJob.setJob(complementDocsJob);
     controlledCompDocsJob.addDependingJob(controlledGenLDocJob);

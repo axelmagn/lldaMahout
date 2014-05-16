@@ -53,18 +53,18 @@ public class ComplementLDocDriver extends AbstractJob {
     Path leftInputPath=new Path(docsRoot+ File.separator+leftDir);
     Path outputPath=new Path(docsRoot+File.separator+"inf");
     String uidFilePath=docsRoot+File.separator+"uid";
-    String dictSizePath=getOption("dictionary")+File.separator+"dictSize";
+    String dictRoot=getOption("dictionary");
     Configuration conf=new Configuration();
 
-    Job complementLDocJob=prepareJob(conf,new Path[]{leftInputPath,inputPath},outputPath,uidFilePath,dictSizePath);
+    Job complementLDocJob=prepareJob(conf,new Path[]{leftInputPath,inputPath},outputPath,uidFilePath,dictRoot);
     complementLDocJob.submit();
     complementLDocJob.waitForCompletion(true);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,String uidFilePath,String dictSizePath) throws IOException {
+  public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,String uidFilePath,String dictRoot) throws IOException {
     conf.set(GenerateLDocDriver.UID_PATH,uidFilePath);
-    conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
+    conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictRoot+File.separator+"dictSize");
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath);
