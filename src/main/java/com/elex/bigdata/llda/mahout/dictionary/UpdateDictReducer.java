@@ -38,7 +38,7 @@ public class UpdateDictReducer extends Reducer<Text,NullWritable,Text,IntWritabl
     IntWritable id=new IntWritable();
     while(dictReader.next(url,id)){
       dict.put(url.toString(),id.get());
-      context.write(url,id);
+      //context.write(url,id);
     }
     dictId=dict.size();
   }
