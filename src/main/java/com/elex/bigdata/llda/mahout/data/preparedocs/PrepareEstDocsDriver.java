@@ -5,6 +5,7 @@ import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocMapper;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
+import com.elex.bigdata.llda.mahout.data.mergedocs.MergeLDocDriver;
 import com.elex.bigdata.llda.mahout.data.mergedocs.MergeLDocMapper;
 import com.elex.bigdata.llda.mahout.data.mergedocs.MergeLDocReducer;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
@@ -59,18 +60,10 @@ public class PrepareEstDocsDriver extends AbstractJob {
     }
     Path textInputPath=getInputPath();
     String dictRoot=getOption(UpdateDictDriver.DICT_OPTION_NAME);
-    String dictPath=dictRoot+ File.separator+"dict";
-    String tmpDictPath=dictRoot+File.separator+"tmpDict";
-    String dictSizePath=dictRoot+File.separator+"dictSize";
     Configuration conf=getConf();
-    conf.set(UpdateDictDriver.DICT_PATH,dictPath);
-    conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
-    conf.set(UpdateDictDriver.TMP_DICT_PATH,tmpDictPath);
     setConf(conf);
-    Path dictOutputPath=new Path(dictRoot+File.separator+"updateDicOut");
-    Job updateDictJob=prepareJob(textInputPath,dictOutputPath, TextInputFormat.class, UpdateDictMapper.class, LongWritable.class,Text.class, UpdateDictReducer.class,Text.class, IntWritable.class, SequenceFileOutputFormat.class);
-    updateDictJob.setJobName("updateDict");
-    JobControl jobControl=new JobControl("prepareInfDocs");
+    Job updateDictJob=UpdateDictDriver.prepareJob(conf,textInputPath,dictRoot);
+    JobControl jobControl=new JobControl("prepareEstDocs");
     ControlledJob controlledDictJob=new ControlledJob(conf);
     controlledDictJob.setJob(updateDictJob);
     jobControl.addJob(controlledDictJob);
@@ -79,27 +72,19 @@ public class PrepareEstDocsDriver extends AbstractJob {
     String docsDir=getOption(GenerateLDocDriver.DOC_OPTION_NAME);
     String docsPath=docsRoot+File.separator+docsDir;
     String uidPath=docsRoot+File.separator+"uid";
-
     String resourceDir=getOption(GenerateLDocDriver.RESOURCE_OPTION_NAME);
-    String urlCategoryPath=resourceDir+File.separator+"url_category";
-    String categoryLabelPath=resourceDir+File.separator+"category_label";
 
-    conf.set(GenerateLDocDriver.URL_CATEGORY_PATH,urlCategoryPath);
-    conf.set(GenerateLDocDriver.CATEGORY_LABEL_PATH,categoryLabelPath);
-    conf.set(GenerateLDocDriver.UID_PATH,uidPath);
-
-    Job generateDocJob=prepareJob(textInputPath,new Path(docsPath),TextInputFormat.class, GenerateLDocMapper.class,LongWritable.class,Text.class, GenerateLDocReducer.class,Text.class, LabeledDocumentWritable.class,SequenceFileOutputFormat.class);
+    Job generateDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,new Path(docsPath),dictRoot,resourceDir,uidPath);
     ControlledJob controlledGenLDocJob=new ControlledJob(conf);
     controlledGenLDocJob.setJob(generateDocJob);
     controlledGenLDocJob.addDependingJob(controlledDictJob);
     jobControl.addJob(controlledGenLDocJob);
 
-    String estLDocPath=docsRoot+File.separator+"_"+docsDir;
+    String estLDocPath=docsRoot+File.separator+"est";
     String preLDocPath=docsRoot+File.separator+getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
     String currentDocPath=docsPath;
-    Job mergeDocsJob=prepareJob(new Path(preLDocPath),new Path(estLDocPath),SequenceFileInputFormat.class, MergeLDocMapper.class,
-      Text.class,LabeledDocumentWritable.class,MergeLDocReducer.class,Text.class,LabeledDocumentWritable.class,SequenceFileOutputFormat.class);
-    SequenceFileInputFormat.addInputPath(mergeDocsJob,new Path(currentDocPath));
+    Job mergeDocsJob= MergeLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(estLDocPath),dictRoot);
+      SequenceFileInputFormat.addInputPath(mergeDocsJob,new Path(currentDocPath));
     ControlledJob controlledMergeDocsJob=new ControlledJob(conf);
     controlledMergeDocsJob.setJob(mergeDocsJob);
     jobControl.addJob(controlledMergeDocsJob);
