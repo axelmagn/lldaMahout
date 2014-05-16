@@ -13,14 +13,20 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.mahout.clustering.lda.cvb.CVB0Driver;
-import org.apache.mahout.clustering.lda.cvb.CVB0TopicTermVectorNormalizerMapper;
-import org.apache.mahout.clustering.lda.cvb.CachingCVB0PerplexityMapper;
+import org.apache.hadoop.util.ToolRunner;
+import org.apache.mahout.clustering.lda.cvb.*;
+import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
+import org.apache.mahout.common.iterator.sequencefile.PathType;
+import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
 import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
@@ -37,8 +43,25 @@ import java.util.List;
  * Time: 5:36 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CachingLLDADriver extends CVB0Driver {
-  private static final Logger log = LoggerFactory.getLogger(CVB0Driver.class);
+public class LLDADriver extends AbstractJob {
+  private static final Logger log = LoggerFactory.getLogger(LLDADriver.class);
+
+  public static final String NUM_TOPICS = "num_topics";
+  public static final String NUM_TERMS = "num_terms";
+  public static final String DOC_TOPIC_SMOOTHING = "doc_topic_smoothing";
+  public static final String TERM_TOPIC_SMOOTHING = "term_topic_smoothing";
+  public static final String DICTIONARY = "dictionary";
+  public static final String DOC_TOPIC_OUTPUT = "doc_topic_output";
+  public static final String MODEL_TEMP_DIR = "topic_model_temp_dir";
+  public static final String ITERATION_BLOCK_SIZE = "iteration_block_size";
+  public static final String RANDOM_SEED = "random_seed";
+  public static final String TEST_SET_FRACTION = "test_set_fraction";
+  public static final String NUM_TRAIN_THREADS = "num_train_threads";
+  public static final String NUM_UPDATE_THREADS = "num_update_threads";
+  public static final String MAX_ITERATIONS_PER_DOC = "max_doc_topic_iters";
+  public static final String MODEL_WEIGHT = "prev_iter_mult";
+  public static final String NUM_REDUCE_TASKS = "num_reduce_tasks";
+  public static final String BACKFILL_PERPLEXITY = "backfill_perplexity";
   private static final String MODEL_PATHS = "mahout.lda.cvb.modelPath";
 
   private static final double DEFAULT_CONVERGENCE_DELTA = 0;
@@ -50,9 +73,6 @@ public class CachingLLDADriver extends CVB0Driver {
   private static final int DEFAULT_NUM_UPDATE_THREADS = 1;
   private static final int DEFAULT_MAX_ITERATIONS_PER_DOC = 10;
   private static final int DEFAULT_NUM_REDUCE_TASKS = 10;
-  public static final String INF = "inf";
-  public static final String EST = "est";
-  public static final String ESTC = "estc";
 
   @Override
   public int run(String[] args) throws Exception {
@@ -119,16 +139,11 @@ public class CachingLLDADriver extends CVB0Driver {
       : 0.0f;
     int numReduceTasks = Integer.parseInt(getOption(NUM_REDUCE_TASKS));
     boolean backfillPerplexity = hasOption(BACKFILL_PERPLEXITY);
-    if (hasOption(INF)) {
-      return infer(getConf(), inputPath, topicModelOutputPath, docTopicOutputPath);
-    } else if (hasOption(EST) || hasOption(ESTC)) {
-      return run(getConf(), inputPath, topicModelOutputPath, numTopics, numTerms, alpha, eta,
-        maxIterations, iterationBlockSize, convergenceDelta, dictionaryPath, docTopicOutputPath,
-        modelTempPath, seed, testFraction, numTrainThreads, numUpdateThreads, maxItersPerDoc,
-        numReduceTasks, backfillPerplexity);
-    }else{
-      return -1;
-    }
+
+    return run(getConf(), inputPath, topicModelOutputPath, numTopics, numTerms, alpha, eta,
+      maxIterations, iterationBlockSize, convergenceDelta, dictionaryPath, docTopicOutputPath,
+      modelTempPath, seed, testFraction, numTrainThreads, numUpdateThreads, maxItersPerDoc,
+      numReduceTasks, backfillPerplexity);
   }
 
   private static int getNumTerms(Configuration conf, Path dictionaryPath) throws IOException {
@@ -145,32 +160,27 @@ public class CachingLLDADriver extends CVB0Driver {
     return maxTermId + 1;
   }
 
-
-  @Override
-  public int run(Configuration conf,
-                 Path inputPath,
-                 Path topicModelOutputPath,
-                 int numTopics,
-                 int numTerms,
-                 double alpha,
-                 double eta,
-                 int maxIterations,
-                 int iterationBlockSize,
-                 double convergenceDelta,
-                 Path dictionaryPath,
-                 Path docTopicOutputPath,
-                 Path topicModelStateTempPath,
-                 long randomSeed,
-                 float testFraction,
-                 int numTrainThreads,
-                 int numUpdateThreads,
-                 int maxItersPerDoc,
-                 int numReduceTasks,
-                 boolean backfillPerplexity)
+  public static int run(Configuration conf,
+                        Path inputPath,
+                        Path topicModelOutputPath,
+                        int numTopics,
+                        int numTerms,
+                        double alpha,
+                        double eta,
+                        int maxIterations,
+                        int iterationBlockSize,
+                        double convergenceDelta,
+                        Path dictionaryPath,
+                        Path docTopicOutputPath,
+                        Path topicModelStateTempPath,
+                        long randomSeed,
+                        float testFraction,
+                        int numTrainThreads,
+                        int numUpdateThreads,
+                        int maxItersPerDoc,
+                        int numReduceTasks,
+                        boolean backfillPerplexity)
     throws ClassNotFoundException, IOException, InterruptedException {
-
-    setConf(conf);
-
     // verify arguments
     Preconditions.checkArgument(testFraction >= 0.0 && testFraction <= 1.0,
       "Expected 'testFraction' value in range [0, 1] but found value '%s'", testFraction);
@@ -183,8 +193,8 @@ public class CachingLLDADriver extends CVB0Driver {
       + "perplexity is less than {}.  Topic model output (p(term|topic) for each topic) will be "
       + "stored {}.  Random initialization seed is {}, holding out {} of the data for perplexity "
       + "check\n";
-    log.info(infoString, inputPath, numTerms, numTopics, alpha, eta, maxIterations,
-      convergenceDelta, topicModelOutputPath, randomSeed, testFraction);
+    log.info(infoString, new Object[] {inputPath, numTerms, numTopics, alpha, eta, maxIterations,
+      convergenceDelta, topicModelOutputPath, randomSeed, testFraction});
     infoString = dictionaryPath == null
       ? "" : "Dictionary to be used located " + dictionaryPath.toString() + '\n';
     infoString += docTopicOutputPath == null
@@ -219,8 +229,7 @@ public class CachingLLDADriver extends CVB0Driver {
         }
         log.info("Backfilling perplexity at iteration {}", i);
         if (!fs.exists(modelPath)) {
-          log.error("Model path '{}' does not exist; Skipping iteration {} perplexity calculation",
-            modelPath.toString(), i);
+          log.error("Model path '{}' does not exist; Skipping iteration {} perplexity calculation", modelPath.toString(), i);
           continue;
         }
         perplexity = calculatePerplexity(conf, inputPath, modelPath, i);
@@ -238,7 +247,7 @@ public class CachingLLDADriver extends CVB0Driver {
         double delta = rateOfChange(perplexities);
         if (delta < convergenceDelta) {
           log.info("Convergence achieved at iteration {} with perplexity {} and delta {}",
-            iterationNumber, perplexities.get(perplexities.size() - 1), delta);
+            new Object[]{iterationNumber, perplexities.get(perplexities.size() - 1), delta});
           break;
         }
       }
@@ -255,12 +264,13 @@ public class CachingLLDADriver extends CVB0Driver {
       if (testFraction > 0 && iterationNumber % iterationBlockSize == 0) {
         perplexities.add(calculatePerplexity(conf, inputPath, modelOutputPath, iterationNumber));
         log.info("Current perplexity = {}", perplexities.get(perplexities.size() - 1));
-        log.info("(p_{} - p_{}) / p_0 = {}; target = {}", iterationNumber, iterationNumber - iterationBlockSize,
-          rateOfChange(perplexities), convergenceDelta);
+        log.info("(p_{} - p_{}) / p_0 = {}; target = {}", new Object[]{
+          iterationNumber , iterationNumber - iterationBlockSize, rateOfChange(perplexities), convergenceDelta
+        });
       }
     }
     log.info("Completed {} iterations in {} seconds", iterationNumber,
-      (System.currentTimeMillis() - startTime) / 1000);
+      (System.currentTimeMillis() - startTime)/1000);
     log.info("Perplexities: ({})", Joiner.on(", ").join(perplexities));
 
     // write final topic-term and doc-topic distributions
@@ -280,18 +290,184 @@ public class CachingLLDADriver extends CVB0Driver {
     return 0;
   }
 
-  @Override
-  public void runIteration(Configuration conf, Path corpusInput, Path modelInput, Path modelOutput,
-                           int iterationNumber, int maxIterations, int numReduceTasks)
+  private static double rateOfChange(List<Double> perplexities) {
+    int sz = perplexities.size();
+    if (sz < 2) {
+      return Double.MAX_VALUE;
+    }
+    return Math.abs(perplexities.get(sz - 1) - perplexities.get(sz - 2)) / perplexities.get(0);
+  }
+
+  private static double calculatePerplexity(Configuration conf, Path corpusPath, Path modelPath, int iteration)
+    throws IOException,
+    ClassNotFoundException, InterruptedException {
+    String jobName = "Calculating perplexity for " + modelPath;
+    log.info("About to run: " + jobName);
+    Job job = new Job(conf, jobName);
+    job.setJarByClass(CachingCVB0PerplexityMapper.class);
+    job.setMapperClass(CachingCVB0PerplexityMapper.class);
+    job.setCombinerClass(DualDoubleSumReducer.class);
+    job.setReducerClass(DualDoubleSumReducer.class);
+    job.setNumReduceTasks(1);
+    job.setOutputKeyClass(DoubleWritable.class);
+    job.setOutputValueClass(DoubleWritable.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    FileInputFormat.addInputPath(job, corpusPath);
+    Path outputPath = perplexityPath(modelPath.getParent(), iteration);
+    FileOutputFormat.setOutputPath(job, outputPath);
+    setModelPaths(job, modelPath);
+    HadoopUtil.delete(conf, outputPath);
+    if (!job.waitForCompletion(true)) {
+      throw new InterruptedException("Failed to calculate perplexity for: " + modelPath);
+    }
+    return readPerplexity(conf, modelPath.getParent(), iteration);
+  }
+
+  /**
+   * Sums keys and values independently.
+   */
+  public static class DualDoubleSumReducer extends
+    Reducer<DoubleWritable, DoubleWritable, DoubleWritable, DoubleWritable> {
+    private final DoubleWritable outKey = new DoubleWritable();
+    private final DoubleWritable outValue = new DoubleWritable();
+
+    @Override
+    public void run(Context context) throws IOException,
+      InterruptedException {
+      double keySum = 0.0;
+      double valueSum = 0.0;
+      while (context.nextKey()) {
+        keySum += context.getCurrentKey().get();
+        for (DoubleWritable value : context.getValues()) {
+          valueSum += value.get();
+        }
+      }
+      outKey.set(keySum);
+      outValue.set(valueSum);
+      context.write(outKey, outValue);
+    }
+  }
+
+  /**
+   * @param topicModelStateTemp
+   * @param iteration
+   * @return {@code double[2]} where first value is perplexity and second is model weight of those
+   *         documents sampled during perplexity computation, or {@code null} if no perplexity data
+   *         exists for the given iteration.
+   * @throws IOException
+   */
+  public static double readPerplexity(Configuration conf, Path topicModelStateTemp, int iteration)
+    throws IOException {
+    Path perplexityPath = perplexityPath(topicModelStateTemp, iteration);
+    FileSystem fs = FileSystem.get(perplexityPath.toUri(), conf);
+    if (!fs.exists(perplexityPath)) {
+      log.warn("Perplexity path {} does not exist, returning NaN", perplexityPath);
+      return Double.NaN;
+    }
+    double perplexity = 0;
+    double modelWeight = 0;
+    long n = 0;
+    for (Pair<DoubleWritable, DoubleWritable> pair : new SequenceFileDirIterable<DoubleWritable, DoubleWritable>(
+      perplexityPath, PathType.LIST, PathFilters.partFilter(), null, true, conf)) {
+      modelWeight += pair.getFirst().get();
+      perplexity += pair.getSecond().get();
+      n++;
+    }
+    log.info("Read {} entries with total perplexity {} and model weight {}", new Object[] { n,
+      perplexity, modelWeight });
+    return perplexity / modelWeight;
+  }
+
+  private static Job writeTopicModel(Configuration conf, Path modelInput, Path output) throws IOException,
+    InterruptedException, ClassNotFoundException {
+    String jobName = String.format("Writing final topic/term distributions from %s to %s", modelInput,
+      output);
+    log.info("About to run: " + jobName);
+    Job job = new Job(conf, jobName);
+    job.setJarByClass(LLDADriver.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setMapperClass(CVB0TopicTermVectorNormalizerMapper.class);
+    job.setNumReduceTasks(0);
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(VectorWritable.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    FileInputFormat.addInputPath(job, modelInput);
+    FileOutputFormat.setOutputPath(job, output);
+    job.submit();
+    return job;
+  }
+
+  private static Job writeDocTopicInference(Configuration conf, Path corpus, Path modelInput, Path output)
     throws IOException, ClassNotFoundException, InterruptedException {
+    String jobName = String.format("Writing final document/topic inference from %s to %s", corpus,
+      output);
+    log.info("About to run: " + jobName);
+    Job job = new Job(conf, jobName);
+    job.setMapperClass(LLDAInferenceMapper.class);
+    job.setNumReduceTasks(0);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(VectorWritable.class);
+    FileSystem fs = FileSystem.get(corpus.toUri(), conf);
+    if (modelInput != null && fs.exists(modelInput)) {
+      FileStatus[] statuses = fs.listStatus(modelInput, PathFilters.partFilter());
+      URI[] modelUris = new URI[statuses.length];
+      for (int i = 0; i < statuses.length; i++) {
+        modelUris[i] = statuses[i].getPath().toUri();
+      }
+      DistributedCache.setCacheFiles(modelUris, conf);
+    }
+    FileInputFormat.addInputPath(job, corpus);
+    FileOutputFormat.setOutputPath(job, output);
+    job.setJarByClass(LLDADriver.class);
+    job.submit();
+    return job;
+  }
+
+  public static Path modelPath(Path topicModelStateTempPath, int iterationNumber) {
+    return new Path(topicModelStateTempPath, "model-" + iterationNumber);
+  }
+
+  public static Path stage1OutputPath(Path topicModelStateTempPath, int iterationNumber) {
+    return new Path(topicModelStateTempPath, "tmp-" + iterationNumber);
+  }
+
+  public static Path perplexityPath(Path topicModelStateTempPath, int iterationNumber) {
+    return new Path(topicModelStateTempPath, "perplexity-" + iterationNumber);
+  }
+
+  private static int getCurrentIterationNumber(Configuration config, Path modelTempDir, int maxIterations)
+    throws IOException {
+    FileSystem fs = FileSystem.get(modelTempDir.toUri(), config);
+    int iterationNumber = 1;
+    Path iterationPath = modelPath(modelTempDir, iterationNumber);
+    while (fs.exists(iterationPath) && iterationNumber <= maxIterations) {
+      log.info("Found previous state: " + iterationPath);
+      iterationNumber++;
+      iterationPath = modelPath(modelTempDir, iterationNumber);
+    }
+    return iterationNumber - 1;
+  }
+
+  public static void runIteration(Configuration conf, Path corpusInput, Path modelInput, Path modelOutput,
+                                  int iterationNumber, int maxIterations, int numReduceTasks) throws IOException, ClassNotFoundException, InterruptedException {
     String jobName = String.format("Iteration %d of %d, input path: %s",
       iterationNumber, maxIterations, modelInput);
-    log.info("About to run: {}", jobName);
-    Job job = prepareJob(corpusInput, modelOutput, CachingLLDAMapper.class, IntWritable.class, VectorWritable.class,
-      VectorSumReducer.class, IntWritable.class, VectorWritable.class);
+    log.info("About to run: " + jobName);
+    Job job = new Job(conf, jobName);
+    job.setJarByClass(LLDADriver.class);
+    job.setMapperClass(LLDAMapper.class);
     job.setCombinerClass(VectorSumReducer.class);
+    job.setReducerClass(VectorSumReducer.class);
     job.setNumReduceTasks(numReduceTasks);
-    job.setJobName(jobName);
+    job.setOutputKeyClass(IntWritable.class);
+    job.setOutputValueClass(VectorWritable.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setOutputFormatClass(SequenceFileOutputFormat.class);
+    FileInputFormat.addInputPath(job, corpusInput);
+    FileOutputFormat.setOutputPath(job, modelOutput);
     setModelPaths(job, modelInput);
     HadoopUtil.delete(conf, modelOutput);
     if (!job.waitForCompletion(true)) {
@@ -314,90 +490,20 @@ public class CachingLLDADriver extends CVB0Driver {
     conf.setStrings(MODEL_PATHS, modelPaths);
   }
 
-  private static int getCurrentIterationNumber(Configuration config, Path modelTempDir, int maxIterations)
-    throws IOException {
-    FileSystem fs = FileSystem.get(modelTempDir.toUri(), config);
-    int iterationNumber = 1;
-    Path iterationPath = modelPath(modelTempDir, iterationNumber);
-    while (fs.exists(iterationPath) && iterationNumber <= maxIterations) {
-      log.info("Found previous state: {}", iterationPath);
-      iterationNumber++;
-      iterationPath = modelPath(modelTempDir, iterationNumber);
+  public static Path[] getModelPaths(Configuration conf) {
+    String[] modelPathNames = conf.getStrings(MODEL_PATHS);
+    if (modelPathNames == null || modelPathNames.length == 0) {
+      return null;
     }
-    return iterationNumber - 1;
+    Path[] modelPaths = new Path[modelPathNames.length];
+    for (int i = 0; i < modelPathNames.length; i++) {
+      modelPaths[i] = new Path(modelPathNames[i]);
+    }
+    return modelPaths;
   }
 
-  private double calculatePerplexity(Configuration conf, Path corpusPath, Path modelPath, int iteration)
-    throws IOException, ClassNotFoundException, InterruptedException {
-    String jobName = "Calculating perplexity for " + modelPath;
-    log.info("About to run: {}", jobName);
-
-    Path outputPath = perplexityPath(modelPath.getParent(), iteration);
-    Job job = prepareJob(corpusPath, outputPath, CachingCVB0PerplexityMapper.class, DoubleWritable.class,
-      DoubleWritable.class, DualDoubleSumReducer.class, DoubleWritable.class, DoubleWritable.class);
-
-    job.setJobName(jobName);
-    job.setCombinerClass(DualDoubleSumReducer.class);
-    job.setNumReduceTasks(1);
-    setModelPaths(job, modelPath);
-    HadoopUtil.delete(conf, outputPath);
-    if (!job.waitForCompletion(true)) {
-      throw new InterruptedException("Failed to calculate perplexity for: " + modelPath);
-    }
-    return readPerplexity(conf, modelPath.getParent(), iteration);
-  }
-
-  private static double rateOfChange(List<Double> perplexities) {
-    int sz = perplexities.size();
-    if (sz < 2) {
-      return Double.MAX_VALUE;
-    }
-    return Math.abs(perplexities.get(sz - 1) - perplexities.get(sz - 2)) / perplexities.get(0);
-  }
-
-  private Job writeTopicModel(Configuration conf, Path modelInput, Path output)
-    throws IOException, InterruptedException, ClassNotFoundException {
-    String jobName = String.format("Writing final topic/term distributions from %s to %s", modelInput, output);
-    log.info("About to run: {}", jobName);
-
-    Job job = prepareJob(modelInput, output, SequenceFileInputFormat.class, CVB0TopicTermVectorNormalizerMapper.class,
-      IntWritable.class, VectorWritable.class, SequenceFileOutputFormat.class, jobName);
-    job.submit();
-    return job;
-  }
-
-  private Job writeDocTopicInference(Configuration conf, Path corpus, Path modelInput, Path output)
-    throws IOException, ClassNotFoundException, InterruptedException {
-    String jobName = String.format("Writing final document/topic inference from %s to %s", corpus, output);
-    log.info("About to run: {}", jobName);
-
-    Job job = prepareJob(corpus, output, SequenceFileInputFormat.class, CachingLLDAInferenceMapper.class,
-      IntWritable.class, VectorWritable.class, SequenceFileOutputFormat.class, jobName);
-
-    FileSystem fs = FileSystem.get(corpus.toUri(), conf);
-    if (modelInput != null && fs.exists(modelInput)) {
-      FileStatus[] statuses = fs.listStatus(modelInput, PathFilters.partFilter());
-      URI[] modelUris = new URI[statuses.length];
-      for (int i = 0; i < statuses.length; i++) {
-        modelUris[i] = statuses[i].getPath().toUri();
-      }
-      DistributedCache.setCacheFiles(modelUris, conf);
-      setModelPaths(job, modelInput);
-    }
-    job.submit();
-    return job;
-  }
-
-  public int infer(Configuration conf,
-                   Path inputPath,
-                   Path topicModelOutputPath,
-                   Path docTopicOutputPath
-  ) throws InterruptedException, IOException, ClassNotFoundException {
-    Job docInferenceJob = writeDocTopicInference(conf, inputPath, topicModelOutputPath, docTopicOutputPath);
-    if (docInferenceJob != null && !docInferenceJob.waitForCompletion(true)) {
-      return -1;
-    }
-    return 0;
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new Configuration(), new LLDADriver(), args);
   }
 
 }

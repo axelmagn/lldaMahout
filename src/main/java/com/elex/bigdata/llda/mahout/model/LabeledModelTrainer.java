@@ -123,8 +123,7 @@ public class LabeledModelTrainer {
         } else {
           batchTrain(batch, true, numDocTopicIters);
           long time = System.nanoTime();
-          log.debug("trained {} docs with {} tokens, start time {}, end time {}",
-            numTrainThreads, numTokensInBatch, batchStart, time);
+          log.debug("trained "+numTrainThreads+"docs with "+numTokensInBatch+" tokens, start time "+batchStart+", end time "+time);
           batchStart = time;
           numTokensInBatch = 0;
         }

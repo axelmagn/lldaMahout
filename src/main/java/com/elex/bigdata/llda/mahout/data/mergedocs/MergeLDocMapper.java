@@ -15,6 +15,7 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * Created with IntelliJ IDEA.
@@ -47,8 +48,10 @@ public class MergeLDocMapper extends Mapper<Text,LabeledDocumentWritable,Text,La
     Vector urlCounts=labeledDocument.getUrlCounts();
     if(urlCounts.size()<termSize){
       Vector tmpUrlCounts=new RandomAccessSparseVector(termSize);
-      for(Vector.Element e: urlCounts.nonZeroes()){
-         tmpUrlCounts.set(e.index(),e.get());
+      Iterator<Vector.Element> urlCountIter=urlCounts.iterateNonZero();
+      while(urlCountIter.hasNext()){
+        Vector.Element e=urlCountIter.next();
+        tmpUrlCounts.set(e.index(),e.get());
       }
       labeledDocument.setUrlCounts(urlCounts);
       context.write(key,new LabeledDocumentWritable(labeledDocument));

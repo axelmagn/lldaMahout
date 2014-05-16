@@ -5,12 +5,9 @@ import com.elex.bigdata.llda.mahout.model.LabeledModelTrainer;
 import com.elex.bigdata.llda.mahout.model.LabeledTopicModel;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.lda.cvb.CVB0Driver;
-import org.apache.mahout.clustering.lda.cvb.ModelTrainer;
-import org.apache.mahout.clustering.lda.cvb.TopicModel;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.*;
 import org.slf4j.Logger;
@@ -25,8 +22,8 @@ import java.io.IOException;
  * Time: 5:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class CachingLLDAInferenceMapper extends Mapper<Text, LabeledDocumentWritable, Text, VectorWritable> {
-  private static final Logger log = LoggerFactory.getLogger(CachingLLDAInferenceMapper.class);
+public class LLDAInferenceMapper extends Mapper<Text, LabeledDocumentWritable, Text, VectorWritable> {
+  private static final Logger log = LoggerFactory.getLogger(LLDAInferenceMapper.class);
   private LabeledModelTrainer modelTrainer;
   private LabeledTopicModel readModel;
   private LabeledTopicModel writeModel;

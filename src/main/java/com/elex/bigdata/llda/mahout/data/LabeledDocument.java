@@ -6,6 +6,7 @@ import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -39,7 +40,9 @@ public class LabeledDocument {
     Vector finalUrlCounts=new RandomAccessSparseVector(lDocs.get(0).getUrlCounts());
     for(int i=1;i<lDocs.size();i++){
       Vector tmpLabels=lDocs.get(i).getLabels();
-      for(Vector.Element e: tmpLabels.nonZeroes()){
+      Iterator<Vector.Element> tmpLabelIter=tmpLabels.iterateNonZero();
+      while(tmpLabelIter.hasNext()){
+        Vector.Element e=tmpLabelIter.next();
         finalLabels.set(e.index(),e.get());
       }
       Vector tmpUrlCounts=lDocs.get(i).getUrlCounts();
