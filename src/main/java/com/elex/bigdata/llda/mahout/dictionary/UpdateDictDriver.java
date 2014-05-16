@@ -8,6 +8,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
@@ -46,7 +47,7 @@ public class UpdateDictDriver extends AbstractJob{
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(dictOutputPath))
       fs.delete(dictOutputPath);
-    Job updateDictJob=prepareJob(textInputPath,dictOutputPath, TextInputFormat.class, UpdateDictMapper.class, LongWritable.class,Text.class, UpdateDictReducer.class,Text.class, IntWritable.class, SequenceFileOutputFormat.class);
+    Job updateDictJob=prepareJob(textInputPath,dictOutputPath, FileInputFormat.class, UpdateDictMapper.class, LongWritable.class,Text.class, UpdateDictReducer.class,Text.class, IntWritable.class, SequenceFileOutputFormat.class);
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
