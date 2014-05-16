@@ -52,9 +52,9 @@ public class UpdateDictDriver extends AbstractJob{
     SequenceFileOutputFormat.setOutputPath(updateDictJob, dictOutputPath);
     updateDictJob.setMapOutputKeyClass(Text.class);
     updateDictJob.setMapOutputValueClass(NullWritable.class);
+    updateDictJob.setJarByClass(UpdateDictDriver.class);
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);
-    updateDictJob.setJarByClass(UpdateDictDriver.class);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
   public static void main(String[] args) throws Exception {
