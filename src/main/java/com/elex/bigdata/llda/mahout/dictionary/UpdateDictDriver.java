@@ -4,10 +4,7 @@ import com.elex.bigdata.llda.mahout.data.preparedocs.PrepareInfDocsDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.ObjectWritable;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
@@ -52,10 +49,10 @@ public class UpdateDictDriver extends AbstractJob{
     Job updateDictJob=new Job(conf);
     updateDictJob.setMapperClass(UpdateDictMapper.class);
     updateDictJob.setReducerClass(UpdateDictReducer.class);
-    FileInputFormat.addInputPath(updateDictJob,textInputPath);
-    SequenceFileOutputFormat.setOutputPath(updateDictJob,dictOutputPath);
+    FileInputFormat.addInputPath(updateDictJob, textInputPath);
+    SequenceFileOutputFormat.setOutputPath(updateDictJob, dictOutputPath);
     updateDictJob.setMapOutputKeyClass(Text.class);
-    updateDictJob.setMapOutputValueClass(Text.class);
+    updateDictJob.setMapOutputValueClass(NullWritable.class);
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
