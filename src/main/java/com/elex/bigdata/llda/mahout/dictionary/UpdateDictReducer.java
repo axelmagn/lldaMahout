@@ -25,8 +25,14 @@ public class UpdateDictReducer extends Reducer<Text,NullWritable,Text,IntWritabl
   private int dictId;
   public void setup(Context context) throws IOException, InterruptedException {
     Configuration conf=context.getConfiguration();
+    FileSystem fs=FileSystem.get(conf);
     Path dictPath=new Path(conf.get(UpdateDictDriver.DICT_PATH));
-    SequenceFile.Reader dictReader=new SequenceFile.Reader(FileSystem.get(conf),dictPath,conf);
+    if(!fs.exists(dictPath))
+    {
+      dictId=0;
+      return;
+    }
+    SequenceFile.Reader dictReader=new SequenceFile.Reader(fs,dictPath,conf);
     Text url=new Text();
     IntWritable id=new IntWritable();
     while(dictReader.next(url,id)){
