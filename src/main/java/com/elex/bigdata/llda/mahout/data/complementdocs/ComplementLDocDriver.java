@@ -2,6 +2,7 @@ package com.elex.bigdata.llda.mahout.data.complementdocs;
 
 import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
+import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -42,6 +43,7 @@ public class ComplementLDocDriver extends AbstractJob {
     addInputOption();
     addOption(PRE_LDOC_OPTION_NAME,"li","previous lDocs");
     addOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME,"docsRoot","docs root directory");
+    addOption(UpdateDictDriver.DICT_OPTION_NAME,"dictRoot","dictionary root path");
     if(parseArguments(args)==null){
       return -1;
     }
@@ -51,16 +53,18 @@ public class ComplementLDocDriver extends AbstractJob {
     Path leftInputPath=new Path(docsRoot+ File.separator+leftDir);
     Path outputPath=new Path(docsRoot+File.separator+"inf");
     String uidFilePath=docsRoot+File.separator+"uid";
+    String dictSizePath=getOption("dictionary")+File.separator+"dictSize";
     Configuration conf=new Configuration();
 
-    Job complementLDocJob=prepareJob(conf,new Path[]{leftInputPath,inputPath},outputPath,uidFilePath);
+    Job complementLDocJob=prepareJob(conf,new Path[]{leftInputPath,inputPath},outputPath,uidFilePath,dictSizePath);
     complementLDocJob.submit();
     complementLDocJob.waitForCompletion(true);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,String uidFilePath) throws IOException {
+  public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,String uidFilePath,String dictSizePath) throws IOException {
     conf.set(GenerateLDocDriver.UID_PATH,uidFilePath);
+    conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath);
