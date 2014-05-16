@@ -89,7 +89,7 @@ public class PrepareInfDocsDriver extends AbstractJob{
     Job complementDocsJob= ComplementLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(infLDocPath),uidPath,dictRoot);
     ControlledJob controlledCompDocsJob=new ControlledJob(conf);
     controlledCompDocsJob.setJob(complementDocsJob);
-    controlledCompDocsJob.addDependingJob(controlledCompDocsJob);
+    controlledCompDocsJob.addDependingJob(controlledGenLDocJob);
     jobControl.addJob(controlledCompDocsJob);
 
     Thread jcThread=new Thread(jobControl);
