@@ -7,7 +7,6 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
@@ -55,6 +54,7 @@ public class UpdateDictDriver extends AbstractJob{
     updateDictJob.setMapOutputValueClass(NullWritable.class);
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);
+    updateDictJob.setJarByClass(UpdateDictDriver.class);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
   public static void main(String[] args) throws Exception {
