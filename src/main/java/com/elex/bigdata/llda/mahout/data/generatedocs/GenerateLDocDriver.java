@@ -1,9 +1,11 @@
 package com.elex.bigdata.llda.mahout.data.generatedocs;
 
+import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -67,8 +69,10 @@ public class GenerateLDocDriver extends AbstractJob {
     genLDocJob.setMapOutputValueClass(Text.class);
     genLDocJob.setInputFormatClass(CombineTextInputFormat.class);
     CombineTextInputFormat.addInputPath(genLDocJob, inputPath);
-    SequenceFileOutputFormat.setOutputPath(genLDocJob,outputPath);
+    SequenceFileOutputFormat.setOutputPath(genLDocJob, outputPath);
     genLDocJob.setOutputFormatClass(SequenceFileOutputFormat.class);
+    genLDocJob.setOutputKeyClass(Text.class);
+    genLDocJob.setOutputValueClass(LabeledDocumentWritable.class);
     genLDocJob.setJarByClass(GenerateLDocDriver.class);
     genLDocJob.setJobName("generate LDocs");
     return genLDocJob;
