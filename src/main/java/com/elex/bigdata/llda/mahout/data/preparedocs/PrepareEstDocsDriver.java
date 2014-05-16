@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.data.preparedocs;
 
 import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
+import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocMapper;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
@@ -45,7 +46,7 @@ public class PrepareEstDocsDriver extends AbstractJob {
       lDocRoot:day--sequenceFile(uidUrlCount seperated by day),total(_day)(total url info to day),inf(the docs to inf)
      */
     addOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME,"docsRoot","specify the lDocs Root Directory");
-    addOption(PrepareInfDocsDriver.PRE_LDOC_OPTION_NAME,"lIn","InputPath for previous lDocs");
+    addOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME,"lIn","InputPath for previous lDocs");
     addOption(GenerateLDocDriver.DOC_OPTION_NAME,"docsDir","specify the lDocs directory");
     /*
       resources:url_category,category_label
@@ -94,7 +95,7 @@ public class PrepareEstDocsDriver extends AbstractJob {
     jobControl.addJob(controlledGenLDocJob);
 
     String estLDocPath=docsRoot+File.separator+"_"+docsDir;
-    String preLDocPath=docsRoot+File.separator+getOption(PrepareInfDocsDriver.PRE_LDOC_OPTION_NAME);
+    String preLDocPath=docsRoot+File.separator+getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
     String currentDocPath=docsPath;
     Job mergeDocsJob=prepareJob(new Path(preLDocPath),new Path(estLDocPath),SequenceFileInputFormat.class, MergeLDocMapper.class,
       Text.class,LabeledDocumentWritable.class,MergeLDocReducer.class,Text.class,LabeledDocumentWritable.class,SequenceFileOutputFormat.class);
