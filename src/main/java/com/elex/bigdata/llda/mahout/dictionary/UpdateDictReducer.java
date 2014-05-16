@@ -68,6 +68,8 @@ public class UpdateDictReducer extends Reducer<Text,NullWritable,Text,IntWritabl
      }
      tmpDictWriter.hflush();
      tmpDictWriter.close();
+     if(fs.exists(dictPath))
+       fs.delete(dictPath);
      fs.rename(tmpDictPath,dictPath);
   }
 }
