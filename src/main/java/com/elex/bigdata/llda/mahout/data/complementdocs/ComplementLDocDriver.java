@@ -52,9 +52,7 @@ public class ComplementLDocDriver extends AbstractJob {
     Path outputPath=new Path(docsRoot+File.separator+"inf");
     String uidFilePath=docsRoot+File.separator+"uid";
     Configuration conf=new Configuration();
-    FileSystem fs=FileSystem.get(conf);
-    if(fs.exists(outputPath))
-      fs.delete(outputPath);
+
     Job complementLDocJob=prepareJob(conf,new Path[]{leftInputPath,inputPath},outputPath,uidFilePath);
     complementLDocJob.submit();
     complementLDocJob.waitForCompletion(true);
@@ -63,6 +61,9 @@ public class ComplementLDocDriver extends AbstractJob {
 
   public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,String uidFilePath) throws IOException {
     conf.set(GenerateLDocDriver.UID_PATH,uidFilePath);
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(outputPath);
     Job job=new Job(conf);
     job.setMapperClass(ComplementLDocMapper.class);
     job.setReducerClass(ComplementLDocReducer.class);
