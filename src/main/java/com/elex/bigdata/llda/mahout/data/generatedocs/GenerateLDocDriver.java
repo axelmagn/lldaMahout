@@ -64,6 +64,9 @@ public class GenerateLDocDriver extends AbstractJob {
     conf.set(CATEGORY_LABEL_PATH,categoryLabelPath);
     conf.set(UID_PATH,uidFilePath);
     conf.set(UpdateDictDriver.DICT_PATH,dictRoot+File.separator+"dict");
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(outputPath);
     Job genLDocJob=new Job(conf);
     genLDocJob.setMapperClass(GenerateLDocMapper.class);
     genLDocJob.setReducerClass(GenerateLDocReducer.class);
