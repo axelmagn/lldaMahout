@@ -3,6 +3,7 @@ package com.elex.bigdata.llda.mahout.data.complementdocs;
 import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -51,6 +52,9 @@ public class ComplementLDocDriver extends AbstractJob {
     Path outputPath=new Path(docsRoot+File.separator+"inf");
     String uidFilePath=docsRoot+File.separator+"uid";
     Configuration conf=new Configuration();
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(outputPath);
     Job complementLDocJob=prepareJob(conf,new Path[]{leftInputPath,inputPath},outputPath,uidFilePath);
     complementLDocJob.submit();
     complementLDocJob.waitForCompletion(true);
