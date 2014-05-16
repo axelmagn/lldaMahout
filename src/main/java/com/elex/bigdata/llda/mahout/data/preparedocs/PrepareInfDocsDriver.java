@@ -74,16 +74,9 @@ public class PrepareInfDocsDriver extends AbstractJob{
     String docsDir=getOption(GenerateLDocDriver.DOC_OPTION_NAME);
     String docsPath=docsRoot+File.separator+docsDir;
     String uidPath=docsRoot+File.separator+"uid";
-
     String resourceDir=getOption(GenerateLDocDriver.RESOURCE_OPTION_NAME);
-    String urlCategoryPath=resourceDir+File.separator+"url_category";
-    String categoryLabelPath=resourceDir+File.separator+"category_label";
 
-    conf.set(GenerateLDocDriver.URL_CATEGORY_PATH,urlCategoryPath);
-    conf.set(GenerateLDocDriver.CATEGORY_LABEL_PATH,categoryLabelPath);
-    conf.set(GenerateLDocDriver.UID_PATH,uidPath);
-
-    Job generateDocJob=prepareJob(textInputPath,new Path(docsPath),TextInputFormat.class, GenerateLDocMapper.class,LongWritable.class,Text.class, GenerateLDocReducer.class,Text.class, LabeledDocumentWritable.class,SequenceFileOutputFormat.class);
+    Job generateDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,new Path(docsPath),dictRoot,resourceDir,uidPath);
     ControlledJob controlledGenLDocJob=new ControlledJob(conf);
     controlledGenLDocJob.setJob(generateDocJob);
     controlledGenLDocJob.addDependingJob(controlledDictJob);
@@ -96,6 +89,7 @@ public class PrepareInfDocsDriver extends AbstractJob{
       Text.class,LabeledDocumentWritable.class,ComplementLDocReducer.class,Text.class,LabeledDocumentWritable.class,SequenceFileOutputFormat.class);
     SequenceFileInputFormat.addInputPath(complementDocsJob,new Path(currentDocPath));
     complementDocsJob.setJobName("complementLDoc");
+    complementDocsJob.setJarByClass(PrepareInfDocsDriver.class);
     ControlledJob controlledCompDocsJob=new ControlledJob(conf);
     controlledCompDocsJob.setJob(complementDocsJob);
     controlledCompDocsJob.addDependingJob(controlledGenLDocJob);
