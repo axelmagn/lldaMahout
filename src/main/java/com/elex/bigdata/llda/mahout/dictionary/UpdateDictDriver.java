@@ -2,6 +2,7 @@ package com.elex.bigdata.llda.mahout.dictionary;
 
 import com.elex.bigdata.llda.mahout.data.preparedocs.PrepareInfDocsDriver;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -41,7 +42,10 @@ public class UpdateDictDriver extends AbstractJob{
     conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
     conf.set(UpdateDictDriver.TMP_DICT_PATH,tmpDictPath);
     setConf(conf);
-    Path dictOutputPath=new Path(dictRoot+File.separator+"updateDicOut");
+    Path dictOutputPath=new Path(dictRoot+File.separator+"updateDictOut");
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(dictOutputPath))
+      fs.delete(dictOutputPath);
     Job updateDictJob=prepareJob(textInputPath,dictOutputPath, TextInputFormat.class, UpdateDictMapper.class, LongWritable.class,Text.class, UpdateDictReducer.class,Text.class, IntWritable.class, SequenceFileOutputFormat.class);
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);

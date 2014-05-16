@@ -70,7 +70,7 @@ public class PrepareInfDocsDriver extends AbstractJob{
     conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
     conf.set(UpdateDictDriver.TMP_DICT_PATH,tmpDictPath);
     setConf(conf);
-    Path dictOutputPath=new Path(dictRoot+File.separator+"updateDicOut");
+    Path dictOutputPath=new Path(dictRoot+File.separator+"updateDictOut");
     Job updateDictJob=prepareJob(textInputPath,dictOutputPath, TextInputFormat.class, UpdateDictMapper.class, LongWritable.class,Text.class, UpdateDictReducer.class,Text.class, IntWritable.class, SequenceFileOutputFormat.class);
     updateDictJob.setJobName("updateDict");
     JobControl jobControl=new JobControl("prepareInfDocs");
