@@ -39,25 +39,25 @@ public class PrepareEstDocsDriver extends AbstractJob {
     /*
       dictRoot--dict,dictSize,tmpDict
      */
-    addOption(PrepareInfDocsDriver.DICT_OPTION_NAME,"dict","dictionary root Path",true);
+    addOption(UpdateDictDriver.DICT_OPTION_NAME,"dict","dictionary root Path",true);
 
     /*
       lDocRoot:day--sequenceFile(uidUrlCount seperated by day),total(_day)(total url info to day),inf(the docs to inf)
      */
-    addOption(PrepareInfDocsDriver.DOC_ROOT_OPTION_NAME,"docsRoot","specify the lDocs Root Directory");
+    addOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME,"docsRoot","specify the lDocs Root Directory");
     addOption(PrepareInfDocsDriver.PRE_LDOC_OPTION_NAME,"lIn","InputPath for previous lDocs");
-    addOption(PrepareInfDocsDriver.DOC_OPTION_NAME,"docsDir","specify the lDocs directory");
+    addOption(GenerateLDocDriver.DOC_OPTION_NAME,"docsDir","specify the lDocs directory");
     /*
       resources:url_category,category_label
 
      */
-    addOption(PrepareInfDocsDriver.RESOURCE_OPTION_NAME,"rDir","specify the resources Dir");
+    addOption(GenerateLDocDriver.RESOURCE_OPTION_NAME,"rDir","specify the resources Dir");
 
     if(parseArguments(args)==null){
       return -1;
     }
     Path textInputPath=getInputPath();
-    String dictRoot=getOption(PrepareInfDocsDriver.DICT_OPTION_NAME);
+    String dictRoot=getOption(UpdateDictDriver.DICT_OPTION_NAME);
     String dictPath=dictRoot+ File.separator+"dict";
     String tmpDictPath=dictRoot+File.separator+"tmpDict";
     String dictSizePath=dictRoot+File.separator+"dictSize";
@@ -74,12 +74,12 @@ public class PrepareEstDocsDriver extends AbstractJob {
     controlledDictJob.setJob(updateDictJob);
     jobControl.addJob(controlledDictJob);
 
-    String docsRoot=getOption(PrepareInfDocsDriver.DOC_ROOT_OPTION_NAME);
-    String docsDir=getOption(PrepareInfDocsDriver.DOC_OPTION_NAME);
+    String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME);
+    String docsDir=getOption(GenerateLDocDriver.DOC_OPTION_NAME);
     String docsPath=docsRoot+File.separator+docsDir;
     String uidPath=docsRoot+File.separator+"uid";
 
-    String resourceDir=getOption(PrepareInfDocsDriver.RESOURCE_OPTION_NAME);
+    String resourceDir=getOption(GenerateLDocDriver.RESOURCE_OPTION_NAME);
     String urlCategoryPath=resourceDir+File.separator+"url_category";
     String categoryLabelPath=resourceDir+File.separator+"category_label";
 
