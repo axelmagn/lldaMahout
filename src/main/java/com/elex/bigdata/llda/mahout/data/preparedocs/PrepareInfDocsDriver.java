@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.data.preparedocs;
 
 import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
+import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocDriver;
 import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocMapper;
 import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocReducer;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
@@ -32,7 +33,7 @@ import java.io.File;
  */
 public class PrepareInfDocsDriver extends AbstractJob{
 
-  public static final String PRE_LDOC_OPTION_NAME="leftInput";
+
 
 
 
@@ -48,7 +49,7 @@ public class PrepareInfDocsDriver extends AbstractJob{
       lDocRoot:day--sequenceFile(uidUrlCount seperated by day),total(_day)(total url info to day),inf(the docs to inf)
      */
     addOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME,"docsRoot","specify the lDocs Root Directory");
-    addOption(PRE_LDOC_OPTION_NAME,"lIn","InputPath for previous lDocs");
+    addOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME,"lIn","InputPath for previous lDocs");
     addOption(GenerateLDocDriver.DOC_OPTION_NAME,"docsDir","specify the lDocs directory");
     /*
       resources:url_category,category_label
@@ -82,14 +83,10 @@ public class PrepareInfDocsDriver extends AbstractJob{
     controlledGenLDocJob.addDependingJob(controlledDictJob);
     jobControl.addJob(controlledGenLDocJob);
     // complement docs
-    String preLDocPath=docsRoot+File.separator+getOption(PRE_LDOC_OPTION_NAME);
+    String preLDocPath=docsRoot+File.separator+getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
     String infLDocPath=docsRoot+File.separator+"inf";
     String currentDocPath=docsPath;
-    Job complementDocsJob=prepareJob(new Path(preLDocPath),new Path(infLDocPath),SequenceFileInputFormat.class, ComplementLDocMapper.class,
-      Text.class,LabeledDocumentWritable.class,ComplementLDocReducer.class,Text.class,LabeledDocumentWritable.class,SequenceFileOutputFormat.class);
-    SequenceFileInputFormat.addInputPath(complementDocsJob,new Path(currentDocPath));
-    complementDocsJob.setJobName("complementLDoc");
-    complementDocsJob.setJarByClass(PrepareInfDocsDriver.class);
+    Job complementDocsJob= ComplementLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(infLDocPath),uidPath);
     ControlledJob controlledCompDocsJob=new ControlledJob(conf);
     controlledCompDocsJob.setJob(complementDocsJob);
     controlledCompDocsJob.addDependingJob(controlledGenLDocJob);
