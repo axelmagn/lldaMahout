@@ -36,7 +36,7 @@ public class UpdateDictDriver extends AbstractJob{
     String dictPath=dictRoot+ File.separator+"dict";
     String tmpDictPath=dictRoot+File.separator+"tmpDict";
     String dictSizePath=dictRoot+File.separator+"dictSize";
-    Configuration conf=getConf();
+    Configuration conf=new Configuration();
     conf.set(UpdateDictDriver.DICT_PATH,dictPath);
     conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
     conf.set(UpdateDictDriver.TMP_DICT_PATH,tmpDictPath);
