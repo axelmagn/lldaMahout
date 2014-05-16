@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.dictionary;
 
+import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import com.elex.bigdata.llda.mahout.data.preparedocs.PrepareInfDocsDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -36,6 +37,8 @@ public class UpdateDictDriver extends AbstractJob{
     String tmpDictPath=dictRoot+File.separator+"tmpDict";
     String dictSizePath=dictRoot+File.separator+"dictSize";
     Configuration conf=new Configuration();
+    conf.setLong("mapred.max.split.size", 22485760); // 10m
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize",22485760);
     conf.set(UpdateDictDriver.DICT_PATH,dictPath);
     conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
     conf.set(UpdateDictDriver.TMP_DICT_PATH,tmpDictPath);
@@ -46,10 +49,12 @@ public class UpdateDictDriver extends AbstractJob{
       fs.delete(dictOutputPath);
 
     Job updateDictJob=new Job(conf);
+    updateDictJob.setInputFormatClass(CombineTextInputFormat.class);
     updateDictJob.setMapperClass(UpdateDictMapper.class);
     updateDictJob.setReducerClass(UpdateDictReducer.class);
     FileInputFormat.addInputPath(updateDictJob, textInputPath);
     SequenceFileOutputFormat.setOutputPath(updateDictJob, dictOutputPath);
+    updateDictJob.setOutputFormatClass(SequenceFileOutputFormat.class);
     updateDictJob.setMapOutputKeyClass(Text.class);
     updateDictJob.setMapOutputValueClass(NullWritable.class);
     updateDictJob.setJarByClass(UpdateDictDriver.class);

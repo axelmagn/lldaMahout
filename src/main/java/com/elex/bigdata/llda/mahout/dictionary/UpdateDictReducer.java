@@ -23,10 +23,11 @@ import java.util.Map;
 public class UpdateDictReducer extends Reducer<Text,NullWritable,Text,IntWritable> {
   private Map<String,Integer> dict=new HashMap<String, Integer>();
   private int dictId;
+  private Path dictPath,dictSizePath,tmpDictPath;
   public void setup(Context context) throws IOException, InterruptedException {
     Configuration conf=context.getConfiguration();
     FileSystem fs=FileSystem.get(conf);
-    Path dictPath=new Path(conf.get(UpdateDictDriver.DICT_PATH));
+    dictPath=new Path(conf.get(UpdateDictDriver.DICT_PATH));
     if(!fs.exists(dictPath))
     {
       dictId=0;
@@ -44,14 +45,29 @@ public class UpdateDictReducer extends Reducer<Text,NullWritable,Text,IntWritabl
   public void reduce(Text key,Iterable<NullWritable> values,Context context) throws IOException, InterruptedException {
      if(!dict.containsKey(key.toString())){
        dict.put(key.toString(),dictId);
-       context.write(key,new IntWritable(dictId));
+       //context.write(key,new IntWritable(dictId));
        dictId++;
      }
   }
   public void cleanup(Context context) throws IOException {
      Configuration conf=context.getConfiguration();
-     Path dictSizePath=new Path(conf.get(UpdateDictDriver.DICT_SIZE_PATH));
-     SequenceFile.Writer dictSizeWriter=SequenceFile.createWriter(FileSystem.get(conf), conf, dictSizePath, IntWritable.class, NullWritable.class);
+     FileSystem fs=FileSystem.get(conf);
+     dictSizePath=new Path(conf.get(UpdateDictDriver.DICT_SIZE_PATH));
+     if(fs.exists(dictSizePath))
+       fs.delete(dictSizePath);
+     SequenceFile.Writer dictSizeWriter=SequenceFile.createWriter(fs, conf, dictSizePath, IntWritable.class, NullWritable.class);
      dictSizeWriter.append(new IntWritable(dictId),NullWritable.get());
+     dictSizeWriter.hflush();
+     dictSizeWriter.close();
+     tmpDictPath=new Path(conf.get(UpdateDictDriver.TMP_DICT_PATH));
+     if(fs.exists(tmpDictPath))
+       fs.delete(tmpDictPath);
+     SequenceFile.Writer tmpDictWriter=SequenceFile.createWriter(FileSystem.get(conf), conf, tmpDictPath, Text.class, IntWritable.class);
+     for(Map.Entry<String,Integer> entry: dict.entrySet()){
+        tmpDictWriter.append(new Text(entry.getKey()),new IntWritable(entry.getValue()));
+     }
+     tmpDictWriter.hflush();
+     tmpDictWriter.close();
+     fs.rename(tmpDictPath,dictPath);
   }
 }
