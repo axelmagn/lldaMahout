@@ -12,6 +12,7 @@ import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictMapper;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictReducer;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -94,6 +95,8 @@ public class PrepareEstDocsDriver extends AbstractJob {
     while(true){
       if(jobControl.allFinished()){
         System.out.println(jobControl.getSuccessfulJobList());
+        FileSystem fs=FileSystem.get(conf);
+        fs.delete(new Path(preLDocPath));
         jobControl.stop();
         return 0;
       }
