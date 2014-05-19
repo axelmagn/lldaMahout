@@ -89,7 +89,7 @@ public class PrepareEstDocsDriver extends AbstractJob {
     return -1;
   }
 
-  public static int handleJobChain(List<Job> jobs,String chainName) throws IOException {
+  public static int handleJobChain(List<Job> jobs,String chainName) throws IOException, InterruptedException {
     ControlledJob[] controlledJobs=new ControlledJob[jobs.size()];
     for(int i=0;i<jobs.size();i++){
       controlledJobs[i]=new ControlledJob(jobs.get(i).getConfiguration());
@@ -106,6 +106,7 @@ public class PrepareEstDocsDriver extends AbstractJob {
     Thread jcThread=new Thread(jobControl);
     jcThread.start();
     while(true){
+      Thread.sleep(10);
       if(jobControl.getFailedJobList().size()>0){
         System.out.println("failed job "+jobControl.getFailedJobList());
         jobControl.stop();
