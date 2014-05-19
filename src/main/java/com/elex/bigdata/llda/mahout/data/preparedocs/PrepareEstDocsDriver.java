@@ -27,6 +27,9 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -59,51 +62,60 @@ public class PrepareEstDocsDriver extends AbstractJob {
     if(parseArguments(args)==null){
       return -1;
     }
+    List<Job> jobs=new ArrayList<Job>();
     Path textInputPath=getInputPath();
     String dictRoot=getOption(UpdateDictDriver.DICT_OPTION_NAME);
     Configuration conf=getConf();
     setConf(conf);
     Job updateDictJob=UpdateDictDriver.prepareJob(conf,textInputPath,dictRoot);
-    JobControl jobControl=new JobControl("prepareEstDocs");
-    ControlledJob controlledDictJob=new ControlledJob(conf);
-    controlledDictJob.setJob(updateDictJob);
-    jobControl.addJob(controlledDictJob);
+    jobs.add(updateDictJob);
 
     String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME);
     String docsDir=getOption(GenerateLDocDriver.DOC_OPTION_NAME);
     String docsPath=docsRoot+File.separator+docsDir;
     String uidPath=docsRoot+File.separator+"uid";
     String resourceDir=getOption(GenerateLDocDriver.RESOURCE_OPTION_NAME);
-
     Job generateDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,new Path(docsPath),dictRoot,resourceDir,uidPath);
-    ControlledJob controlledGenLDocJob=new ControlledJob(conf);
-    controlledGenLDocJob.setJob(generateDocJob);
-    controlledGenLDocJob.addDependingJob(controlledDictJob);
-    jobControl.addJob(controlledGenLDocJob);
+    jobs.add(generateDocJob);
 
     String estLDocPath=docsRoot+File.separator+"to"+docsDir;
     String preLDocPath=docsRoot+File.separator+getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
     String currentDocPath=docsPath;
     Job mergeDocsJob= MergeLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(estLDocPath),dictRoot);
-    ControlledJob controlledMergeDocsJob=new ControlledJob(conf);
-    controlledMergeDocsJob.setJob(mergeDocsJob);
-    controlledMergeDocsJob.addDependingJob(controlledGenLDocJob);
-    jobControl.addJob(controlledMergeDocsJob);
+    jobs.add(mergeDocsJob);
+    if(handleJobChain(jobs,"prepareEstDocs")==0){
+      FileSystem fs=FileSystem.get(conf);
+      fs.delete(new Path(preLDocPath));
+      return 0;
+    }
+    return -1;
+  }
 
+  public static int handleJobChain(List<Job> jobs,String chainName) throws IOException {
+    ControlledJob[] controlledJobs=new ControlledJob[jobs.size()];
+    for(int i=0;i<jobs.size();i++){
+      controlledJobs[i]=new ControlledJob(jobs.get(i).getConfiguration());
+      controlledJobs[i].setJob(jobs.get(i));
+      if(i!=0)
+        controlledJobs[i].addDependingJob(controlledJobs[i-1]);
+    }
+    JobControl jobControl=new JobControl(chainName);
+    for(ControlledJob controlledJob:controlledJobs){
+      jobControl.addJob(controlledJob);
+    }
+    System.out.println(jobControl.getReadyJobsList().size()+jobControl.getWaitingJobList().size());
     Thread jcThread=new Thread(jobControl);
     jcThread.start();
     while(true){
       if(jobControl.allFinished()){
         System.out.println("successful job "+jobControl.getSuccessfulJobList());
-        FileSystem fs=FileSystem.get(conf);
-        fs.delete(new Path(preLDocPath));
         jobControl.stop();
         return 0;
       }
       if(jobControl.getFailedJobList().size()>0){
         System.out.println("failed job "+jobControl.getFailedJobList());
         jobControl.stop();
-        return 1;
+        return -1;
       }
     }
   }
