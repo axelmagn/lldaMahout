@@ -5,5 +5,5 @@ MAIN=com.elex.bigdata.llda.mahout.mapreduce.LLDADriver
 rootPath=/user/hadoop/user_category/lldaMahout
 echo "hadoop jar $JAR $MAIN  --input ${rootPath}/docs/$1 -k 20 --output ${rootPath}/models --maxIter 10 -mipd 300 --dictionary ${rootPath}/dictionary/dict \
       -dt ${rootPath}/docTopics -mt ${rootPath}/tmpModels --num_reduce_tasks 1"
-hadoop jar $JAR $MAIN  --input ${rootPath}/docs/$1 -k 20 --output ${rootPath}/models --maxIter 10 -mipd 300 --dictionary ${rootPath}/dictionary/dict \
+hadoop jar $JAR $MAIN  --input ${rootPath}/docs/$1 -k 21 --output ${rootPath}/models --maxIter 10 -mipd 300 --dictionary ${rootPath}/dictionary/dict \
 -dt ${rootPath}/docTopics -mt ${rootPath}/tmpModels --num_reduce_tasks 1
