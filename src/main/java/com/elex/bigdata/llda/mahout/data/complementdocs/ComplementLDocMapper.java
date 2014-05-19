@@ -63,7 +63,7 @@ public class ComplementLDocMapper extends Mapper<Text, LabeledDocumentWritable, 
           Vector.Element e=urlCountIter.next();
           tmpUrlCounts.set(e.index(),e.get());
         }
-        labeledDocument.setUrlCounts(urlCounts);
+        labeledDocument.setUrlCounts(tmpUrlCounts);
         context.write(key, new LabeledDocumentWritable(labeledDocument));
       } else
 

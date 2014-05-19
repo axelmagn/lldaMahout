@@ -53,7 +53,7 @@ public class MergeLDocMapper extends Mapper<Text,LabeledDocumentWritable,Text,La
         Vector.Element e=urlCountIter.next();
         tmpUrlCounts.set(e.index(),e.get());
       }
-      labeledDocument.setUrlCounts(urlCounts);
+      labeledDocument.setUrlCounts(tmpUrlCounts);
       context.write(key,new LabeledDocumentWritable(labeledDocument));
     }else
       context.write(key,value);
