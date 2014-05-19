@@ -84,7 +84,7 @@ public class LLDAMapper extends Mapper<Text, LabeledDocumentWritable, IntWritabl
     /* where to get docTopics? */
     Vector labels=doc.get().getLabels();
     Vector docVector=doc.get().getUrlCounts();
-    modelTrainer.train(labels, docVector, true, maxIters);
+    modelTrainer.train(docVector, labels, true, maxIters);
   }
 
   @Override
