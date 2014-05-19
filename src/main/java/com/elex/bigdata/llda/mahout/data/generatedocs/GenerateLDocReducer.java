@@ -86,6 +86,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,LabeledDocumentW
      */
     Vector urlCounts=new RandomAccessSparseVector(termSize);
     Vector labels=new RandomAccessSparseVector(category_label_map.size());
+
     for(Text url: values){
       int id=dictionary.get(url.toString());
       urlCounts.set(id,urlCounts.get(id)+1l);

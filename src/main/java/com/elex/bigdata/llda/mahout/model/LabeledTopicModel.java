@@ -357,11 +357,14 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
       }
     }
     */
-    Iterator<Vector.Element> topicElementIter=docTopics.iterateNonZero();
-    while(topicElementIter.hasNext()){
-      Vector.Element e=topicElementIter.next();
+    for(Vector.Element e:docTopics){
       Vector topicTermRow = topicTermCounts.viewRow(e.index());
       double topicSum=topicSums.get(e.index());
+      if(e.get()==0.0){
+         topicTermRow.assign(0.0);
+         topicSums.set(e.index(),0.0);
+         continue;
+      }
       Vector termTopicRow=termTopicDist.viewRow(e.index());
       double topicWeight=e.get();
       Iterator<Vector.Element> docElementIter=document.iterateNonZero();
