@@ -80,13 +80,14 @@ public class PrepareEstDocsDriver extends AbstractJob {
     controlledGenLDocJob.addDependingJob(controlledDictJob);
     jobControl.addJob(controlledGenLDocJob);
 
-    String estLDocPath=docsRoot+File.separator+"est";
+    String estLDocPath=docsRoot+File.separator+"_"+docsDir;
     String preLDocPath=docsRoot+File.separator+getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
     String currentDocPath=docsPath;
     Job mergeDocsJob= MergeLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(estLDocPath),dictRoot);
       SequenceFileInputFormat.addInputPath(mergeDocsJob,new Path(currentDocPath));
     ControlledJob controlledMergeDocsJob=new ControlledJob(conf);
     controlledMergeDocsJob.setJob(mergeDocsJob);
+    controlledMergeDocsJob.addDependingJob(controlledGenLDocJob);
     jobControl.addJob(controlledMergeDocsJob);
 
     Thread jcThread=new Thread(jobControl);

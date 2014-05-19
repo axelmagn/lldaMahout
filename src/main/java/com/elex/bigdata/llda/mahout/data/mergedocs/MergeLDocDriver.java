@@ -76,7 +76,7 @@ public class MergeLDocDriver extends AbstractJob {
     job.setOutputValueClass(LabeledDocumentWritable.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     SequenceFileOutputFormat.setOutputPath(job,outputPath);
-    job.setJobName("complement docs");
+    job.setJobName("merge docs");
     job.setJarByClass(MergeLDocDriver.class);
     return job;
   }
