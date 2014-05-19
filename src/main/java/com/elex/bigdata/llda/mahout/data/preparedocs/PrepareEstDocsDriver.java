@@ -84,8 +84,6 @@ public class PrepareEstDocsDriver extends AbstractJob {
     Job mergeDocsJob= MergeLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(estLDocPath),dictRoot);
     jobs.add(mergeDocsJob);
     if(handleJobChain(jobs,"prepareEstDocs")==0){
-      FileSystem fs=FileSystem.get(conf);
-      fs.delete(new Path(preLDocPath));
       return 0;
     }
     return -1;
@@ -103,20 +101,22 @@ public class PrepareEstDocsDriver extends AbstractJob {
     for(ControlledJob controlledJob:controlledJobs){
       jobControl.addJob(controlledJob);
     }
-    System.out.println(jobControl.getReadyJobsList().size()+jobControl.getWaitingJobList().size());
+    int jobSize=jobControl.getReadyJobsList().size()+jobControl.getWaitingJobList().size();
+    System.out.println(jobSize);
     Thread jcThread=new Thread(jobControl);
     jcThread.start();
     while(true){
-      if(jobControl.allFinished()){
-        System.out.println("successful job "+jobControl.getSuccessfulJobList());
-        jobControl.stop();
-        return 0;
-      }
       if(jobControl.getFailedJobList().size()>0){
         System.out.println("failed job "+jobControl.getFailedJobList());
         jobControl.stop();
         return -1;
       }
+      if(jobControl.allFinished()&&jobControl.getSuccessfulJobList().size()>=jobSize){
+        System.out.println("successful job "+jobControl.getSuccessfulJobList());
+        jobControl.stop();
+        return 0;
+      }
+
     }
   }
 
