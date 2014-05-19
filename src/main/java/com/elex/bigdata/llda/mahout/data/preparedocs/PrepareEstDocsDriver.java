@@ -94,14 +94,14 @@ public class PrepareEstDocsDriver extends AbstractJob {
     jcThread.start();
     while(true){
       if(jobControl.allFinished()){
-        System.out.println(jobControl.getSuccessfulJobList());
+        System.out.println("successful job "+jobControl.getSuccessfulJobList());
         FileSystem fs=FileSystem.get(conf);
         fs.delete(new Path(preLDocPath));
         jobControl.stop();
         return 0;
       }
       if(jobControl.getFailedJobList().size()>0){
-        System.out.println(jobControl.getFailedJobList());
+        System.out.println("failed job "+jobControl.getFailedJobList());
         jobControl.stop();
         return 1;
       }
