@@ -13,6 +13,7 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.math.MultiLabelVectorWritable;
 
 import java.io.File;
 import java.io.IOException;
@@ -75,10 +76,10 @@ public class ComplementLDocDriver extends AbstractJob {
       FileInputFormat.addInputPath(job,inputPath);
     }
     job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(LabeledDocumentWritable.class);
+    job.setMapOutputValueClass(MultiLabelVectorWritable.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(LabeledDocumentWritable.class);
+    job.setOutputValueClass(MultiLabelVectorWritable.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     SequenceFileOutputFormat.setOutputPath(job,outputPath);
     job.setJobName("complement docs");

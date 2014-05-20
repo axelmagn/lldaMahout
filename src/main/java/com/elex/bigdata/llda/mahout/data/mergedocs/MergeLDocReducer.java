@@ -4,6 +4,7 @@ import com.elex.bigdata.llda.mahout.data.LabeledDocument;
 import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.math.MultiLabelVectorWritable;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,16 +17,16 @@ import java.util.List;
  * Time: 10:28 AM
  * To change this template use File | Settings | File Templates.
  */
-public class MergeLDocReducer extends Reducer<Text,LabeledDocumentWritable,Text,LabeledDocumentWritable> {
-   public void reduce(Text key,Iterable<LabeledDocumentWritable> values,Context context) throws IOException, InterruptedException {
+public class MergeLDocReducer extends Reducer<Text,MultiLabelVectorWritable,Text,MultiLabelVectorWritable> {
+   public void reduce(Text key,Iterable<MultiLabelVectorWritable> values,Context context) throws IOException, InterruptedException {
      /*
         merge multi labeledDocumentWritable and write to file
      */
-     List<LabeledDocument> lDocs=new ArrayList<LabeledDocument>();
-     for(LabeledDocumentWritable labeledDocumentWritable:values){
-       lDocs.add(labeledDocumentWritable.get());
+     List<MultiLabelVectorWritable> lDocs=new ArrayList<MultiLabelVectorWritable>();
+     for(MultiLabelVectorWritable labelVectorWritable:values){
+       lDocs.add(labelVectorWritable);
      }
-     LabeledDocument finalLDoc=LabeledDocument.mergeDocs(lDocs);
-     context.write(key,new LabeledDocumentWritable(finalLDoc));
+     MultiLabelVectorWritable finalLDoc=LabeledDocument.mergeDocs(lDocs);
+     context.write(key,finalLDoc);
    }
 }

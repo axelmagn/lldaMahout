@@ -12,6 +12,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
@@ -27,7 +28,7 @@ import java.util.Set;
  * Time: 11:27 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ComplementLDocMapper extends Mapper<Text, LabeledDocumentWritable, Text, LabeledDocumentWritable> {
+public class ComplementLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text, MultiLabelVectorWritable> {
   private Set<String> uids = new HashSet<String>();
   private int termSize;
 
@@ -52,22 +53,19 @@ public class ComplementLDocMapper extends Mapper<Text, LabeledDocumentWritable, 
     termSize = dictSizeWritable.get();
   }
 
-  public void map(Text key, LabeledDocumentWritable value, Context context) throws IOException, InterruptedException {
+  public void map(Text key, MultiLabelVectorWritable value, Context context) throws IOException, InterruptedException {
     if (uids.contains(key.toString())) {
-      LabeledDocument labeledDocument = value.get();
-      Vector urlCounts = labeledDocument.getUrlCounts();
-      if (urlCounts.size() < termSize) {
-        Vector tmpUrlCounts = new RandomAccessSparseVector(termSize);
+      Vector urlCounts=value.getVector();
+      if(urlCounts.size()<termSize){
+        Vector tmpUrlCounts=new RandomAccessSparseVector(termSize);
         Iterator<Vector.Element> urlCountIter=urlCounts.iterateNonZero();
         while(urlCountIter.hasNext()){
           Vector.Element e=urlCountIter.next();
           tmpUrlCounts.set(e.index(),e.get());
         }
-        labeledDocument.setUrlCounts(tmpUrlCounts);
-        context.write(key, new LabeledDocumentWritable(labeledDocument));
-      } else
-
-        context.write(key, value);
+        value.setVector(tmpUrlCounts);
+      }
+      context.write(key,value);
     }
   }
 }

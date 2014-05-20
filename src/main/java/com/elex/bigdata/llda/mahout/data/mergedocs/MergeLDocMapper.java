@@ -11,6 +11,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
+import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
@@ -24,7 +25,7 @@ import java.util.Iterator;
  * Time: 10:27 AM
  * To change this template use File | Settings | File Templates.
  */
-public class MergeLDocMapper extends Mapper<Text,LabeledDocumentWritable,Text,LabeledDocumentWritable> {
+public class MergeLDocMapper extends Mapper<Text,MultiLabelVectorWritable,Text,MultiLabelVectorWritable> {
   private int termSize=0;
   public void setup(Context context) throws IOException {
     /*
@@ -40,12 +41,12 @@ public class MergeLDocMapper extends Mapper<Text,LabeledDocumentWritable,Text,La
 
   }
 
-  public void map(Text key,LabeledDocumentWritable value,Context context) throws IOException, InterruptedException {
+  public void map(Text key,MultiLabelVectorWritable value,Context context) throws IOException, InterruptedException {
      /*
         create a labeledDocument with size of dictSize according to value
      */
-    LabeledDocument labeledDocument=value.get();
-    Vector urlCounts=labeledDocument.getUrlCounts();
+
+    Vector urlCounts=value.getVector();
     if(urlCounts.size()<termSize){
       Vector tmpUrlCounts=new RandomAccessSparseVector(termSize);
       Iterator<Vector.Element> urlCountIter=urlCounts.iterateNonZero();
@@ -53,9 +54,8 @@ public class MergeLDocMapper extends Mapper<Text,LabeledDocumentWritable,Text,La
         Vector.Element e=urlCountIter.next();
         tmpUrlCounts.set(e.index(),e.get());
       }
-      labeledDocument.setUrlCounts(tmpUrlCounts);
-      context.write(key,new LabeledDocumentWritable(labeledDocument));
-    }else
-      context.write(key,value);
+      value.setVector(tmpUrlCounts);
+    }
+    context.write(key,value);
   }
 }

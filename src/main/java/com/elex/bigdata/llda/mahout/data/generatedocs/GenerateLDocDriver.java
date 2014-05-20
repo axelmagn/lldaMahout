@@ -11,6 +11,7 @@ import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.math.MultiLabelVectorWritable;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class GenerateLDocDriver extends AbstractJob {
     SequenceFileOutputFormat.setOutputPath(genLDocJob, outputPath);
     genLDocJob.setOutputFormatClass(SequenceFileOutputFormat.class);
     genLDocJob.setOutputKeyClass(Text.class);
-    genLDocJob.setOutputValueClass(LabeledDocumentWritable.class);
+    genLDocJob.setOutputValueClass(MultiLabelVectorWritable.class);
     genLDocJob.setJarByClass(GenerateLDocDriver.class);
     genLDocJob.setJobName("generate LDocs");
     return genLDocJob;

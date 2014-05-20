@@ -23,7 +23,7 @@ import java.io.IOException;
  * Time: 4:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public class LLDAMapper extends Mapper<Text, LabeledDocumentWritable, IntWritable, VectorWritable> {
+public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritable, VectorWritable> {
   private static final Logger log = LoggerFactory.getLogger(LLDAMapper.class);
 
   private LabeledModelTrainer modelTrainer;
@@ -48,18 +48,18 @@ public class LLDAMapper extends Mapper<Text, LabeledDocumentWritable, IntWritabl
   protected void setup(Context context) throws IOException, InterruptedException {
     log.info("Retrieving configuration");
     Configuration conf = context.getConfiguration();
-    float eta = conf.getFloat(CVB0Driver.TERM_TOPIC_SMOOTHING, Float.NaN);
-    float alpha = conf.getFloat(CVB0Driver.DOC_TOPIC_SMOOTHING, Float.NaN);
-    long seed = conf.getLong(CVB0Driver.RANDOM_SEED, 1234L);
-    numTopics = conf.getInt(CVB0Driver.NUM_TOPICS, -1);
-    int numTerms = conf.getInt(CVB0Driver.NUM_TERMS, -1);
-    int numUpdateThreads = conf.getInt(CVB0Driver.NUM_UPDATE_THREADS, 1);
-    int numTrainThreads = conf.getInt(CVB0Driver.NUM_TRAIN_THREADS, 4);
-    maxIters = conf.getInt(CVB0Driver.MAX_ITERATIONS_PER_DOC, 10);
-    float modelWeight = conf.getFloat(CVB0Driver.MODEL_WEIGHT, 1.0f);
+    float eta = conf.getFloat(LLDADriver.TERM_TOPIC_SMOOTHING, Float.NaN);
+    float alpha = conf.getFloat(LLDADriver.DOC_TOPIC_SMOOTHING, Float.NaN);
+    long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
+    numTopics = conf.getInt(LLDADriver.NUM_TOPICS, -1);
+    int numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
+    int numUpdateThreads = conf.getInt(LLDADriver.NUM_UPDATE_THREADS, 1);
+    int numTrainThreads = conf.getInt(LLDADriver.NUM_TRAIN_THREADS, 4);
+    maxIters = conf.getInt(LLDADriver.MAX_ITERATIONS_PER_DOC, 10);
+    float modelWeight = conf.getFloat(LLDADriver.MODEL_WEIGHT, 1.0f);
 
     log.info("Initializing read model");
-    Path[] modelPaths = CVB0Driver.getModelPaths(conf);
+    Path[] modelPaths = LLDADriver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new LabeledTopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
     } else {
@@ -79,12 +79,15 @@ public class LLDAMapper extends Mapper<Text, LabeledDocumentWritable, IntWritabl
   }
 
   @Override
-  public void map(Text uid, LabeledDocumentWritable doc, Context context)
+  public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
     /* where to get docTopics? */
-    Vector labels=doc.get().getLabels();
-    Vector docVector=doc.get().getUrlCounts();
-    modelTrainer.train(docVector, labels, true, maxIters);
+    int numTopics=getNumTopics();
+    Vector labels=new RandomAccessSparseVector(numTopics);
+    labels.assign(0.0);
+    for(int label: doc.getLabels())
+      labels.set(label,1.0);
+    modelTrainer.train(doc.getVector(), labels, true, maxIters);
   }
 
   @Override

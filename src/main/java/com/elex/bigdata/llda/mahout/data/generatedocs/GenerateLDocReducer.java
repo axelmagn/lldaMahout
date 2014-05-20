@@ -12,6 +12,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
@@ -19,7 +20,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,7 +31,7 @@ import java.util.Map;
  * Time: 10:36 AM
  * To change this template use File | Settings | File Templates.
  */
-public class GenerateLDocReducer extends Reducer<Text,Text,Text,LabeledDocumentWritable> {
+public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVectorWritable> {
   Map<String,Integer> dictionary=new HashMap<String,Integer>();
   Map<String,String> url_category_map=new HashMap<String,String>();
   Map<String,Integer> category_label_map=new HashMap<String, Integer>();
@@ -85,7 +88,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,LabeledDocumentW
 
      */
     Vector urlCounts=new RandomAccessSparseVector(termSize);
-    Vector labels=new RandomAccessSparseVector(category_label_map.size());
+    Set<Integer> labelSet=new HashSet<Integer>();
 
     for(Text url: values){
       int id=dictionary.get(url.toString());
@@ -94,13 +97,18 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,LabeledDocumentW
       if(category!=null){
         Integer label=category_label_map.get(category);
         if(label!=null){
-           labels.set(label,1);
+           labelSet.add(label);
         }
       }
     }
-    LabeledDocument lDoc=new LabeledDocument(labels,urlCounts);
+    int[] labels=new int[labelSet.size()];
+    int i=0;
+    for(Integer label:labelSet){
+      labels[i++]=label;
+    }
+    MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCounts,labels);
     uidWriter.append(key,NullWritable.get());
-    context.write(key,new LabeledDocumentWritable(lDoc));
+    context.write(key,labelVectorWritable);
   }
 
   public void cleanup(Context context) throws IOException {
