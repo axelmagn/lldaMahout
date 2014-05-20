@@ -358,6 +358,12 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
       }
     }
     */
+    List<Integer> terms=new ArrayList<Integer>();
+    Iterator<Vector.Element> docElementIter=document.iterateNonZero();
+    while( docElementIter.hasNext()) {
+      Vector.Element element=docElementIter.next();
+      terms.add(element.index());
+    }
     for(Vector.Element e:docTopics){
       Vector topicTermRow = topicTermCounts.viewRow(e.index());
       double topicSum=topicSums.get(e.index());
@@ -366,18 +372,28 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
          topicSums.set(e.index(),0.0);
          continue;
       }
+
       Vector termTopicRow=termTopicDist.viewRow(e.index());
-      double topicWeight=e.get();
-      Iterator<Vector.Element> docElementIter=document.iterateNonZero();
+      docElementIter=document.iterateNonZero();
       while( docElementIter.hasNext()) {
-        Vector.Element element=docElementIter.next();
+         Vector.Element element=docElementIter.next();
          int termIndex=element.index();
          if(termIndex>topicTermRow.size())
            continue;
+         double topicWeight=calTopicWeight(terms,termIndex,e.index());
          double termTopicLikelihood=(topicTermRow.get(termIndex)+eta)*(topicWeight+alpha)/(topicSum+eta*numTerms);
          termTopicRow.set(termIndex,termTopicLikelihood);
       }
     }
+  }
+
+  private double calTopicWeight(List<Integer> terms,Integer currentTerm,int topicIndex){
+    double weight=0.0;
+    for(Integer term:terms){
+      if(term!=currentTerm)
+        weight+=topicTermCounts.viewRow(topicIndex).get(term);
+    }
+    return weight;
   }
 
   /**
