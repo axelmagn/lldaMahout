@@ -113,7 +113,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     Matrix docModel = new SparseRowMatrix(numTopics,doc.getVector().size());
     int maxIters=getMaxIters();
     LabeledModelTrainer modelTrainer=getModelTrainer();
-    System.out.println("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
+    //System.out.println("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
     for(int i=0;i<maxIters;i++){
       modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel);
     }
