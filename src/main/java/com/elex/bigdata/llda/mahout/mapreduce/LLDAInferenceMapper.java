@@ -57,7 +57,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     maxIters = conf.getInt(LLDADriver.MAX_ITERATIONS_PER_DOC, 10);
     float modelWeight = conf.getFloat(LLDADriver.MODEL_WEIGHT, 1.0f);
 
-    log.info("Initializing read model");
+    System.out.println("Initializing read model");
     Path[] modelPaths = LLDADriver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new LabeledTopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
@@ -67,12 +67,12 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
         numTrainThreads, modelWeight);
     }
 
-    log.info("Initializing write model");
+    System.out.println("Initializing write model");
     writeModel = modelWeight == 1
       ? new LabeledTopicModel(numTopics, numTerms, eta, alpha, null, numUpdateThreads)
       : readModel;
 
-    log.info("Initializing model trainer");
+    System.out.println("Initializing model trainer");
     modelTrainer = new LabeledModelTrainer(readModel, writeModel, numTrainThreads, numTopics, numTerms);
     modelTrainer.start();
   }
@@ -110,7 +110,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     Matrix docModel = new SparseRowMatrix(numTopics,doc.getVector().size());
     int maxIters=getMaxIters();
     LabeledModelTrainer modelTrainer=getModelTrainer();
-    log.info("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
+    System.out.println("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
     for(int i=0;i<maxIters;i++){
       modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel);
     }
