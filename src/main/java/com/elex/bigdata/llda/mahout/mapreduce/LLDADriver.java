@@ -395,6 +395,9 @@ public class LLDADriver extends AbstractJob {
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     FileInputFormat.addInputPath(job, modelInput);
     FileOutputFormat.setOutputPath(job, output);
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(output))
+      fs.delete(output);
     job.submit();
     return job;
   }
