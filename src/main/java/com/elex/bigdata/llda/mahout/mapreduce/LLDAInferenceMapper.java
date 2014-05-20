@@ -58,7 +58,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     float modelWeight = conf.getFloat(LLDADriver.MODEL_WEIGHT, 1.0f);
 
     log.info("Initializing read model");
-    Path[] modelPaths = CVB0Driver.getModelPaths(conf);
+    Path[] modelPaths = LLDADriver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new LabeledTopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
     } else {
@@ -110,6 +110,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     Matrix docModel = new SparseRowMatrix(numTopics,doc.getVector().size());
     int maxIters=getMaxIters();
     LabeledModelTrainer modelTrainer=getModelTrainer();
+    log.info("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
     for(int i=0;i<maxIters;i++){
       modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel);
     }
