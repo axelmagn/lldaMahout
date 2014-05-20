@@ -87,6 +87,9 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     labels.assign(0.0);
     for(int label: doc.getLabels())
       labels.set(label,1.0);
+    if(doc.getLabels().length==0){
+      labels.assign(1.0);
+    }
     modelTrainer.train(doc.getVector(), labels, true, maxIters);
   }
 
