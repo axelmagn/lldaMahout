@@ -18,6 +18,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.clustering.lda.cvb.*;
 import org.apache.mahout.common.AbstractJob;
@@ -407,9 +408,9 @@ public class LLDADriver extends AbstractJob {
     job.setMapperClass(LLDAInferenceMapper.class);
     job.setNumReduceTasks(0);
     job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setOutputFormatClass(SequenceFileOutputFormat.class);
-    job.setOutputKeyClass(Text.class);
-    job.setOutputValueClass(VectorWritable.class);
+    job.setOutputFormatClass(TextOutputFormat.class);
+    job.setMapOutputKeyClass(Text.class);
+    job.setMapOutputValueClass(Text.class);
     FileSystem fs = FileSystem.get(corpus.toUri(), conf);
     if (modelInput != null && fs.exists(modelInput)) {
       FileStatus[] statuses = fs.listStatus(modelInput, PathFilters.partFilter());
@@ -418,6 +419,9 @@ public class LLDADriver extends AbstractJob {
         modelUris[i] = statuses[i].getPath().toUri();
       }
       DistributedCache.setCacheFiles(modelUris, conf);
+    }
+    if(fs.exists(output)){
+      fs.delete(output);
     }
     FileInputFormat.addInputPath(job, corpus);
     FileOutputFormat.setOutputPath(job, output);

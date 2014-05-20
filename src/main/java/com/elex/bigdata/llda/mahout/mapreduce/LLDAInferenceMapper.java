@@ -22,7 +22,7 @@ import java.io.IOException;
  * Time: 5:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class LLDAInferenceMapper extends Mapper<Text, LabeledDocumentWritable, Text, VectorWritable> {
+public class LLDAInferenceMapper extends Mapper<Text, LabeledDocumentWritable, Text, Text> {
   private static final Logger log = LoggerFactory.getLogger(LLDAInferenceMapper.class);
   private LabeledModelTrainer modelTrainer;
   private LabeledTopicModel readModel;
@@ -111,7 +111,11 @@ public class LLDAInferenceMapper extends Mapper<Text, LabeledDocumentWritable, T
     for(int i=0;i<maxIters;i++){
       modelTrainer.getReadModel().trainDocTopicModel(doc.get().getUrlCounts(),labels,docModel);
     }
-    context.write(uid,new VectorWritable(labels));
+    StringBuilder builder=new StringBuilder();
+    for(Vector.Element e: labels){
+       builder.append(e.index()+":"+e.get()+"\t");
+    }
+    context.write(uid,new Text(builder.toString()));
   }
 
   @Override
