@@ -250,18 +250,21 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
     }
   }
 
-  public void trainDocTopicModel(Vector original, Vector topics, Matrix docTopicModel) {
+  public Vector trainDocTopicModel(Vector original, Vector labels, Matrix docTopicModel) {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
-    log.info("before train. topics: " + topics.toString());
-    pTopicGivenTerm(original, topics, docTopicModel);
+    log.info("before train. labels: " + labels.toString());
+    pTopicGivenTerm(original, labels, docTopicModel);
     normalizeByTopic(docTopicModel);
     // now multiply, term-by-term, by the document, to get the weighted distribution of
     // term-topic pairs from this document.
+    double docTermCount=0.0;
+    int termSize=getNumTerms();
     Iterator<Vector.Element> origElementIter=original.iterateNonZero();
     while( origElementIter.hasNext()) {
       Vector.Element e=origElementIter.next();
-      Iterator<Vector.Element> topicElementIter=topics.iterateNonZero();
+      docTermCount+=e.get();
+      Iterator<Vector.Element> topicElementIter=labels.iterateNonZero();
       while(topicElementIter.hasNext()){
         Vector.Element topic=topicElementIter.next();
         Vector docTopicModelRow = docTopicModel.viewRow(topic.index());
@@ -269,14 +272,15 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
       }
     }
     // now recalculate \(p(topic|doc)\) by summing contributions from all of pTopicGivenTerm
+    Vector topics=new DenseVector(labels.size());
     topics.assign(0.0);
     for(Vector.Element topic : topics){
-      topics.set(topic.index(), docTopicModel.viewRow(topic.index()).norm(1));
+      topics.set(topic.index(), (docTopicModel.viewRow(topic.index()).norm(1)+alpha)/(docTermCount+termSize*alpha));
     }
-    log.info("before norm topics is "+topics.toString());
     // now renormalize so that \(sum_x(p(x|doc))\) = 1
     topics.assign(Functions.mult(1 / topics.norm(1)));
     log.info("after train: "+ topics.toString());
+    return topics;
   }
 
   public Vector infer(Vector original, Vector docTopics) {

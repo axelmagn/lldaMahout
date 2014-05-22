@@ -245,10 +245,10 @@ public class LabeledModelTrainer {
 
     @Override
     public void run() {
-      for (int i = 0; i < numDocTopicIters; i++) {
+      //for (int i = 0; i < numDocTopicIters; i++) {
         // synchronous read-only call:
         readModel.trainDocTopicModel(document, docTopics, docTopicModel);
-      }
+      //}
       if (writeModel != null) {
         // parallel call which is read-only on the docTopicModel, and write-only on the writeModel
         // this method does not return until all rows of the docTopicModel have been submitted

@@ -111,14 +111,14 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
       labels.assign(1.0);
     }
     Matrix docModel = new SparseRowMatrix(numTopics,doc.getVector().size());
-    int maxIters=getMaxIters();
+    //int maxIters=getMaxIters();
     LabeledModelTrainer modelTrainer=getModelTrainer();
     //System.out.println("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
-    for(int i=0;i<maxIters;i++){
-      modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel);
-    }
+    //for(int i=0;i<maxIters;i++){
+      Vector topics=modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel);
+    //}
     StringBuilder builder=new StringBuilder();
-    for(Vector.Element e: labels){
+    for(Vector.Element e: topics){
        builder.append(e.index()+":"+e.get()+"\t");
     }
     context.write(uid,new Text(builder.toString()));
