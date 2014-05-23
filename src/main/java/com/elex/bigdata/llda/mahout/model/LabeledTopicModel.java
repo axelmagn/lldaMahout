@@ -316,8 +316,17 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void updateTopic(int topic, Vector docTopicCounts) {
-    topicTermCounts.viewRow(topic).assign(docTopicCounts, Functions.PLUS);
-    topicSums.set(topic, topicSums.get(topic) + docTopicCounts.norm(1));
+    Iterator<Vector.Element> docTopicElementIter=docTopicCounts.iterateNonZero();
+    Vector distTopicTermCountRow=topicTermCounts.viewRow(topic);
+    double topicCountSum=0.0;
+    while(docTopicElementIter.hasNext()){
+      Vector.Element topicTermCount=docTopicElementIter.next();
+      int termIndex=topicTermCount.index();
+      double count=topicTermCount.get();
+      topicCountSum+=count;
+      distTopicTermCountRow.setQuick(termIndex,count+distTopicTermCountRow.get(termIndex));
+    }
+    topicSums.set(topic, topicSums.get(topic) + topicCountSum);
   }
 
   public void update(int termId, Vector topicCounts) {
@@ -543,7 +552,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
           long t1=System.currentTimeMillis();
           Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
           if (pair != null) {
+            long t2=System.currentTimeMillis();
             updateTopic(pair.getFirst(), pair.getSecond());
+            log.info("updateTopic use {} ms",(System.currentTimeMillis()-t2));
           }
           log.info("update pair use {} ms",(System.currentTimeMillis()-t1));
         } catch (InterruptedException e) {
