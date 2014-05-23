@@ -250,15 +250,17 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
   }
 
-  public void trainDocTopicModel(Vector original, Vector labels, Matrix docTopicModel) {
+  public void trainDocTopicModel(Vector original, Vector labels, Matrix docTopicModel, boolean inf) {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
     //log.info("before train. labels: " + labels.toString());
     List<Integer> terms = new ArrayList<Integer>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
+    double docTermCount = 0.0;
     while (docElementIter.hasNext()) {
       Vector.Element element = docElementIter.next();
       terms.add(element.index());
+      docTermCount+=element.get();
     }
     List<Integer> topicLabels = new ArrayList<Integer>();
     for (Vector.Element e : labels) {
@@ -267,26 +269,25 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       else
         topicLabels.add(e.index());
     }
-
+    long t1 = System.currentTimeMillis();
     pTopicGivenTerm(terms, topicLabels, docTopicModel);
-    normalizeByTopic(docTopicModel);
+    long t2 = System.currentTimeMillis();
+    log.info("pTopic use {} ms", (t2 - t1));
+    normByTopicAndMultiByCount(original,terms,docTopicModel);
+    long t3 = System.currentTimeMillis();
+    log.info("normalize use {} ms", (t3 - t2));
     // now multiply, term-by-term, by the document, to get the weighted distribution of
     // term-topic pairs from this document.
-    double docTermCount = 0.0;
-    int termSize = getNumTerms();
-    for (Integer termIndex : terms) {
-      docTermCount += original.get(termIndex);
-      for (Integer topicIndex : topicLabels) {
-        Vector docTopicModelRow = docTopicModel.viewRow(topicIndex);
-        docTopicModelRow.setQuick(termIndex, docTopicModelRow.getQuick(termIndex) * docTopicModelRow.get(termIndex));
-      }
-    }
+
     // now recalculate \(p(topic|doc)\) by summing contributions from all of pTopicGivenTerm
-    for (Vector.Element topic : labels) {
-      labels.set(topic.index(), (docTopicModel.viewRow(topic.index()).norm(1) + alpha) / (docTermCount + termSize * alpha));
+    if (inf) {
+      for (Vector.Element topic : labels) {
+        labels.set(topic.index(), (docTopicModel.viewRow(topic.index()).norm(1) + alpha) / (docTermCount + numTerms * alpha));
+      }
+      // now renormalize so that \(sum_x(p(x|doc))\) = 1
+      labels.assign(Functions.mult(1 / labels.norm(1)));
+      log.info("set topics use {} " + (System.currentTimeMillis() - t3));
     }
-    // now renormalize so that \(sum_x(p(x|doc))\) = 1
-    labels.assign(Functions.mult(1 / labels.norm(1)));
     //log.info("after train: "+ topics.toString());
   }
 
@@ -443,19 +444,17 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     return -perplexity;
   }
 
-  private void normalizeByTopic(Matrix perTopicSparseDistributions) {
+  private void normByTopicAndMultiByCount(Vector doc,List<Integer> terms,Matrix perTopicSparseDistributions) {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
-    Iterator<Vector.Element> firstRowIter = perTopicSparseDistributions.viewRow(0).iterateNonZero();
-    while (firstRowIter.hasNext()) {
-      Vector.Element e = firstRowIter.next();
-      int a = e.index();
+    for(Integer termIndex: terms){
       double sum = 0;
       for (int x = 0; x < numTopics; x++) {
-        sum += perTopicSparseDistributions.viewRow(x).get(a);
+        sum += perTopicSparseDistributions.viewRow(x).get(termIndex);
       }
+      double count=doc.get(termIndex);
       for (int x = 0; x < numTopics; x++) {
-        perTopicSparseDistributions.viewRow(x).set(a,
-          perTopicSparseDistributions.viewRow(x).get(a) / sum);
+        perTopicSparseDistributions.viewRow(x).set(termIndex,
+          perTopicSparseDistributions.viewRow(x).get(termIndex)*count / sum);
       }
     }
   }

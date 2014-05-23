@@ -71,8 +71,8 @@ public class LabeledModelTrainer {
     writeModel.reset();
   }
 
-  public void train(VectorIterable matrix, VectorIterable docTopicCounts) {
-    train(matrix, docTopicCounts, 1);
+  public void train(VectorIterable matrix, VectorIterable docTopicCounts,boolean isInf) {
+    train(matrix, docTopicCounts, 1,isInf);
   }
 
   public double calculatePerplexity(VectorIterable matrix, VectorIterable docTopicCounts) {
@@ -92,7 +92,7 @@ public class LabeledModelTrainer {
       Vector document = docSlice.vector();
       Vector topicDist = topicSlice.vector();
       if (testFraction == 0 || docId % (1 / testFraction) == 0) {
-        trainSync(document, topicDist, false, 10);
+        trainSync(document, topicDist, false, 10,true);
         perplexity += readModel.perplexity(document, topicDist);
         matrixNorm += document.norm(1);
       }
@@ -100,7 +100,7 @@ public class LabeledModelTrainer {
     return perplexity / matrixNorm;
   }
 
-  public void train(VectorIterable matrix, VectorIterable docTopicCounts, int numDocTopicIters) {
+  public void train(VectorIterable matrix, VectorIterable docTopicCounts, int numDocTopicIters,boolean inf) {
     start();
     Iterator<MatrixSlice> docIterator = matrix.iterator();
     Iterator<MatrixSlice> docTopicIterator = docTopicCounts.iterator();
@@ -121,7 +121,7 @@ public class LabeledModelTrainer {
             numTokensInBatch += document.getNumNondefaultElements();
           }
         } else {
-          batchTrain(batch, true, numDocTopicIters);
+          batchTrain(batch, true, numDocTopicIters,inf);
           long time = System.nanoTime();
           log.debug("trained "+numTrainThreads+"docs with "+numTokensInBatch+" tokens, start time "+batchStart+", end time "+time);
           batchStart = time;
@@ -129,7 +129,7 @@ public class LabeledModelTrainer {
         }
       } else {
         long start = System.nanoTime();
-        train(document, topicDist, true, numDocTopicIters);
+        train(document, topicDist, true, numDocTopicIters,inf);
         if (log.isDebugEnabled()) {
           times[i % times.length] =
             (System.nanoTime() - start) / (1.0e6 * document.getNumNondefaultElements());
@@ -147,14 +147,14 @@ public class LabeledModelTrainer {
     stop();
   }
 
-  public void batchTrain(Map<Vector, Vector> batch, boolean update, int numDocTopicsIters) {
+  public void batchTrain(Map<Vector, Vector> batch, boolean update, int numDocTopicsIters,boolean isInf) {
     while (true) {
       try {
         List<TrainerRunnable> runnables = Lists.newArrayList();
         for (Map.Entry<Vector, Vector> entry : batch.entrySet()) {
           runnables.add(new TrainerRunnable(readModel, null, entry.getKey(),
             entry.getValue(), new SparseRowMatrix(numTopics, numTerms, true),
-            numDocTopicsIters));
+            numDocTopicsIters,isInf));
         }
         threadPool.invokeAll(runnables);
         if (update) {
@@ -169,12 +169,12 @@ public class LabeledModelTrainer {
     }
   }
 
-  public void train(Vector document, Vector docTopicCounts, boolean update, int numDocTopicIters) {
+  public void train(Vector document, Vector docTopicCounts, boolean update, int numDocTopicIters,boolean isInf) {
     while (true) {
       try {
         workQueue.put(new TrainerRunnable(readModel, update
           ? writeModel
-          : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters));
+          : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters,isInf));
         return;
       } catch (InterruptedException e) {
         log.warn("Interrupted waiting to submit document to work queue: {}", document, e);
@@ -183,15 +183,15 @@ public class LabeledModelTrainer {
   }
 
   public void trainSync(Vector document, Vector docTopicCounts, boolean update,
-                        int numDocTopicIters) {
+                        int numDocTopicIters,boolean isInf) {
     new TrainerRunnable(readModel, update
       ? writeModel
-      : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters).run();
+      : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters,isInf).run();
   }
 
   public double calculatePerplexity(Vector document, Vector docTopicCounts, int numDocTopicIters) {
     TrainerRunnable runner =  new TrainerRunnable(readModel, null, document, docTopicCounts,
-      new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters);
+      new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters,true);
     return runner.call();
   }
 
@@ -232,22 +232,27 @@ public class LabeledModelTrainer {
     private final Vector docTopics;
     private final Matrix docTopicModel;
     private final int numDocTopicIters;
+    private boolean isInf;
 
     private TrainerRunnable(LabeledTopicModel readModel, LabeledTopicModel writeModel, Vector document,
-                            Vector docTopics, Matrix docTopicModel, int numDocTopicIters) {
+                            Vector docTopics, Matrix docTopicModel, int numDocTopicIters,boolean isInf) {
       this.readModel = readModel;
       this.writeModel = writeModel;
       this.document = document;
       this.docTopics = docTopics;
       this.docTopicModel = docTopicModel;
       this.numDocTopicIters = numDocTopicIters;
+      this.isInf=isInf;
     }
 
     @Override
     public void run() {
       //for (int i = 0; i < numDocTopicIters; i++) {
         // synchronous read-only call:
-        readModel.trainDocTopicModel(document, docTopics, docTopicModel);
+        long t1=System.currentTimeMillis();
+        readModel.trainDocTopicModel(document, docTopics, docTopicModel,isInf);
+        long t2=System.currentTimeMillis();
+        log.info("trainerRunnable run use "+(t2-t1)+" ms");
       //}
       if (writeModel != null) {
         // parallel call which is read-only on the docTopicModel, and write-only on the writeModel
@@ -255,6 +260,7 @@ public class LabeledModelTrainer {
         // to write work queues
         writeModel.update(docTopicModel);
       }
+      log.info("update use "+(System.currentTimeMillis()-t2)+" ms");
     }
 
     @Override

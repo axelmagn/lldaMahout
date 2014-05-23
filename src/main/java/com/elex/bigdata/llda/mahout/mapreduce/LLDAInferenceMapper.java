@@ -114,7 +114,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     LabeledModelTrainer modelTrainer=getModelTrainer();
     //System.out.println("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
     //for(int i=0;i<maxIters;i++){
-    modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel);
+    modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel,true);
     //}
     StringBuilder builder=new StringBuilder();
     for(Vector.Element e: labels){
