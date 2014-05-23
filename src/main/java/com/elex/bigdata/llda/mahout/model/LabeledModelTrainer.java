@@ -63,7 +63,7 @@ public class LabeledModelTrainer {
 
   public void start() {
     log.info("Starting training threadpool with {} threads", numTrainThreads);
-    workQueue = new ArrayBlockingQueue<Runnable>(numTrainThreads * 10);
+    workQueue = new ArrayBlockingQueue<Runnable>(numTrainThreads * 100);
     threadPool = new ThreadPoolExecutor(numTrainThreads, numTrainThreads, 0, TimeUnit.SECONDS,
       workQueue);
     threadPool.allowCoreThreadTimeOut(false);
