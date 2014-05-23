@@ -254,26 +254,35 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
     //log.info("before train. labels: " + labels.toString());
-    pTopicGivenTerm(original, labels, docTopicModel);
+    List<Integer> terms=new ArrayList<Integer>();
+    Iterator<Vector.Element> docElementIter=original.iterateNonZero();
+    while( docElementIter.hasNext()) {
+      Vector.Element element=docElementIter.next();
+      terms.add(element.index());
+    }
+    List<Integer> topicLabels=new ArrayList<Integer>();
+    for(Vector.Element e: labels){
+      if(e.get()==0.0)
+        docTopicModel.viewRow(e.index()).assign(0.0);
+      else
+        topicLabels.add(e.index());
+    }
+
+    pTopicGivenTerm(terms, topicLabels, docTopicModel);
     normalizeByTopic(docTopicModel);
     // now multiply, term-by-term, by the document, to get the weighted distribution of
     // term-topic pairs from this document.
     double docTermCount=0.0;
     int termSize=getNumTerms();
-    Iterator<Vector.Element> origElementIter=original.iterateNonZero();
-    while( origElementIter.hasNext()) {
-      Vector.Element e=origElementIter.next();
-      docTermCount+=e.get();
-      Iterator<Vector.Element> topicElementIter=labels.iterateNonZero();
-      while(topicElementIter.hasNext()){
-        Vector.Element topic=topicElementIter.next();
-        Vector docTopicModelRow = docTopicModel.viewRow(topic.index());
-        docTopicModelRow.setQuick(e.index(), docTopicModelRow.getQuick(e.index()) * e.get());
+    for(Integer termIndex: terms){
+      docTermCount+=original.get(termIndex);
+        for(Integer topicIndex: topicLabels){
+          Vector docTopicModelRow = docTopicModel.viewRow(topicIndex);
+          docTopicModelRow.setQuick(termIndex, docTopicModelRow.getQuick(termIndex) * docTopicModelRow.get(termIndex));
+        }
       }
-    }
     // now recalculate \(p(topic|doc)\) by summing contributions from all of pTopicGivenTerm
     Vector topics=new DenseVector(labels.size());
-    topics.assign(0.0);
     for(Vector.Element topic : topics){
       topics.set(topic.index(), (docTopicModel.viewRow(topic.index()).norm(1)+alpha)/(docTermCount+termSize*alpha));
     }
@@ -362,6 +371,7 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
       }
     }
     */
+    int modelTermSize=topicTermCounts.columnSize();
     List<Integer> terms=new ArrayList<Integer>();
     Iterator<Vector.Element> docElementIter=document.iterateNonZero();
     while( docElementIter.hasNext()) {
@@ -369,36 +379,49 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
       terms.add(element.index());
     }
     for(Vector.Element e:docTopics){
-      Vector topicTermRow = topicTermCounts.viewRow(e.index());
-      double topicSum=topicSums.get(e.index());
+      int topicIndex=e.index();
+      Vector termTopicRow=termTopicDist.viewRow(topicIndex);
       if(e.get()==0.0){
-         topicTermRow.assign(0.0);
-         topicSums.set(e.index(),0.0);
-         continue;
+        termTopicRow.assign(0.0);
+        continue;
+      }
+      Vector topicTermRow = topicTermCounts.viewRow(topicIndex);
+      double topicSum=topicSums.get(topicIndex);
+      double docTopicSum=0.0;
+      for(Integer termIndex: terms){
+        docTopicSum+=topicTermRow.get(termIndex);
       }
 
-      Vector termTopicRow=termTopicDist.viewRow(e.index());
-      docElementIter=document.iterateNonZero();
-      while( docElementIter.hasNext()) {
-         Vector.Element element=docElementIter.next();
-         int termIndex=element.index();
-         if(termIndex>topicTermRow.size())
+      for(Integer termIndex: terms){
+         if(termIndex>modelTermSize)
            continue;
-         double topicWeight=calTopicWeight(terms,termIndex,e.index());
+         double topicWeight=docTopicSum-topicTermRow.get(termIndex);
          double termTopicLikelihood=(topicTermRow.get(termIndex)+eta)*(topicWeight+alpha)/(topicSum+eta*numTerms);
          termTopicRow.set(termIndex,termTopicLikelihood);
       }
     }
   }
 
-  private double calTopicWeight(List<Integer> terms,Integer currentTerm,int topicIndex){
-    double weight=0.0;
-    for(Integer term:terms){
-      if(term!=currentTerm)
-        weight+=topicTermCounts.viewRow(topicIndex).get(term);
-    }
-    return weight;
+  private void pTopicGivenTerm(List<Integer> terms,List<Integer> topicLabels,Matrix termTopicDist){
+    int modelTermSize=topicTermCounts.columnSize();
+     for(Integer topicIndex: topicLabels){
+       Vector termTopicRow=termTopicDist.viewRow(topicIndex);
+       Vector topicTermRow = topicTermCounts.viewRow(topicIndex);
+       double topicSum=topicSums.get(topicIndex);
+       double docTopicSum=0.0;
+       for(Integer termIndex: terms){
+         docTopicSum+=topicTermRow.get(termIndex);
+       }
+       for(Integer termIndex: terms){
+         if(termIndex>modelTermSize)
+           continue;
+         double topicWeight=docTopicSum-topicTermRow.get(termIndex);
+         double termTopicLikelihood=(topicTermRow.get(termIndex)+eta)*(topicWeight+alpha)/(topicSum+eta*numTerms);
+         termTopicRow.set(termIndex,termTopicLikelihood);
+       }
+     }
   }
+
 
   /**
    * \(sum_x sum_a (c_ai * log(p(x|i) * p(a|x)))\)
