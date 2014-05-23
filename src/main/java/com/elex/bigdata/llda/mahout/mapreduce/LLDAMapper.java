@@ -82,13 +82,17 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
     /* where to get docTopics? */
+    long t1=System.currentTimeMillis();
     Vector labels=new RandomAccessSparseVector(numTopics);
     for(int label: doc.getLabels())
       labels.setQuick(label,1.0);
     if(doc.getLabels().length==0){
       labels.assign(1.0);
     }
+    long t2=System.currentTimeMillis();
+    log.info("create labels using "+(t2-t1)+" ms");
     modelTrainer.train(doc.getVector(), labels, true, maxIters);
+    log.info("train using "+" ms");
   }
 
   @Override
