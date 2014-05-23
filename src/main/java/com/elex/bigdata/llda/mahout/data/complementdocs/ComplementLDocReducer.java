@@ -27,6 +27,8 @@ public class ComplementLDocReducer extends Reducer<Text,MultiLabelVectorWritable
     for(MultiLabelVectorWritable labelVectorWritable: values){
       lDocs.add(labelVectorWritable);
     }
+    if(lDocs.size()==1)
+      context.write(key,lDocs.get(0));
     MultiLabelVectorWritable finalLDoc=LabeledDocument.mergeDocs(lDocs);
     context.write(key,finalLDoc);
   }

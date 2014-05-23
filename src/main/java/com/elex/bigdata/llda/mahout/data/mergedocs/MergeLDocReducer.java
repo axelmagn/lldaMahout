@@ -26,6 +26,8 @@ public class MergeLDocReducer extends Reducer<Text,MultiLabelVectorWritable,Text
      for(MultiLabelVectorWritable labelVectorWritable:values){
        lDocs.add(labelVectorWritable);
      }
+     if(lDocs.size()==1)
+       context.write(key,lDocs.get(0));
      MultiLabelVectorWritable finalLDoc=LabeledDocument.mergeDocs(lDocs);
      context.write(key,finalLDoc);
    }
