@@ -65,6 +65,7 @@ public class MergeLDocDriver extends AbstractJob {
     if(fs.exists(outputPath))
       fs.delete(outputPath);
     Job job=new Job(conf);
+    job.setNumReduceTasks(3);
     job.setMapperClass(MergeLDocMapper.class);
     job.setReducerClass(MergeLDocReducer.class);
     for(Path inputPath: inputPaths){

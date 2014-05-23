@@ -70,6 +70,7 @@ public class ComplementLDocDriver extends AbstractJob {
     if(fs.exists(outputPath))
       fs.delete(outputPath);
     Job job=new Job(conf);
+    job.setNumReduceTasks(3);
     job.setMapperClass(ComplementLDocMapper.class);
     job.setReducerClass(ComplementLDocReducer.class);
     for(Path inputPath: inputPaths){
