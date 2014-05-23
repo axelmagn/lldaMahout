@@ -265,9 +265,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
     List<Integer> topicLabels = new ArrayList<Integer>();
     for (Vector.Element e : labels) {
-      if (e.get() == 0.0)
-        docTopicModel.viewRow(e.index()).assign(0.0);
-      else
+      if (e.get() != 0.0)
         topicLabels.add(e.index());
     }
     long t1 = System.currentTimeMillis();
