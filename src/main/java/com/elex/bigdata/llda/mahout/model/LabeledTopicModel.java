@@ -254,6 +254,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
     //log.info("before train. labels: " + labels.toString());
+    long preTime=System.currentTimeMillis();
     List<Integer> terms = new ArrayList<Integer>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
     double docTermCount = 0.0;
@@ -270,6 +271,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         topicLabels.add(e.index());
     }
     long t1 = System.currentTimeMillis();
+    log.info("get List use {} ms",(t1-preTime));
     pTopicGivenTerm(terms, topicLabels, docTopicModel);
     long t2 = System.currentTimeMillis();
     log.info("pTopic use {} ms", (t2 - t1));
@@ -503,7 +505,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private final class Updater implements Runnable {
     private final ArrayBlockingQueue<Pair<Integer, Vector>> queue =
-      new ArrayBlockingQueue<Pair<Integer, Vector>>(100);
+      new ArrayBlockingQueue<Pair<Integer, Vector>>(updaters.length*500);
     private boolean shutdown = false;
     private boolean shutdownComplete = false;
 
@@ -540,10 +542,12 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     public void run() {
       while (!shutdown) {
         try {
+          long t1=System.currentTimeMillis();
           Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
           if (pair != null) {
             updateTopic(pair.getFirst(), pair.getSecond());
           }
+          log.info("update pair use {} ms",(System.currentTimeMillis()-t1));
         } catch (InterruptedException e) {
           log.warn("Interrupted waiting to poll for update", e);
         }
