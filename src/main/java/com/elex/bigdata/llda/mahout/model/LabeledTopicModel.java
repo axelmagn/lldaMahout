@@ -253,7 +253,7 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
   public Vector trainDocTopicModel(Vector original, Vector labels, Matrix docTopicModel) {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
-    log.info("before train. labels: " + labels.toString());
+    //log.info("before train. labels: " + labels.toString());
     pTopicGivenTerm(original, labels, docTopicModel);
     normalizeByTopic(docTopicModel);
     // now multiply, term-by-term, by the document, to get the weighted distribution of
@@ -279,7 +279,7 @@ public class LabeledTopicModel  implements Configurable, Iterable<MatrixSlice> {
     }
     // now renormalize so that \(sum_x(p(x|doc))\) = 1
     topics.assign(Functions.mult(1 / topics.norm(1)));
-    log.info("after train: "+ topics.toString());
+    //log.info("after train: "+ topics.toString());
     return topics;
   }
 
