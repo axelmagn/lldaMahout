@@ -82,11 +82,9 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
     /* where to get docTopics? */
-    int numTopics=getNumTopics();
     Vector labels=new RandomAccessSparseVector(numTopics);
-    labels.assign(0.0);
     for(int label: doc.getLabels())
-      labels.set(label,1.0);
+      labels.setQuick(label,1.0);
     if(doc.getLabels().length==0){
       labels.assign(1.0);
     }
