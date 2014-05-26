@@ -263,10 +263,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       terms.add(element.index());
       docTermCount+=element.get();
     }
+    long midTime=System.currentTimeMillis();
+    log.info("get term list use {} ms",(midTime-preTime));
     List<Integer> topicLabels = new ArrayList<Integer>();
-    for (Vector.Element e : labels) {
-      if (e.get() != 0.0)
-        topicLabels.add(e.index());
+    Iterator<Vector.Element> labelIter=labels.iterateNonZero();
+    while(labelIter.hasNext()){
+      Vector.Element e=labelIter.next();
+      topicLabels.add(e.index());
     }
     long t1 = System.currentTimeMillis();
     log.info("get List use {} ms",(t1-preTime));
@@ -412,6 +415,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private void pTopicGivenTerm(List<Integer> terms, List<Integer> topicLabels, Matrix termTopicDist) {
     int modelTermSize = topicTermCounts.columnSize();
+    double Vbeta=eta*numTerms;
     for (Integer topicIndex : topicLabels) {
       Vector termTopicRow = termTopicDist.viewRow(topicIndex);
       Vector topicTermRow = topicTermCounts.viewRow(topicIndex);
@@ -424,7 +428,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         if (termIndex > modelTermSize)
           continue;
         double topicWeight = docTopicSum - topicTermRow.get(termIndex);
-        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha) / (topicSum + eta * numTerms);
+        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
         termTopicRow.set(termIndex, termTopicLikelihood);
       }
     }
