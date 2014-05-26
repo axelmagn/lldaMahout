@@ -14,6 +14,7 @@ import org.apache.hadoop.mapred.TextInputFormat;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.SequentialAccessSparseVector;
 import org.apache.mahout.math.Vector;
 
 import java.io.BufferedReader;
@@ -36,7 +37,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
   Map<String,String> url_category_map=new HashMap<String,String>();
   Map<String,Integer> category_label_map=new HashMap<String, Integer>();
   SequenceFile.Writer uidWriter;
-  int termSize;
+  //int termSize;
   public void setup(Context context) throws IOException {
     /*
        load dict;
@@ -56,7 +57,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
       dictionary.put(urlText.toString(),intWritable.get());
     }
     dictReader.close();
-    termSize=dictionary.size();
+    //termSize=dictionary.size();
 
     BufferedReader urlCategoryReader=new BufferedReader(new InputStreamReader(fs.open(urlCategoryPath)));
     String line="";
@@ -87,12 +88,15 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
        uidWriter.write(key,NullWritable)
 
      */
-    Vector urlCounts=new RandomAccessSparseVector(termSize);
+    Map<Integer,Double> urlCounts=new HashMap<Integer, Double>();
     Set<Integer> labelSet=new HashSet<Integer>();
 
     for(Text url: values){
       int id=dictionary.get(url.toString());
-      urlCounts.set(id,urlCounts.get(id)+1l);
+      if(urlCounts.containsKey(id))
+        urlCounts.put(id,urlCounts.get(id)+1l);
+      else
+        urlCounts.put(id,1.0);
       String category=url_category_map.get(url.toString());
       if(category!=null){
         Integer label=category_label_map.get(category);
@@ -101,12 +105,16 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
         }
       }
     }
+    Vector urlCountsVector=new RandomAccessSparseVector(urlCounts.size()*2);
+    for(Map.Entry<Integer,Double> urlCount: urlCounts.entrySet()){
+       urlCountsVector.setQuick(urlCount.getKey(),urlCount.getValue());
+    }
     int[] labels=new int[labelSet.size()];
     int i=0;
     for(Integer label:labelSet){
       labels[i++]=label;
     }
-    MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCounts,labels);
+    MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCountsVector,labels);
     uidWriter.append(key,NullWritable.get());
     context.write(key,labelVectorWritable);
   }

@@ -5,12 +5,12 @@ import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.function.DoubleDoubleFunction;
 import org.apache.mahout.math.function.Functions;
+import org.apache.mahout.math.function.IntProcedure;
+import org.apache.mahout.math.list.IntArrayList;
+import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -40,14 +40,23 @@ public class LabeledDocument {
   }
   public static MultiLabelVectorWritable mergeDocs(List<MultiLabelVectorWritable> lDocs){
     Set<Integer> labelSet=new HashSet<Integer>();
-    Vector finalUrlCounts=new RandomAccessSparseVector(lDocs.get(0).getVector().size());
-    finalUrlCounts.assign(0.0);
+    OpenIntDoubleHashMap urlCountMap=new OpenIntDoubleHashMap();
+
     for(int i=0;i<lDocs.size();i++){
       MultiLabelVectorWritable labelVectorWritable=lDocs.get(i);
       for(Integer label: labelVectorWritable.getLabels())
         labelSet.add(label);
       Vector tmpUrlCounts=lDocs.get(i).getVector();
-      finalUrlCounts.assign(tmpUrlCounts, Functions.PLUS);
+      Iterator<Vector.Element> tmpUrlCountIter=tmpUrlCounts.iterateNonZero();
+      while(tmpUrlCountIter.hasNext()){
+        Vector.Element urlCount=tmpUrlCountIter.next();
+        int termIndex=urlCount.index();
+        urlCountMap.put(termIndex,urlCount.get()+urlCountMap.get(termIndex));
+      }
+    }
+    Vector finalUrlCounts=new RandomAccessSparseVector(urlCountMap.size()*2);
+    for(Integer url: urlCountMap.keys().elements()){
+       finalUrlCounts.setQuick(url,urlCountMap.get(url));
     }
     int[] labels=new int[labelSet.size()];
     int i=0;

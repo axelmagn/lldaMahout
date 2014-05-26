@@ -257,6 +257,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     long preTime=System.currentTimeMillis();
     List<Integer> terms = new ArrayList<Integer>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
+    long getIterTime=System.currentTimeMillis();
     double docTermCount = 0.0;
     while (docElementIter.hasNext()) {
       Vector.Element element = docElementIter.next();
@@ -271,7 +272,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topicLabels.add(e.index());
     }
     long t1 = System.currentTimeMillis();
-    log.info("get List use {} ms ,with terms' size of {},get term list use {} ms ",new Object[]{(t1-preTime),terms.size(),(midTime-preTime)});
+    log.info("get List use {} ms ,with terms' size of {},get term list use {} ms,get termIter use time {} ",new Object[]{(t1-preTime),terms.size(),(midTime-preTime),(getIterTime-preTime)});
     pTopicGivenTerm(terms, topicLabels, docTopicModel);
     long t2 = System.currentTimeMillis();
     log.info("pTopic use {} ms with terms' size {}", new Object[]{(t2 - t1),terms.size()});
@@ -463,7 +464,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       for (int x = 0; x < numTopics; x++) {
         sum += perTopicSparseDistributions.viewRow(x).get(termIndex);
       }
-      double count=doc.get(termIndex);
+      double count=doc.getQuick(termIndex);
       for (int x = 0; x < numTopics; x++) {
         perTopicSparseDistributions.viewRow(x).set(termIndex,
           perTopicSparseDistributions.viewRow(x).get(termIndex)*count / sum);

@@ -30,7 +30,6 @@ import java.util.Set;
  */
 public class ComplementLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text, MultiLabelVectorWritable> {
   private Set<String> uids = new HashSet<String>();
-  private int termSize;
 
   public void setup(Context context) throws IOException {
     /*
@@ -46,25 +45,10 @@ public class ComplementLDocMapper extends Mapper<Text, MultiLabelVectorWritable,
     }
     uidReader.close();
 
-    Path dictSizePath = new Path(conf.get(UpdateDictDriver.DICT_SIZE_PATH));
-    SequenceFile.Reader dictSizeReader = new SequenceFile.Reader(FileSystem.get(conf), dictSizePath, conf);
-    IntWritable dictSizeWritable = new IntWritable();
-    dictSizeReader.next(dictSizeWritable, nullWritable);
-    termSize = dictSizeWritable.get();
   }
 
   public void map(Text key, MultiLabelVectorWritable value, Context context) throws IOException, InterruptedException {
     if (uids.contains(key.toString())) {
-      Vector urlCounts=value.getVector();
-      if(urlCounts.size()<termSize){
-        Vector tmpUrlCounts=new RandomAccessSparseVector(termSize);
-        Iterator<Vector.Element> urlCountIter=urlCounts.iterateNonZero();
-        while(urlCountIter.hasNext()){
-          Vector.Element e=urlCountIter.next();
-          tmpUrlCounts.set(e.index(),e.get());
-        }
-        value.setVector(tmpUrlCounts);
-      }
       context.write(key,value);
     }
   }

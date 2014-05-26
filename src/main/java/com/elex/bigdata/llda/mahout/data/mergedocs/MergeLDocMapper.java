@@ -26,36 +26,11 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class MergeLDocMapper extends Mapper<Text,MultiLabelVectorWritable,Text,MultiLabelVectorWritable> {
-  private int termSize=0;
-  public void setup(Context context) throws IOException {
-    /*
-       get dictSize
-     */
-    Configuration conf=context.getConfiguration();
-    Path dictSizePath=new Path(conf.get(UpdateDictDriver.DICT_SIZE_PATH));
-    SequenceFile.Reader reader=new SequenceFile.Reader(FileSystem.get(conf),dictSizePath,conf);
-    IntWritable dictSizeWritable=new IntWritable();
-    NullWritable nullWritable=NullWritable.get();
-    reader.next(dictSizeWritable,nullWritable);
-    termSize=dictSizeWritable.get();
-
-  }
 
   public void map(Text key,MultiLabelVectorWritable value,Context context) throws IOException, InterruptedException {
      /*
         create a labeledDocument with size of dictSize according to value
      */
-
-    Vector urlCounts=value.getVector();
-    if(urlCounts.size()<termSize){
-      Vector tmpUrlCounts=new RandomAccessSparseVector(termSize);
-      Iterator<Vector.Element> urlCountIter=urlCounts.iterateNonZero();
-      while(urlCountIter.hasNext()){
-        Vector.Element e=urlCountIter.next();
-        tmpUrlCounts.set(e.index(),e.get());
-      }
-      value.setVector(tmpUrlCounts);
-    }
     context.write(key,value);
   }
 }

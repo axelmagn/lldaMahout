@@ -1,6 +1,5 @@
 package com.elex.bigdata.llda.mahout.data.mergedocs;
 
-import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
 import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
