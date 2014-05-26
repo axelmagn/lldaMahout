@@ -88,6 +88,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     Set<Integer> labelSet=new HashSet<Integer>();
 
     for(Text url: values){
+      try{
       int id=dictionary.get(url.toString());
       if(urlCounts.containsKey(id))
         urlCounts.put(id,urlCounts.get(id)+1l);
@@ -99,6 +100,13 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
         if(label!=null){
            labelSet.add(label);
         }
+      }
+      }catch (NullPointerException e){
+        e.printStackTrace();
+        System.out.println("url==null? "+(url.toString()==null));
+        System.out.println(url);
+        System.out.println("dictionary==null? "+(dictionary==null));
+        throw e;
       }
     }
     Vector urlCountsVector=new RandomAccessSparseVector(urlCounts.size()*2);
