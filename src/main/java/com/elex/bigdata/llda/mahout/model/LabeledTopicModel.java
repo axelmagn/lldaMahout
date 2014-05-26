@@ -422,14 +422,16 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       double topicSum = topicSums.get(topicIndex);
       double docTopicSum = 0.0;
       for (Integer termIndex : terms) {
+        if (termIndex > modelTermSize)
+          continue;
         docTopicSum += topicTermRow.get(termIndex);
       }
       for (Integer termIndex : terms) {
         if (termIndex > modelTermSize)
           continue;
         double topicWeight = docTopicSum - topicTermRow.get(termIndex);
-        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
-        termTopicRow.set(termIndex, termTopicLikelihood);
+        double termTopicLikelihood = (topicTermRow.getQuick(termIndex) + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
+        termTopicRow.setQuick(termIndex, termTopicLikelihood);
       }
     }
   }
@@ -462,12 +464,12 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     for(Integer termIndex: terms){
       double sum = 0;
       for (int x = 0; x < numTopics; x++) {
-        sum += perTopicSparseDistributions.viewRow(x).get(termIndex);
+        sum += perTopicSparseDistributions.viewRow(x).getQuick(termIndex);
       }
       double count=doc.getQuick(termIndex);
       for (int x = 0; x < numTopics; x++) {
-        perTopicSparseDistributions.viewRow(x).set(termIndex,
-          perTopicSparseDistributions.viewRow(x).get(termIndex)*count / sum);
+        perTopicSparseDistributions.viewRow(x).setQuick(termIndex,
+          perTopicSparseDistributions.viewRow(x).getQuick(termIndex)*count / sum);
       }
     }
   }
