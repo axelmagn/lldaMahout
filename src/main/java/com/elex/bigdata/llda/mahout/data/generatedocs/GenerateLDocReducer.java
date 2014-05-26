@@ -46,6 +46,8 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     Path urlCategoryPath=new Path(conf.get(GenerateLDocDriver.URL_CATEGORY_PATH));
     Path categoryLabelPath=new Path(conf.get(GenerateLDocDriver.CATEGORY_LABEL_PATH));
     Path uidPath=new Path(conf.get(GenerateLDocDriver.UID_PATH));
+    if(fs.exists(uidPath))
+      fs.delete(uidPath);
     SequenceFile.Reader dictReader=new SequenceFile.Reader(fs,dictPath,conf);
     Text urlText=new Text();
     IntWritable intWritable=new IntWritable();
