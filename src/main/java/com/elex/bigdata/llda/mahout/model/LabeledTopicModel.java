@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
-  private static final Logger log = LoggerFactory.getLogger(TopicModel.class);
+  private static final Logger log = LoggerFactory.getLogger(LabeledTopicModel.class);
 
   private final String[] dictionary;
   private final Matrix topicTermCounts;
@@ -264,7 +264,6 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       docTermCount+=element.get();
     }
     long midTime=System.currentTimeMillis();
-    log.info("get term list use {} ms",(midTime-preTime));
     List<Integer> topicLabels = new ArrayList<Integer>();
     Iterator<Vector.Element> labelIter=labels.iterateNonZero();
     while(labelIter.hasNext()){
@@ -272,13 +271,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topicLabels.add(e.index());
     }
     long t1 = System.currentTimeMillis();
-    log.info("get List use {} ms",(t1-preTime));
+    log.info("get List use {} ms ,with terms' size of {},get term list use {} ms ",new Object[]{(t1-preTime),terms.size(),(midTime-preTime)});
     pTopicGivenTerm(terms, topicLabels, docTopicModel);
     long t2 = System.currentTimeMillis();
-    log.info("pTopic use {} ms", (t2 - t1));
+    log.info("pTopic use {} ms with terms' size {}", new Object[]{(t2 - t1),terms.size()});
     normByTopicAndMultiByCount(original,terms,docTopicModel);
     long t3 = System.currentTimeMillis();
-    log.info("normalize use {} ms", (t3 - t2));
+    log.info("normalize use {} ms with terms' size {}", new Object[]{(t3 - t2),terms.size()});
     // now multiply, term-by-term, by the document, to get the weighted distribution of
     // term-topic pairs from this document.
 
