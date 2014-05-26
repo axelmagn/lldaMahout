@@ -90,10 +90,10 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
       labels.assign(1.0);
     }
     long t2=System.currentTimeMillis();
-    log.info("create labels using "+(t2-t1)+" ms");
+    //log.info("create labels using "+(t2-t1)+" ms");
     //train
     modelTrainer.train(doc.getVector(), labels, true, maxIters,false);
-    log.info("train using "+(System.currentTimeMillis()-t2)+" ms");
+    //log.info("train using "+(System.currentTimeMillis()-t2)+" ms");
   }
 
   @Override

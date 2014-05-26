@@ -174,7 +174,7 @@ public class LabeledModelTrainer {
       try {
         workQueue.put(new TrainerRunnable(readModel, update
           ? writeModel
-          : null, document, docTopicCounts, new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters,isInf));
+          : null, document, docTopicCounts, new SparseRowMatrix(numTopics, docTopicCounts.size(), true), numDocTopicIters,isInf));
         return;
       } catch (InterruptedException e) {
         log.warn("Interrupted waiting to submit document to work queue: {}", document, e);
