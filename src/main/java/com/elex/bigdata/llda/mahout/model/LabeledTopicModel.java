@@ -272,7 +272,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topicLabels.add(e.index());
     }
     long t1 = System.currentTimeMillis();
-    log.info("get List use {} ms ,with terms' size of {},get term list use {} ms,get termIter use time {} ",new Object[]{(t1-preTime),terms.size(),(midTime-preTime),(getIterTime-preTime)});
+    log.info("get List use {} ms ,with terms' size of {} and doc size of {},get term list use {} ms,get termIter use time {} ",new Object[]{(t1-preTime),terms.size(),original.size(),(midTime-preTime),(getIterTime-preTime)});
+    log.info("docTopicModel columns' length is {} ",docTopicModel.columnSize());
     pTopicGivenTerm(terms, topicLabels, docTopicModel);
     long t2 = System.currentTimeMillis();
     log.info("pTopic use {} ms with terms' size {}", new Object[]{(t2 - t1),terms.size()});
@@ -419,18 +420,19 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     for (Integer topicIndex : topicLabels) {
       Vector termTopicRow = termTopicDist.viewRow(topicIndex);
       Vector topicTermRow = topicTermCounts.viewRow(topicIndex);
-      double topicSum = topicSums.get(topicIndex);
+      double topicSum = topicSums.getQuick(topicIndex);
       double docTopicSum = 0.0;
       for (Integer termIndex : terms) {
         if (termIndex > modelTermSize)
           continue;
-        docTopicSum += topicTermRow.get(termIndex);
+        docTopicSum += topicTermRow.getQuick(termIndex);
       }
       for (Integer termIndex : terms) {
         if (termIndex > modelTermSize)
           continue;
-        double topicWeight = docTopicSum - topicTermRow.get(termIndex);
-        double termTopicLikelihood = (topicTermRow.getQuick(termIndex) + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
+        double topicTermCount=topicTermRow.getQuick(termIndex);
+        double topicWeight = docTopicSum - topicTermCount;
+        double termTopicLikelihood = (topicTermCount + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
         termTopicRow.setQuick(termIndex, termTopicLikelihood);
       }
     }
