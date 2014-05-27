@@ -254,32 +254,32 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
     //log.info("before train. labels: " + labels.toString());
-    long preTime=System.currentTimeMillis();
+    //long preTime=System.currentTimeMillis();
     List<Integer> terms = new ArrayList<Integer>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
-    long getIterTime=System.currentTimeMillis();
+    //long getIterTime=System.currentTimeMillis();
     double docTermCount = 0.0;
     while (docElementIter.hasNext()) {
       Vector.Element element = docElementIter.next();
       terms.add(element.index());
       docTermCount+=element.get();
     }
-    long midTime=System.currentTimeMillis();
+    //long midTime=System.currentTimeMillis();
     List<Integer> topicLabels = new ArrayList<Integer>();
     Iterator<Vector.Element> labelIter=labels.iterateNonZero();
     while(labelIter.hasNext()){
       Vector.Element e=labelIter.next();
       topicLabels.add(e.index());
     }
-    long t1 = System.currentTimeMillis();
-    log.info("get List use {} ms ,with terms' size of {} and doc size of {},get term list use {} ms,get termIter use time {} ",new Object[]{(t1-preTime),terms.size(),original.size(),(midTime-preTime),(getIterTime-preTime)});
-    log.info("docTopicModel columns' length is {} ",docTopicModel.columnSize());
+    //long t1 = System.currentTimeMillis();
+    //log.info("get List use {} ms ,with terms' size of {} and doc size of {},get term list use {} ms,get termIter use time {} ",new Object[]{(t1-preTime),terms.size(),original.size(),(midTime-preTime),(getIterTime-preTime)});
+    //log.info("docTopicModel columns' length is {} ",docTopicModel.columnSize());
     pTopicGivenTerm(terms, topicLabels, docTopicModel);
-    long t2 = System.currentTimeMillis();
-    log.info("pTopic use {} ms with terms' size {}", new Object[]{(t2 - t1),terms.size()});
+    //long t2 = System.currentTimeMillis();
+    //log.info("pTopic use {} ms with terms' size {}", new Object[]{(t2 - t1),terms.size()});
     normByTopicAndMultiByCount(original,terms,docTopicModel);
-    long t3 = System.currentTimeMillis();
-    log.info("normalize use {} ms with terms' size {}", new Object[]{(t3 - t2),terms.size()});
+    //long t3 = System.currentTimeMillis();
+    //log.info("normalize use {} ms with terms' size {}", new Object[]{(t3 - t2),terms.size()});
     // now multiply, term-by-term, by the document, to get the weighted distribution of
     // term-topic pairs from this document.
 
@@ -290,7 +290,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       }
       // now renormalize so that \(sum_x(p(x|doc))\) = 1
       labels.assign(Functions.mult(1 / labels.norm(1)));
-      log.info("set topics use {} " + (System.currentTimeMillis() - t3));
+      //log.info("set topics use {} " + (System.currentTimeMillis() - t3));
     }
     //log.info("after train: "+ topics.toString());
   }
@@ -557,14 +557,14 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     public void run() {
       while (!shutdown) {
         try {
-          long t1=System.currentTimeMillis();
+          //long t1=System.currentTimeMillis();
           Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
           if (pair != null) {
-            long t2=System.currentTimeMillis();
+            //long t2=System.currentTimeMillis();
             updateTopic(pair.getFirst(), pair.getSecond());
-            log.info("updateTopic use {} ms",(System.currentTimeMillis()-t2));
+            //log.info("updateTopic use {} ms",(System.currentTimeMillis()-t2));
           }
-          log.info("update pair use {} ms",(System.currentTimeMillis()-t1));
+          //log.info("update pair use {} ms",(System.currentTimeMillis()-t1));
         } catch (InterruptedException e) {
           log.warn("Interrupted waiting to poll for update", e);
         }
