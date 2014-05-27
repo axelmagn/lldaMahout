@@ -388,7 +388,7 @@ public class LLDADriver extends AbstractJob {
     Job job = new Job(conf, jobName);
     job.setJarByClass(LLDADriver.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
-    job.setMapperClass(CVB0TopicTermVectorNormalizerMapper.class);
+    job.setMapperClass(LLDATopicTermVectorMapper.class);
     job.setNumReduceTasks(0);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
