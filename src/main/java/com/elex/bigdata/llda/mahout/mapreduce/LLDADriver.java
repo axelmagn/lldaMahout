@@ -305,8 +305,8 @@ public class LLDADriver extends AbstractJob {
     String jobName = "Calculating perplexity for " + modelPath;
     log.info("About to run: " + jobName);
     Job job = new Job(conf, jobName);
-    job.setJarByClass(CachingCVB0PerplexityMapper.class);
-    job.setMapperClass(CachingCVB0PerplexityMapper.class);
+    job.setJarByClass(CachingLLDAPerplexityMapper.class);
+    job.setMapperClass(CachingLLDAPerplexityMapper.class);
     job.setCombinerClass(DualDoubleSumReducer.class);
     job.setReducerClass(DualDoubleSumReducer.class);
     job.setNumReduceTasks(1);

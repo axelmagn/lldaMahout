@@ -191,7 +191,7 @@ public class LabeledModelTrainer {
 
   public double calculatePerplexity(Vector document, Vector docTopicCounts, int numDocTopicIters) {
     TrainerRunnable runner =  new TrainerRunnable(readModel, null, document, docTopicCounts,
-      new SparseRowMatrix(numTopics, numTerms, true), numDocTopicIters,true);
+      new SparseRowMatrix(numTopics, document.size(), true), numDocTopicIters,true);
     return runner.call();
   }
 
