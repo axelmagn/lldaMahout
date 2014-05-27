@@ -122,7 +122,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel,true);
     //}
     for(Vector.Element e: labels){
-       builder.append(e.index()+":"+e.get()+"\t");
+       builder.append(e.index()+":"+e.get()+",");
     }
     context.write(uid,new Text(builder.toString()));
   }
