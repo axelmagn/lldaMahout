@@ -103,9 +103,14 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     context.write(uid, topics);
     */
     Vector labels=new RandomAccessSparseVector(numTopics);
-    labels.assign(0.0);
-    for(int label: doc.getLabels())
+    //labels.assign(0.0);
+    StringBuilder builder=new StringBuilder();
+    builder.append("[");
+    for(int label: doc.getLabels()){
       labels.set(label,1.0);
+      builder.append(label+" ");
+    }
+    builder.append("]\t");
     if(doc.getLabels().length==0){
       labels.assign(1.0);
     }
@@ -116,7 +121,6 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     //for(int i=0;i<maxIters;i++){
     modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel,true);
     //}
-    StringBuilder builder=new StringBuilder();
     for(Vector.Element e: labels){
        builder.append(e.index()+":"+e.get()+"\t");
     }
