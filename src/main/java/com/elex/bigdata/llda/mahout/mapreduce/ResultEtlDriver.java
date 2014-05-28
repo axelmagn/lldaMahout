@@ -5,6 +5,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
 import java.io.File;
@@ -56,5 +57,8 @@ public class ResultEtlDriver extends AbstractJob{
     job.setNumReduceTasks(0);
     job.submit();
     return job;
+  }
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new Configuration(),new ResultEtlDriver(),args);
   }
 }
