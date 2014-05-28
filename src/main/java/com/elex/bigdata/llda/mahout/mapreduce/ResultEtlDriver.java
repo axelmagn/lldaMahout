@@ -4,7 +4,10 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
@@ -55,6 +58,10 @@ public class ResultEtlDriver extends AbstractJob{
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
     job.setNumReduceTasks(0);
+    FileInputFormat.addInputPath(job, inputPath);
+    TextOutputFormat.setOutputPath(job,outputPath);
+    job.setJobName("etl "+inputPath.toString());
+    job.setJarByClass(ResultEtlDriver.class);
     job.submit();
     return job;
   }
