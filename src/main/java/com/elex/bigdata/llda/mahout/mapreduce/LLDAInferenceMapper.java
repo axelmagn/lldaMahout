@@ -124,6 +124,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     for(Vector.Element e: labels){
        builder.append(e.index()+":"+e.get()+",");
     }
+    builder.deleteCharAt(builder.length()-1);
     context.write(uid,new Text(builder.toString()));
   }
 
