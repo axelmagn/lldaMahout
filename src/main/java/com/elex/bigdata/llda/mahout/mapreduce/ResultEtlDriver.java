@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.mapreduce;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -46,6 +47,9 @@ public class ResultEtlDriver extends AbstractJob{
   }
   private static Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException, ClassNotFoundException, InterruptedException {
     Job job=new Job(conf);
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(inputPath);
     job.setMapperClass(ResultEtlMapper.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
