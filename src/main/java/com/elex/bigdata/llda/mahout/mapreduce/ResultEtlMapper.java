@@ -22,7 +22,7 @@ public class ResultEtlMapper extends Mapper<Object,Text,Text,Text> {
     String[] probs=results[2].split(",");
     List<Integer> probabilities=new ArrayList<Integer>();
     for(int i=0;i<4;i++)
-      probabilities.add((int)Double.parseDouble(probs[i].split(":")[1])*100);
+      probabilities.add((int)(Double.parseDouble(probs[i].split(":")[1])*100));
     StringBuilder probBuilder=new StringBuilder();
     String[] probStrs=new String[]{"a","b","c","d","z"};
     int probLeft=100;
