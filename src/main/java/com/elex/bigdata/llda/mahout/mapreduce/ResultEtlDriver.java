@@ -53,7 +53,7 @@ public class ResultEtlDriver extends AbstractJob{
     Job job=new Job(conf);
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
-      fs.delete(inputPath);
+      fs.delete(outputPath);
     job.setMapperClass(ResultEtlMapper.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
