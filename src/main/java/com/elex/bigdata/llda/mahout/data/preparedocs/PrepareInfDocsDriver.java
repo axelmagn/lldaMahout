@@ -65,11 +65,13 @@ public class PrepareInfDocsDriver extends AbstractJob{
     String dictRoot=getOption(UpdateDictDriver.DICT_OPTION_NAME);
     Configuration conf=getConf();
     setConf(conf);
+    /*
     Job updateDictJob=UpdateDictDriver.prepareJob(conf,textInputPath,dictRoot);
     updateDictJob.setJobName("updateDict");
     ControlledJob controlledDictJob=new ControlledJob(conf);
     controlledDictJob.setJob(updateDictJob);
     jobControl.addJob(controlledDictJob);
+    */
 
     String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME);
     String docsDir=getOption(GenerateLDocDriver.DOC_OPTION_NAME);
@@ -77,10 +79,10 @@ public class PrepareInfDocsDriver extends AbstractJob{
     String uidPath=docsRoot+File.separator+"uid";
     String resourceDir=getOption(GenerateLDocDriver.RESOURCE_OPTION_NAME);
 
-    Job generateDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,new Path(docsPath),dictRoot,resourceDir,uidPath);
+    Job generateDocJob=GenerateLDocDriver.prepareJob(conf,textInputPath,new Path(docsPath),dictRoot,resourceDir,uidPath);
     ControlledJob controlledGenLDocJob=new ControlledJob(conf);
     controlledGenLDocJob.setJob(generateDocJob);
-    controlledGenLDocJob.addDependingJob(controlledDictJob);
+    //controlledGenLDocJob.addDependingJob(controlledDictJob);
     jobControl.addJob(controlledGenLDocJob);
     // complement docs
     String preLDocPath=docsRoot+File.separator+getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
