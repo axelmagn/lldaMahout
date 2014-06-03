@@ -426,6 +426,7 @@ public class LLDADriver extends AbstractJob {
     if(fs.exists(output)){
       fs.delete(output);
     }
+    setModelPaths(job,modelInput);
     FileInputFormat.addInputPath(job, corpus);
     FileOutputFormat.setOutputPath(job, output);
     job.setJarByClass(LLDADriver.class);

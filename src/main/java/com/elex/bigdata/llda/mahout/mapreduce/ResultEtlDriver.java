@@ -49,7 +49,7 @@ public class ResultEtlDriver extends AbstractJob{
     Runtime.getRuntime().exec("hadoop fs -getmerge "+outputPath.toString()+" "+localResultPath+ File.separator+"result."+day+"."+hour+"."+index);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
-  private static Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException, ClassNotFoundException, InterruptedException {
+  public static Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException, ClassNotFoundException, InterruptedException {
     Job job=new Job(conf);
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
