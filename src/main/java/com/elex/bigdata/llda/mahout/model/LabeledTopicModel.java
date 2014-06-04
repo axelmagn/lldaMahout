@@ -176,6 +176,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     int numTerms = -1;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
     for (Path modelPath : modelPaths) {
+      log.info("load model from {}",modelPath.toString());
       for (Pair<IntWritable, VectorWritable> row
         : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
@@ -189,6 +190,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       throw new IOException(java.util.Arrays.toString(modelPaths) + " have no vectors in it");
     }
     numTopics++;
+    log.info("numTopics is {},numTerms is {}",numTopics,numTerms);
     Matrix model = new DenseMatrix(numTopics, numTerms);
     Vector topicSums = new DenseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
