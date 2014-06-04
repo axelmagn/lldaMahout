@@ -484,7 +484,7 @@ public class LLDADriver extends AbstractJob {
     }
   }
 
-  private static void setModelPaths(Job job, Path modelPath) throws IOException {
+  public static void setModelPaths(Job job, Path modelPath) throws IOException {
     Configuration conf = job.getConfiguration();
     if (modelPath == null || !FileSystem.get(modelPath.toUri(), conf).exists(modelPath)) {
       return;

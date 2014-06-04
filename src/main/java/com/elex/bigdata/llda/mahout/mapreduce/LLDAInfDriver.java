@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.mapreduce;
 
+import com.google.common.base.Preconditions;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
 import org.apache.hadoop.fs.FileStatus;
@@ -157,12 +158,14 @@ public class LLDAInfDriver extends AbstractJob{
     if(fs.exists(output)){
       fs.delete(output);
     }
+    LLDADriver.setModelPaths(job,modelInput);
     FileInputFormat.addInputPath(job, corpus);
     FileOutputFormat.setOutputPath(job, output);
     job.setJarByClass(LLDADriver.class);
     job.submit();
     return job;
   }
+
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new LLDAInfDriver(), args);
