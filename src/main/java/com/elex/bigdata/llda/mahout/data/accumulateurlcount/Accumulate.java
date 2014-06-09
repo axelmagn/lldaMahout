@@ -125,9 +125,11 @@ public class Accumulate extends AbstractJob{
     }
     KeyRangeComparator comparator = new KeyRangeComparator();
     Collections.sort(keyRanges, comparator);
+    /*
     for (KeyRange keyRange : keyRanges) {
       System.out.println("add keyRange " + Bytes.toStringBinary(keyRange.getLowerRange()) + "---" + Bytes.toStringBinary(keyRange.getUpperRange()));
     }
+    */
     return keyRanges;
   }
 
