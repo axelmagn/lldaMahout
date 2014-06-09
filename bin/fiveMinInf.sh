@@ -6,8 +6,8 @@ preDay=`date +%Y%m%d -d "-1 days"`
 day=`date +%Y%m%d `
 logFile=/data/log/user_category/processLog/llda/hadoopLLDA.log
 echo "fiveMinInf $startTime" >> $logFile
-sh $baseDir/../Url_Count/bin/AccumulateUrlCount.sh $startTime $endTime >> $logFile
-#sh $baseDir/bin/accumulateUrlCount.sh $startTime $endTime >> $logFile
+#sh $baseDir/../Url_Count/bin/AccumulateUrlCount.sh $startTime $endTime >> $logFile
+sh $baseDir/bin/accumulateUrlCount.sh $startTime $endTime >> $logFile
 sh $baseDir/bin/updateDict.sh url_count/*/${startTime}_${endTime} >> $logFile
 sh $baseDir/bin/getInfDocs.sh url_count/*/${day}* to${preDay} ${day} >> $logFile
 sh $baseDir/bin/infDocs.sh ${day}  >> $logFile
