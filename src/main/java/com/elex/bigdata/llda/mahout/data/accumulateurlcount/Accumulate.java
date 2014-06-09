@@ -197,6 +197,8 @@ public class Accumulate extends AbstractJob{
         String url = Bytes.toString(kv.getValue());
         if(url.startsWith("http://"))
           url=url.substring(7);
+        if(url.endsWith("/"))
+          url=url.substring(0,url.length()-1);
         Map<String, Integer> urlCountMap = uidUrlCountMap.get(uid);
         if (urlCountMap == null) {
           urlCountMap = new HashMap<String, Integer>();
