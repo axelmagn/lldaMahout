@@ -7,8 +7,10 @@ import org.apache.hadoop.fs.Path;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,22 +19,38 @@ import java.util.Map;
  * Time: 6:22 PM
  * To change this template use File | Settings | File Templates.
  */
-public class PutUrlCountRunnable implements Runnable {
-  private Path filePath;
-  private Map<String,Map<String,Integer>> uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
-  FileSystem fs;
-  public PutUrlCountRunnable(FileSystem fs, Path filePath, Map<String, Map<String, Integer>> uidUrlCountMap) {
-    this.filePath=filePath;
-    this.uidUrlCountMap=uidUrlCountMap;
+public class PutUrlCount {
+  private Map<Path,BufferedWriter> writers=new ConcurrentHashMap<Path, BufferedWriter>();
+  private FileSystem fs;
+  public PutUrlCount(FileSystem fs){
     this.fs=fs;
+  }
+
+  public PutUrlCountRunnable getRunnable(Path filePath,Map<String,Map<String,Integer>> uidUrlCountMap) throws IOException {
+     BufferedWriter writer;
+     if(writers.containsKey(filePath))
+       writer=writers.get(filePath);
+     else {
+       FSDataOutputStream outputStream=fs.create(filePath);
+       writer=new BufferedWriter(new OutputStreamWriter(outputStream));
+       writers.put(filePath,writer);
+     }
+    System.out.println(filePath.getName()+" uid size "+uidUrlCountMap.size());
+     return new PutUrlCountRunnable(writer,uidUrlCountMap);
+
+  }
+
+public static class PutUrlCountRunnable implements Runnable {
+  Writer writer;
+  private Map<String,Map<String,Integer>> uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
+  public PutUrlCountRunnable(Writer writer, Map<String, Map<String, Integer>> uidUrlCountMap) {
+    this.uidUrlCountMap=uidUrlCountMap;
+    this.writer=writer;
   }
 
   @Override
   public void run() {
     try {
-      System.out.println(filePath.toString()+" uid size "+uidUrlCountMap.size());
-      FSDataOutputStream outputStream=fs.create(filePath);
-      BufferedWriter writer=new BufferedWriter(new OutputStreamWriter(outputStream));
       for(Map.Entry<String,Map<String,Integer>> entry: uidUrlCountMap.entrySet()){
         String uid=entry.getKey();
         Map<String,Integer> urlCount=entry.getValue();
@@ -41,14 +59,16 @@ public class PutUrlCountRunnable implements Runnable {
           StringBuilder builder=new StringBuilder();
           builder.append(uid+"\t");
           builder.append(urlCountEntry.getKey()+"\t"+urlCountEntry.getValue());
-          writer.write(builder.toString());
-          writer.write("\r\n");
+          synchronized (writer){
+            writer.write(builder.toString());
+            writer.write("\r\n");
+          }
         }
       }
       writer.flush();
-      writer.close();
     } catch (IOException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
   }
+}
 }

@@ -65,7 +65,7 @@ public class Accumulate extends AbstractJob{
   private static final String[] Plugin_Families = {"ua"};
   private static final String ACTION = "a", DURATION = "d", PROJECT_AREA = "pa", PROJECT = "p",  PLUG_CATEGORY = "cat",ORIG_URL="ou";
   private static final int pluginUidIndex = 9;
-
+  private static  PutUrlCount putUrlCount=null;
 
   public Accumulate(){
 
@@ -80,6 +80,7 @@ public class Accumulate extends AbstractJob{
     endTimeStamp=dateFormat.parse(endTime).getTime();
     conf=HBaseConfiguration.create();
     fs=FileSystem.get(conf);
+    putUrlCount=new PutUrlCount(fs);
   }
 
 
@@ -177,6 +178,11 @@ public class Accumulate extends AbstractJob{
           urlCountMap.put(url, new Integer(1));
         else
           urlCountMap.put(url, count + 1);
+
+      }
+      if(uidUrlCountMap.size()>100000){
+        putToHdfs(uidUrlCountMap,"navCustom");
+        uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
       }
     }
     putToHdfs(uidUrlCountMap,"navCustom");
@@ -213,6 +219,11 @@ public class Accumulate extends AbstractJob{
           urlCountMap.put(url, new Integer(1));
         else
           urlCountMap.put(url, count + 1);
+
+      }
+      if(uidUrlCountMap.size()>100000){
+        putToHdfs(uidUrlCountMap,"plugin");
+        uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
       }
     }
     putToHdfs(uidUrlCountMap,"plugin");
@@ -255,6 +266,10 @@ public class Accumulate extends AbstractJob{
         urlCountMap.put(url, new Integer(3));
       else
         urlCountMap.put(url, count + 3);
+      if(uidUrlCountMap.size()>100000){
+        putToHdfs(uidUrlCountMap,"navAd");
+        uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
+      }
     }
     putToHdfs(uidUrlCountMap,"navAd");
   }
@@ -269,7 +284,7 @@ public class Accumulate extends AbstractJob{
 
   private void putToHdfs(Map<String, Map<String, Integer>> urlCountMap, String flag) throws IOException {
       Path filePath = getFinalPath(flag);
-      service.execute(new PutUrlCountRunnable(fs, filePath, urlCountMap));
+      service.execute(putUrlCount.getRunnable(filePath,urlCountMap));
   }
   /*
   private Path getOutputPath(String project, String flag) throws IOException {
@@ -329,6 +344,7 @@ public class Accumulate extends AbstractJob{
     endTimeStamp=dateFormat.parse(endTime).getTime();
     conf=getConf();
     fs=FileSystem.get(conf);
+    putUrlCount=new PutUrlCount(fs);
     getNavUidUrl();
     getAdUidUrl();
     getPluginUidUrl();
