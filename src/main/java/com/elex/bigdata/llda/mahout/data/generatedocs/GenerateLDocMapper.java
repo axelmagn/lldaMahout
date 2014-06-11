@@ -44,6 +44,11 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
     String[] uidUrlCount=value.toString().split("\t");
     if(eliminated_urls.contains(uidUrlCount[1]))
       return;
+    if(uidUrlCount.length<3)
+    {
+      System.out.println(value.toString()+" len<3");
+      return;
+    }
     int count=Integer.parseInt(uidUrlCount[2]);
     for(int i=0;i<count;i++){
       context.write(new Text(uidUrlCount[0]),new Text(uidUrlCount[1]));
