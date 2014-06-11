@@ -425,12 +425,12 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       double topicSum = topicSums.getQuick(topicIndex);
       double docTopicSum = 0.0;
       for (Integer termIndex : terms) {
-        if (termIndex > modelTermSize)
+        if (termIndex >= modelTermSize)
           continue;
         docTopicSum += topicTermRow.getQuick(termIndex);
       }
       for (Integer termIndex : terms) {
-        if (termIndex > modelTermSize)
+        if (termIndex >= modelTermSize)
           continue;
         double topicTermCount=topicTermRow.getQuick(termIndex);
         double topicWeight = docTopicSum - topicTermCount;
