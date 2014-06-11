@@ -65,6 +65,7 @@ public class PutUrlCount {
           }
         }
         writer.flush();
+        System.out.println("finished");
       } catch (IOException e) {
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
       }
