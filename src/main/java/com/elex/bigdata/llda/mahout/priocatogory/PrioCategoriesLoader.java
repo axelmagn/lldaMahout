@@ -49,7 +49,7 @@ public class PrioCategoriesLoader {
       BloomFilter bloomFilter = new BloomFilter();
       bloomFilter.readFields(dataInput);
       System.out.println("load bloomFilter "+categoryName);
-      if (categoryName != GLOBAL_FILTER)
+      if (!categoryName.equals(GLOBAL_FILTER))
         bloomFilterMap.put(categoryName, bloomFilter);
       else
       {
