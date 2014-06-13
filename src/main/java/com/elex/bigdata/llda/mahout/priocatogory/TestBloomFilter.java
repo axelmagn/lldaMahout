@@ -28,7 +28,7 @@ public class TestBloomFilter {
   public static void main(String[] args) throws IOException {
     int urlCount=0,hitCount=0;
     Map<String,Integer> categoryUrlCount=new HashMap<String, Integer>();
-    String inputDir="/home/hadoop/user_category/lldaMahout/resources/categoryFilter";
+    String inputDir="/user/hadoop/user_category/lldaMahout/resources/categoryFilter";
     FileSystem fs=FileSystem.get(HBaseConfiguration.create());
     PrioCategoriesLoader prioCategoriesLoader=PrioCategoriesLoader.getCategoriesLoader(inputDir,fs);
     BloomFilter globalFilter=prioCategoriesLoader.getGlobalFilter();
