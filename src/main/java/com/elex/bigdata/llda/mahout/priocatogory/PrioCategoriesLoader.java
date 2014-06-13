@@ -52,7 +52,10 @@ public class PrioCategoriesLoader {
       if (categoryName != GLOBAL_FILTER)
         bloomFilterMap.put(categoryName, bloomFilter);
       else
+      {
         globalFilter = bloomFilter;
+        System.out.println("globalFilter set");
+      }
     }
     loaded=true;
 

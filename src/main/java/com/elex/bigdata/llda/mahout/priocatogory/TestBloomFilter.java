@@ -34,6 +34,7 @@ public class TestBloomFilter {
     FileSystem fs=FileSystem.get(HBaseConfiguration.create());
     PrioCategoriesLoader prioCategoriesLoader=PrioCategoriesLoader.getCategoriesLoader(inputDir, fs);
     BloomFilter globalFilter=prioCategoriesLoader.getGlobalFilter();
+    System.out.println("globalFilter ==null "+(globalFilter==null));
     Map<String,BloomFilter> bloomFilterMap=prioCategoriesLoader.getCategoryFilters();
     HTable table=new HTable(HBaseConfiguration.create(),tableName);
     String startTime=args[0];
