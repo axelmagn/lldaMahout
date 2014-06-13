@@ -48,6 +48,7 @@ public class PrioCategoriesLoader {
       DataInput dataInput = fs.open(fileStatus.getPath());
       BloomFilter bloomFilter = new BloomFilter();
       bloomFilter.readFields(dataInput);
+      System.out.println("load bloomFilter "+categoryName);
       if (categoryName != GLOBAL_FILTER)
         bloomFilterMap.put(categoryName, bloomFilter);
       else
