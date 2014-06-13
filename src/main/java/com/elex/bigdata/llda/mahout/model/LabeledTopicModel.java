@@ -416,6 +416,12 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
   }
 
+  /*
+     if infer according to labels ;
+     topicWeitht should use labels.get(topicIndex) while now use topicTermCounts to get it
+     then the inf can be executed more than once,but there is unsafety because notLabeled url's count may be bigger than labeled
+ */
+
   private void pTopicGivenTerm(List<Integer> terms, List<Integer> topicLabels, Matrix termTopicDist) {
     int modelTermSize = topicTermCounts.columnSize();
     double Vbeta=eta*numTerms;
