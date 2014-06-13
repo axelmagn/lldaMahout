@@ -13,6 +13,8 @@ import org.apache.hadoop.util.bloom.BloomFilter;
 import org.apache.hadoop.util.bloom.Key;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,22 +27,26 @@ import java.util.Map;
  */
 public class TestBloomFilter {
   private static String tableName="dmp_user_action";
-  public static void main(String[] args) throws IOException {
+  public static void main(String[] args) throws IOException, ParseException {
     int urlCount=0,hitCount=0;
     Map<String,Integer> categoryUrlCount=new HashMap<String, Integer>();
     String inputDir="/user/hadoop/user_category/lldaMahout/resources/categoryFilter";
     FileSystem fs=FileSystem.get(HBaseConfiguration.create());
-    PrioCategoriesLoader prioCategoriesLoader=PrioCategoriesLoader.getCategoriesLoader(inputDir,fs);
+    PrioCategoriesLoader prioCategoriesLoader=PrioCategoriesLoader.getCategoriesLoader(inputDir, fs);
     BloomFilter globalFilter=prioCategoriesLoader.getGlobalFilter();
     Map<String,BloomFilter> bloomFilterMap=prioCategoriesLoader.getCategoryFilters();
     HTable table=new HTable(HBaseConfiguration.create(),tableName);
     String startTime=args[0];
     String endTime=args[1];
-    String startRowKey="\\x01"+startTime;
-    String endRowKey="\\x01"+endTime;
+    SimpleDateFormat dateFormat=new SimpleDateFormat("yyyyMMddHHmmss");
+    long startTimeStamp=dateFormat.parse(startTime).getTime();
+    long endTimeStamp=dateFormat.parse(endTime).getTime();
+    byte[] startRk=Bytes.add(Bytes.toBytesBinary("\\x01"),Bytes.toBytes(startTimeStamp));
+    byte[] endRk=Bytes.add(Bytes.toBytesBinary("\\x01"),Bytes.toBytes(endTimeStamp));
+    System.out.println(Bytes.toStringBinary(startRk)+"  "+Bytes.toStringBinary(endRk));
     Scan scan=new Scan();
-    scan.setStartRow(Bytes.toBytesBinary(startRowKey));
-    scan.setStopRow(Bytes.toBytesBinary(endRowKey));
+    scan.setStartRow(startRk);
+    scan.setStopRow(endRk);
     scan.addColumn(Bytes.toBytes("ua"),Bytes.toBytes("url"));
     scan.setCaching(5096);
     ResultScanner results=table.getScanner(scan);
