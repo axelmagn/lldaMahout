@@ -72,6 +72,7 @@ public class RegularDictionray {
         dict.put(urlMd5, id);
       }
     }
+    reader.close();
     loadDict = true;
   }
 
@@ -94,6 +95,7 @@ public class RegularDictionray {
       }
       dayDicts.add(dayDict);
     }
+    reader.close();
     loadDayDict = true;
     loadDict = true;
   }
@@ -165,14 +167,18 @@ public class RegularDictionray {
        sql.append("("+word+","+freshDict.get(word)+"),");
     }
     sql.deleteCharAt(sql.length()-1);
-    statement.execute(sql.toString());
+    String sqlStr=sql.toString();
+    System.out.println("flush to mysql "+sqlStr);
+    statement.execute(sqlStr);
 
   }
 
   private void initStatement() throws ClassNotFoundException, SQLException {
     Class.forName("com.mysql.jdbc.Driver");
     String url="jdbc:mysql://"+ip+":"+port+"/bigdata";
+    System.out.println(url);
     Connection connectMySQL  =  DriverManager.getConnection(url, user, passwd);
+    System.out.println(user+":"+passwd);
     statement =connectMySQL.createStatement();
   }
   public void flushDict() throws SQLException, ClassNotFoundException, IOException {
@@ -190,6 +196,7 @@ public class RegularDictionray {
       }
       writer.newLine();
     }
+    writer.flush();
   }
 
   private class QueryWordRunner implements Runnable{
@@ -207,7 +214,9 @@ public class RegularDictionray {
        querySql.delete(querySql.lastIndexOf("or"),querySql.length());
        querySql.append(";");
       try {
-        ResultSet resultSet=statement.executeQuery(querySql.toString());
+        String querySqlStr=querySql.toString();
+        System.out.println("query sql :"+ querySqlStr);
+        ResultSet resultSet=statement.executeQuery(querySqlStr);
         while(resultSet.next()){
           String word=resultSet.getString("url");
           int id=resultSet.getInt("id");
