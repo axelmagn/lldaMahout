@@ -166,11 +166,6 @@
         </dependency>
         <dependency>
             <groupId>com.elex.bigdata</groupId>
-            <artifactId>commons</artifactId>
-            <version>1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.elex.bigdata</groupId>
             <artifactId>hashing</artifactId>
             <version>1.0</version>
         </dependency>
