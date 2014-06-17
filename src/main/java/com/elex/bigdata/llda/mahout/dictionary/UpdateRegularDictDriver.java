@@ -42,6 +42,7 @@ public class UpdateRegularDictDriver extends AbstractJob {
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
   public static void main(String[] args) throws Exception {
+    System.out.println("hhhh");
     ToolRunner.run(new Configuration(), new UpdateDictDriver(), args);
   }
 
