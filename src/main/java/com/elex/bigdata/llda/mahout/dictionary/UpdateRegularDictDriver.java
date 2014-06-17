@@ -68,7 +68,7 @@ public class UpdateRegularDictDriver extends AbstractJob {
     updateDictJob.setOutputFormatClass(SequenceFileOutputFormat.class);
     updateDictJob.setMapOutputKeyClass(Text.class);
     updateDictJob.setMapOutputValueClass(NullWritable.class);
-    updateDictJob.setJarByClass(UpdateDictDriver.class);
+    updateDictJob.setJarByClass(UpdateRegularDictDriver.class);
     updateDictJob.setJobName("update Regular Dict");
     return updateDictJob;
   }
