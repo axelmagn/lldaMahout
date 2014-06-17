@@ -77,7 +77,7 @@ public class RegularDictionray {
     }
     reader.close();
     }else {
-      System.out.println(dictPath+" not exists");
+      log.info(dictPath+" not exists");
     }
     loadDict = true;
   }
@@ -104,7 +104,7 @@ public class RegularDictionray {
     }
     reader.close();
     }else{
-      System.out.println(dictPath+" not exists");
+      log.info(dictPath+" not exists");
     }
     loadDayDict = true;
     loadDict = true;
@@ -178,7 +178,7 @@ public class RegularDictionray {
     }
     sql.deleteCharAt(sql.length()-1);
     String sqlStr=sql.toString();
-    System.out.println("flush to mysql "+sqlStr);
+    log.info("flush to mysql "+sqlStr);
     statement.execute(sqlStr);
 
   }
@@ -188,7 +188,7 @@ public class RegularDictionray {
     String url="jdbc:mysql://"+ip+":"+port+"/bigdata";
     System.out.println(url);
     Connection connectMySQL  =  DriverManager.getConnection(url, user, passwd);
-    System.out.println(user+":"+passwd);
+    log.info(user+":"+passwd);
     statement =connectMySQL.createStatement();
   }
   public void flushDict() throws SQLException, ClassNotFoundException, IOException {
@@ -225,7 +225,7 @@ public class RegularDictionray {
        querySql.append(";");
       try {
         String querySqlStr=querySql.toString();
-        System.out.println("query sql :"+ querySqlStr);
+        log.info("query sql :"+ querySqlStr);
         ResultSet resultSet=statement.executeQuery(querySqlStr);
         while(resultSet.next()){
           String word=resultSet.getString("url");
