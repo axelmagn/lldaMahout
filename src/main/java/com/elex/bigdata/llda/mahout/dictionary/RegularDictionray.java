@@ -78,6 +78,7 @@ public class RegularDictionray {
     reader.close();
     }else {
       log.info(dictPath+" not exists");
+      dictSize=0;
     }
     loadDict = true;
   }
@@ -105,6 +106,7 @@ public class RegularDictionray {
     reader.close();
     }else{
       log.info(dictPath+" not exists");
+      dictSize=0;
     }
     loadDayDict = true;
     loadDict = true;
