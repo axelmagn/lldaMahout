@@ -43,10 +43,12 @@ public class UpdateRegularDictDriver extends AbstractJob {
   }
   public static void main(String[] args) throws Exception {
     System.out.println("hhhh");
-    ToolRunner.run(new Configuration(), new UpdateDictDriver(), args);
+    ToolRunner.run(new Configuration(), new UpdateRegularDictDriver(), args);
+
   }
 
   public static Job  prepareJob(Configuration conf,Path inputPath,String dictRoot) throws IOException {
+    System.out.println("prepareJob");
     String dictPath=dictRoot+ File.separator+"dict";
     String tmpDictPath=dictRoot+File.separator+"tmpDict";
     String dictSizePath=dictRoot+File.separator+"dictSize";
