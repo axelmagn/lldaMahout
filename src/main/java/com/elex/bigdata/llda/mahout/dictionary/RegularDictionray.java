@@ -55,6 +55,7 @@ public class RegularDictionray {
   }
 
   public void loadDict() throws IOException, HashingException {
+    if(fs.exists(new Path(dictPath))){
     BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(new Path(dictPath))));
     String line;
     line = reader.readLine();
@@ -73,10 +74,14 @@ public class RegularDictionray {
       }
     }
     reader.close();
+    }else {
+      System.out.println(dictPath+" not exists");
+    }
     loadDict = true;
   }
 
   public void loadDayDicts() throws IOException, HashingException {
+    if(fs.exists(new Path(dictPath))){
     BufferedReader reader = new BufferedReader(new InputStreamReader(fs.open(new Path(dictPath))));
     String line;
     line = reader.readLine();
@@ -96,6 +101,9 @@ public class RegularDictionray {
       dayDicts.add(dayDict);
     }
     reader.close();
+    }else{
+      System.out.println(dictPath+" not exists");
+    }
     loadDayDict = true;
     loadDict = true;
   }
