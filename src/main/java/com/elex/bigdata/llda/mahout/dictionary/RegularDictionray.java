@@ -5,6 +5,8 @@ import com.elex.bigdata.hashing.HashingException;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.mahout.math.map.OpenObjectIntHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.sql.*;
@@ -22,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * To change this template use File | Settings | File Templates.
  */
 public class RegularDictionray {
-
+  private static final Logger log = LoggerFactory.getLogger(UpdateRegularDictReducer.class);
   private String dictPath;
   private FileSystem fs;
   private List<OpenObjectIntHashMap<String>> dayDicts;
@@ -219,7 +221,7 @@ public class RegularDictionray {
        for(String word: words){
          querySql.append("url="+word+" or ");
        }
-       querySql.delete(querySql.lastIndexOf("or"),querySql.length());
+       querySql.delete(querySql.lastIndexOf("or"), querySql.length());
        querySql.append(";");
       try {
         String querySqlStr=querySql.toString();
