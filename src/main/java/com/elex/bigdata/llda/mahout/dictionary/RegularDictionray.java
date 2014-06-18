@@ -33,6 +33,7 @@ public class RegularDictionray {
   private OpenObjectIntHashMap<String> freshDict;
   private Set<String> notHitWords;
   private Integer dictSize;
+  private int collisionCount=0;
   private boolean loadDict = false, loadDayDict = false;
   private String user,passwd,ip,port;
   private String tableName="url_map";
@@ -201,6 +202,7 @@ public class RegularDictionray {
     BufferedWriter writer=new BufferedWriter(new OutputStreamWriter(fs.create(new Path(dictPath))));
     writer.write(String.valueOf(dictSize));
     log.info("when flush dict dictSize is "+dictSize);
+    log.info("collision count is "+collisionCount);
     writer.newLine();
     for(String word:freshDict.keys()){
       writer.write(word+" "+freshDict.get(word)+"\t");
@@ -247,7 +249,10 @@ public class RegularDictionray {
       }
         for(String word: words){
           synchronized (dictSize){
-             freshDict.put(word,dictSize++);
+             if(!freshDict.containsKey(word))
+              freshDict.put(word,dictSize++);
+             else
+              collisionCount++;
           }
         }
     }
