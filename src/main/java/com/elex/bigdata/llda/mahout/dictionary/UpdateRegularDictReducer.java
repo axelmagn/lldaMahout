@@ -56,6 +56,8 @@ public class UpdateRegularDictReducer extends Reducer<Text,NullWritable,Text,Int
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     } catch (ClassNotFoundException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    } catch (InterruptedException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
   }
 }
