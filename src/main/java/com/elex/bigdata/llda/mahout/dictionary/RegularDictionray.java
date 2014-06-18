@@ -175,7 +175,7 @@ public class RegularDictionray {
   public void flushToMysql() throws ClassNotFoundException, SQLException {
     queryMysql();
     StringBuilder sql=new StringBuilder();
-    sql.append("insert into table "+tableName+" values ");
+    sql.append("insert into "+tableName+" values ");
     for(String word: freshDict.keys()){
        sql.append("('"+word+"',"+freshDict.get(word)+"),");
     }
