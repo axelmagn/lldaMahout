@@ -22,24 +22,23 @@ import java.sql.SQLException;
  */
 public class UpdateRegularDictReducer extends Reducer<Text,NullWritable,Text,IntWritable> {
   private RegularDictionray regularDictionray;
-  private int dictId;
+  private Integer dictId;
   private Path dictPath,dictSizePath,tmpDictPath;
   public void setup(Context context) throws IOException, InterruptedException {
     Configuration conf=context.getConfiguration();
     FileSystem fs=FileSystem.get(conf);
     try {
       regularDictionray=new RegularDictionray(conf.get(UpdateDictDriver.DICT_PATH),fs);
+      regularDictionray.getDayDicts();
+      dictId=regularDictionray.getDictSize();
     } catch (SQLException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     } catch (ClassNotFoundException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-    try {
-      regularDictionray.getDayDicts();
     } catch (HashingException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
-    dictId=regularDictionray.getDictSize();
+
   }
   public void reduce(Text key,Iterable<NullWritable> values,Context context) throws IOException, InterruptedException {
     try {

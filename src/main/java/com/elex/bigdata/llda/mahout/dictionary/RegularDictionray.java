@@ -107,6 +107,7 @@ public class RegularDictionray {
     }else{
       log.info(dictPath+" not exists");
       dictSize=0;
+      log.info("dictSize is 0");
     }
     loadDayDict = true;
     loadDict = true;
@@ -124,11 +125,11 @@ public class RegularDictionray {
     return dayDicts;
   }
 
-  public int getDictSize() {
+  public Integer getDictSize() {
     return dictSize;
   }
 
-  public void setDictSize(int dictSize) {
+  public void setDictSize(Integer dictSize) {
     this.dictSize = dictSize;
   }
 
@@ -188,7 +189,7 @@ public class RegularDictionray {
   private void initStatement() throws ClassNotFoundException, SQLException {
     Class.forName("com.mysql.jdbc.Driver");
     String url="jdbc:mysql://"+ip+":"+port+"/bigdata";
-    System.out.println(url);
+    log.info(url);
     Connection connectMySQL  =  DriverManager.getConnection(url, user, passwd);
     log.info(user+":"+passwd);
     statement =connectMySQL.createStatement();
