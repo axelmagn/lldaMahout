@@ -174,6 +174,8 @@ public class RegularDictionray {
 
   public void flushToMysql() throws ClassNotFoundException, SQLException {
     queryMysql();
+    if(freshDict.size()==0)
+      return;
     StringBuilder sql=new StringBuilder();
     sql.append("insert into "+tableName+" values ");
     for(String word: freshDict.keys()){
@@ -222,6 +224,8 @@ public class RegularDictionray {
     @Override
     public void run() {
        StringBuilder querySql=new StringBuilder();
+       if(words.size()==0)
+         return;
        querySql.append("select url,id from "+tableName+" where ");
        for(String word: words){
          querySql.append("url = '"+word+"' or ");
