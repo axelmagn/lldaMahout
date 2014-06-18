@@ -97,13 +97,14 @@ public class RegularDictionray {
           String[] urlId = urlIdMap.split(" ");
           if (urlId.length < 2)
             continue;
-          String urlMd5 = BDMD5.getInstance().toMD5(urlId[0]);
           int id = Integer.parseInt(urlId[1]);
-          dict.put(urlMd5, id);
-          dayDict.put(urlMd5, id);
+          dict.put(urlId[0], id);
+          dayDict.put(urlId[0], id);
         }
         dayDicts.add(dayDict);
       }
+      log.info("regular dict size is "+dict.size());
+      log.info("dict Size is "+dictSize);
       reader.close();
     } else {
       log.info(dictPath + " not exists");
@@ -259,6 +260,7 @@ public class RegularDictionray {
             words.remove(word);
           }
       } catch (SQLException e) {
+        log.warn(e.getMessage());
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
       }
       for (String word : words) {
