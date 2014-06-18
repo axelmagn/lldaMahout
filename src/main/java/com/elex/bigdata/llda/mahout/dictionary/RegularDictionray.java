@@ -173,8 +173,10 @@ public class RegularDictionray {
     }
   }
 
-  public void flushToMysql() throws ClassNotFoundException, SQLException {
+  public void flushToMysql() throws ClassNotFoundException, SQLException, InterruptedException {
     queryMysql();
+    service.shutdown();
+    service.awaitTermination(30,TimeUnit.MINUTES);
     log.info("fresh dict size is "+freshDict.size());
     if(freshDict.size()==0)
       return;
@@ -198,11 +200,11 @@ public class RegularDictionray {
     log.info(user+":"+passwd);
     statement =connectMySQL.createStatement();
   }
-  public void flushDict() throws SQLException, ClassNotFoundException, IOException {
+  public void flushDict() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
     flushToMysql();
     BufferedWriter writer=new BufferedWriter(new OutputStreamWriter(fs.create(new Path(dictPath))));
     writer.write(String.valueOf(dictSize));
-    log.info("when flush dict dictSize is "+dictSize);
+    log.info("when flush dict dictSize is " + dictSize);
     log.info("collision count is "+collisionCount);
 
     writer.newLine();
