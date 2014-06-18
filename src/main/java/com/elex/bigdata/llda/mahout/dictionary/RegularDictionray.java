@@ -214,6 +214,7 @@ public class RegularDictionray {
     writer.write(String.valueOf(dictSize));
     log.info("when flush dict dictSize is " + dictSize);
     log.info("collision count is " + collisionCount);
+    log.info("latent dict size is "+latentDict.size());
 
     writer.newLine();
     for (Map.Entry<String,Integer> entry: freshDict.entrySet()) {
@@ -221,6 +222,10 @@ public class RegularDictionray {
     }
     if (dayDicts.size() >= 10)
       dayDicts.remove(dayDicts.size() - 1);
+    for(Map.Entry<String,Integer> entry: latentDict.entrySet()){
+      writer.write(entry.getKey()+" "+entry.getValue()+"\t");
+    }
+    writer.newLine();
     for (Map<String,Integer> dayDict : dayDicts) {
       for (Map.Entry<String,Integer> entry: dayDict.entrySet()) {
         writer.write(entry.getKey() + " " + entry.getValue() + "\t");
