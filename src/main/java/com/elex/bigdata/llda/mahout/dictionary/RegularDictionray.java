@@ -197,7 +197,8 @@ public class RegularDictionray {
   public void flushDict() throws SQLException, ClassNotFoundException, IOException {
     flushToMysql();
     BufferedWriter writer=new BufferedWriter(new OutputStreamWriter(fs.create(new Path(dictPath))));
-    writer.write(dictSize);
+    writer.write(String.valueOf(dictSize));
+    log.info("when flush dict dictSize is "+dictSize);
     writer.newLine();
     for(String word:freshDict.keys()){
       writer.write(word+" "+freshDict.get(word)+"\t");
