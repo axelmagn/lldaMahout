@@ -33,7 +33,7 @@ public class RegularDictionray {
   private OpenObjectIntHashMap<String> freshDict;
   private Set<String> notHitWords;
   private Integer dictSize;
-  private int collisionCount = 0, hitWordCount=0,wordCount=0;
+  private int collisionCount = 0, hitWordCount = 0, wordCount = 0;
   private boolean loadDict = false, loadDayDict = false;
   private String user, passwd, ip, port;
   private String tableName = "url_map";
@@ -103,8 +103,8 @@ public class RegularDictionray {
         }
         dayDicts.add(dayDict);
       }
-      log.info("regular dict size is "+dict.size());
-      log.info("dict Size is "+dictSize);
+      log.info("regular dict size is " + dict.size());
+      log.info("dict Size is " + dictSize);
       reader.close();
     } else {
       log.info(dictPath + " not exists");
@@ -182,8 +182,8 @@ public class RegularDictionray {
     queryMysql();
     service.shutdown();
     service.awaitTermination(30, TimeUnit.MINUTES);
-    log.info("hitCount is "+hitWordCount);
-    log.info("total word count is "+wordCount);
+    log.info("hitCount is " + hitWordCount);
+    log.info("total word count is " + wordCount);
     log.info("fresh dict size is " + freshDict.size());
     if (freshDict.size() == 0)
       return;
@@ -252,13 +252,12 @@ public class RegularDictionray {
         String querySqlStr = querySql.toString();
         log.info("query sql :" + querySqlStr);
         ResultSet resultSet = statement.executeQuery(querySqlStr);
-        if (resultSet != null)
-          while (resultSet.next()) {
-            String word = resultSet.getString("url");
-            int id = resultSet.getInt("id");
-            latentDict.put(word, id);
-            words.remove(word);
-          }
+        while (resultSet.next()) {
+          String word = resultSet.getString("url");
+          int id = resultSet.getInt("id");
+          latentDict.put(word, id);
+          words.remove(word);
+        }
       } catch (SQLException e) {
         log.warn(e.getMessage());
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
