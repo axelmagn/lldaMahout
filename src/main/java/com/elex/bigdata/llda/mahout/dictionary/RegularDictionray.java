@@ -202,7 +202,8 @@ public class RegularDictionray {
     for(String word:freshDict.keys()){
       writer.write(word+" "+freshDict.get(word)+"\t");
     }
-    dayDicts.remove(dayDicts.size()-1);
+    if(dayDicts.size()>=10)
+      dayDicts.remove(dayDicts.size()-1);
     for(OpenObjectIntHashMap<String> dayDict: dayDicts){
       for(String word: dayDict.keys()){
         writer.write(word+" "+dayDict.get(word)+"\t");
