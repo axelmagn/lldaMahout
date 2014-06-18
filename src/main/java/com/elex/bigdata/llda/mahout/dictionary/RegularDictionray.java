@@ -37,7 +37,6 @@ public class RegularDictionray {
   private boolean loadDict = false, loadDayDict = false;
   private String user, passwd, ip, port;
   private String tableName = "url_map";
-  private Connection connection;
   private ExecutorService service = new ThreadPoolExecutor(3, 8, 3600, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(30));
 
   public RegularDictionray(String dictPath, FileSystem fs) throws IOException, SQLException, ClassNotFoundException {
@@ -54,7 +53,6 @@ public class RegularDictionray {
     passwd = properties.getProperty("passwd");
     ip = properties.getProperty("ip");
     port = properties.getProperty("port");
-    initConnection();
   }
 
   public void loadDict() throws IOException, HashingException {
@@ -196,17 +194,20 @@ public class RegularDictionray {
     sql.deleteCharAt(sql.length() - 1);
     String sqlStr = sql.toString();
     log.info("flush to mysql " + sqlStr);
+    Connection connection=getConnection();
     Statement statement=connection.createStatement();
     statement.execute(sqlStr);
-
+    connection.close();
   }
 
-  private void initConnection() throws ClassNotFoundException, SQLException {
+  private Connection getConnection() throws ClassNotFoundException, SQLException {
     Class.forName("com.mysql.jdbc.Driver");
     String url = "jdbc:mysql://" + ip + ":" + port + "/bigdata";
     log.info(url);
-    connection = DriverManager.getConnection(url, user, passwd);
+    Connection connection = DriverManager.getConnection(url, user, passwd);
     log.info(user + ":" + passwd);
+    return connection;
+
   }
 
   public void flushDict() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
@@ -254,8 +255,10 @@ public class RegularDictionray {
       }
       querySql.delete(querySql.lastIndexOf("or"), querySql.length());
       querySql.append(";");
+      Connection connection= null;
       Statement localStatement;
       try {
+        connection = getConnection();
         String querySqlStr = querySql.toString();
         log.info("query sql :" + querySqlStr);
         localStatement=connection.createStatement();
@@ -267,11 +270,15 @@ public class RegularDictionray {
           words.remove(word);
         }
         localStatement.close();
+        connection.close();
         log.info("query complete ");
       } catch (SQLException e) {
         log.warn(e.getMessage());
         e.printStackTrace();
       } //To change body of catch statement use File | Settings | File Templates.
+      catch (ClassNotFoundException e) {
+        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      }
       for (String word : words) {
         synchronized (dictSize) {
           if (!freshDict.containsKey(word))
