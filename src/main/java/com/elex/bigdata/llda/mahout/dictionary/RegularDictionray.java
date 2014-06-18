@@ -27,10 +27,10 @@ public class RegularDictionray {
   private static final Logger log = LoggerFactory.getLogger(UpdateRegularDictReducer.class);
   private String dictPath;
   private FileSystem fs;
-  private List<OpenObjectIntHashMap<String>> dayDicts;
-  private OpenObjectIntHashMap<String> dict;
-  private OpenObjectIntHashMap<String> latentDict = null;
-  private OpenObjectIntHashMap<String> freshDict;
+  private List<Map<String,Integer>> dayDicts;
+  private Map<String,Integer> dict;
+  private Map<String,Integer> latentDict = null;
+  private Map<String,Integer> freshDict;
   private Set<String> notHitWords;
   private Integer dictSize;
   private int collisionCount = 0, hitWordCount = 0, wordCount = 0;
@@ -43,10 +43,10 @@ public class RegularDictionray {
   public RegularDictionray(String dictPath, FileSystem fs) throws IOException, SQLException, ClassNotFoundException {
     this.fs = fs;
     this.dictPath = dictPath;
-    dayDicts = new ArrayList<OpenObjectIntHashMap<String>>();
-    dict = new OpenObjectIntHashMap<String>();
-    latentDict = new OpenObjectIntHashMap<String>();
-    freshDict = new OpenObjectIntHashMap<String>();
+    dayDicts = new ArrayList<Map<String,Integer>>();
+    dict = new HashMap<String, Integer>();
+    latentDict = new HashMap<String, Integer>();
+    freshDict = new HashMap<String, Integer>();
     notHitWords = new HashSet<String>();
     Properties properties = new Properties();
     properties.load(this.getClass().getResourceAsStream("/mysql.properties"));
@@ -92,7 +92,7 @@ public class RegularDictionray {
       dictSize = Integer.parseInt(line);
       while ((line = reader.readLine()) != null) {
         String[] urlIdMaps = line.split("\t");
-        OpenObjectIntHashMap<String> dayDict = new OpenObjectIntHashMap<String>();
+        Map<String,Integer> dayDict = new HashMap<String, Integer>();
         for (String urlIdMap : urlIdMaps) {
           String[] urlId = urlIdMap.split(" ");
           if (urlId.length < 2)
@@ -115,13 +115,13 @@ public class RegularDictionray {
     loadDict = true;
   }
 
-  public OpenObjectIntHashMap<String> getDict() throws IOException, HashingException {
+  public Map<String,Integer> getDict() throws IOException, HashingException {
     if (!loadDict)
       loadDict();
     return dict;
   }
 
-  public List<OpenObjectIntHashMap<String>> getDayDicts() throws IOException, HashingException {
+  public List<Map<String,Integer>> getDayDicts() throws IOException, HashingException {
     if (!loadDayDict)
       loadDayDicts();
     return dayDicts;
@@ -139,10 +139,10 @@ public class RegularDictionray {
     wordCount++;
     if (dict.containsKey(word)) {
       hitWordCount++;
-      for (OpenObjectIntHashMap<String> dayDict : dayDicts) {
+      for (Map<String,Integer> dayDict : dayDicts) {
         if (dayDict.containsKey(word)) {
           latentDict.put(word, dayDict.get(word));
-          dayDict.removeKey(word);
+          dayDict.remove(word);
           break;
         }
       }
@@ -163,10 +163,10 @@ public class RegularDictionray {
       wordCount++;
       if (dict.containsKey(word)) {
         hitWordCount++;
-        for (OpenObjectIntHashMap<String> dayDict : dayDicts) {
+        for (Map<String,Integer> dayDict : dayDicts) {
           if (dayDict.containsKey(word)) {
             latentDict.put(word, dayDict.get(word));
-            dayDict.removeKey(word);
+            dayDict.remove(word);
             break;
           }
         }
@@ -189,8 +189,8 @@ public class RegularDictionray {
       return;
     StringBuilder sql = new StringBuilder();
     sql.append("insert into " + tableName + " values ");
-    for (String word : freshDict.keys()) {
-      sql.append("('" + word + "'," + freshDict.get(word) + "),");
+    for(Map.Entry<String,Integer> entry: freshDict.entrySet()) {
+      sql.append("('" + entry.getKey() + "'," + entry.getValue() + "),");
     }
     sql.deleteCharAt(sql.length() - 1);
     String sqlStr = sql.toString();
@@ -216,14 +216,14 @@ public class RegularDictionray {
     log.info("collision count is " + collisionCount);
 
     writer.newLine();
-    for (String word : freshDict.keys()) {
-      writer.write(word + " " + freshDict.get(word) + "\t");
+    for (Map.Entry<String,Integer> entry: freshDict.entrySet()) {
+      writer.write(entry.getKey() + " " + entry.getValue() + "\t");
     }
     if (dayDicts.size() >= 10)
       dayDicts.remove(dayDicts.size() - 1);
-    for (OpenObjectIntHashMap<String> dayDict : dayDicts) {
-      for (String word : dayDict.keys()) {
-        writer.write(word + " " + dayDict.get(word) + "\t");
+    for (Map<String,Integer> dayDict : dayDicts) {
+      for (Map.Entry<String,Integer> entry: dayDict.entrySet()) {
+        writer.write(entry.getKey() + " " + entry.getValue() + "\t");
       }
       writer.newLine();
     }
