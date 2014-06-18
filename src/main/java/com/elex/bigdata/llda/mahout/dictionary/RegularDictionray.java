@@ -177,7 +177,7 @@ public class RegularDictionray {
     StringBuilder sql=new StringBuilder();
     sql.append("insert into table "+tableName+" values ");
     for(String word: freshDict.keys()){
-       sql.append("("+word+","+freshDict.get(word)+"),");
+       sql.append("('"+word+"',"+freshDict.get(word)+"),");
     }
     sql.deleteCharAt(sql.length()-1);
     String sqlStr=sql.toString();
@@ -222,7 +222,7 @@ public class RegularDictionray {
        StringBuilder querySql=new StringBuilder();
        querySql.append("select url,id from "+tableName+" where ");
        for(String word: words){
-         querySql.append("url="+word+" or ");
+         querySql.append("url = '"+word+"' or ");
        }
        querySql.delete(querySql.lastIndexOf("or"), querySql.length());
        querySql.append(";");
