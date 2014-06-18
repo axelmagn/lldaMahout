@@ -38,7 +38,7 @@ public class RegularDictionray {
   private String user, passwd, ip, port;
   private String tableName = "url_map";
   private Connection connection;
-  private ExecutorService service = new ThreadPoolExecutor(3, 5, 3600, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(30));
+  private ExecutorService service = new ThreadPoolExecutor(3, 8, 3600, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(30));
 
   public RegularDictionray(String dictPath, FileSystem fs) throws IOException, SQLException, ClassNotFoundException {
     this.fs = fs;
@@ -172,7 +172,7 @@ public class RegularDictionray {
         }
       } else {
         notHitWords.add(word);
-        if (notHitWords.size() > 5000)
+        if (notHitWords.size() > 10000)
           queryMysql();
       }
     }
