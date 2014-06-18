@@ -148,7 +148,7 @@ public class RegularDictionray {
       }
     } else {
       notHitWords.add(word);
-      if (notHitWords.size() > 5000)
+      if (notHitWords.size() > 20000)
         queryMysql();
     }
   }
@@ -172,7 +172,7 @@ public class RegularDictionray {
         }
       } else {
         notHitWords.add(word);
-        if (notHitWords.size() > 10000)
+        if (notHitWords.size() >20000)
           queryMysql();
       }
     }
@@ -180,6 +180,7 @@ public class RegularDictionray {
 
   public void flushToMysql() throws ClassNotFoundException, SQLException, InterruptedException {
     queryMysql();
+    log.info("service shutdown....");
     service.shutdown();
     service.awaitTermination(30, TimeUnit.MINUTES);
     log.info("hitCount is " + hitWordCount);
@@ -266,6 +267,7 @@ public class RegularDictionray {
           words.remove(word);
         }
         localStatement.close();
+        log.info("query complete ");
       } catch (SQLException e) {
         log.warn(e.getMessage());
         e.printStackTrace();
