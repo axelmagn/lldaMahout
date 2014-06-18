@@ -37,7 +37,7 @@ public class RegularDictionray {
   private boolean loadDict = false, loadDayDict = false;
   private String user, passwd, ip, port;
   private String tableName = "url_map";
-  private Statement statement;
+  private Connection connection;
   private ExecutorService service = new ThreadPoolExecutor(3, 5, 3600, TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(30));
 
   public RegularDictionray(String dictPath, FileSystem fs) throws IOException, SQLException, ClassNotFoundException {
@@ -54,7 +54,7 @@ public class RegularDictionray {
     passwd = properties.getProperty("passwd");
     ip = properties.getProperty("ip");
     port = properties.getProperty("port");
-    initStatement();
+    initConnection();
   }
 
   public void loadDict() throws IOException, HashingException {
@@ -195,17 +195,17 @@ public class RegularDictionray {
     sql.deleteCharAt(sql.length() - 1);
     String sqlStr = sql.toString();
     log.info("flush to mysql " + sqlStr);
+    Statement statement=connection.createStatement();
     statement.execute(sqlStr);
 
   }
 
-  private void initStatement() throws ClassNotFoundException, SQLException {
+  private void initConnection() throws ClassNotFoundException, SQLException {
     Class.forName("com.mysql.jdbc.Driver");
     String url = "jdbc:mysql://" + ip + ":" + port + "/bigdata";
     log.info(url);
-    Connection connectMySQL = DriverManager.getConnection(url, user, passwd);
+    connection = DriverManager.getConnection(url, user, passwd);
     log.info(user + ":" + passwd);
-    statement = connectMySQL.createStatement();
   }
 
   public void flushDict() throws SQLException, ClassNotFoundException, IOException, InterruptedException {
@@ -248,20 +248,23 @@ public class RegularDictionray {
       }
       querySql.delete(querySql.lastIndexOf("or"), querySql.length());
       querySql.append(";");
+      Statement localStatement;
       try {
         String querySqlStr = querySql.toString();
         log.info("query sql :" + querySqlStr);
-        ResultSet resultSet = statement.executeQuery(querySqlStr);
+        localStatement=connection.createStatement();
+        ResultSet resultSet = localStatement.executeQuery(querySqlStr);
         while (resultSet.next()) {
           String word = resultSet.getString("url");
           int id = resultSet.getInt("id");
           latentDict.put(word, id);
           words.remove(word);
         }
+        localStatement.close();
       } catch (SQLException e) {
         log.warn(e.getMessage());
-        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-      }
+        e.printStackTrace();
+      } //To change body of catch statement use File | Settings | File Templates.
       for (String word : words) {
         synchronized (dictSize) {
           if (!freshDict.containsKey(word))
