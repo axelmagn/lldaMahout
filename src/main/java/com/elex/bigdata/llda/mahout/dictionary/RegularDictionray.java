@@ -175,6 +175,7 @@ public class RegularDictionray {
 
   public void flushToMysql() throws ClassNotFoundException, SQLException {
     queryMysql();
+    log.info("fresh dict size is "+freshDict.size());
     if(freshDict.size()==0)
       return;
     StringBuilder sql=new StringBuilder();
@@ -203,6 +204,7 @@ public class RegularDictionray {
     writer.write(String.valueOf(dictSize));
     log.info("when flush dict dictSize is "+dictSize);
     log.info("collision count is "+collisionCount);
+
     writer.newLine();
     for(String word:freshDict.keys()){
       writer.write(word+" "+freshDict.get(word)+"\t");
