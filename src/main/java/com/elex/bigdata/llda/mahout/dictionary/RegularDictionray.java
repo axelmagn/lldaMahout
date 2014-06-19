@@ -223,7 +223,8 @@ public class RegularDictionray {
       sqlBuilder.append("('" + entry.getKey() + "'," + entry.getValue() + "),");
       if(valueSize>=updateBatch){
         sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
-        updateService.execute(new UpdateWordRunner(sqlBuilder.toString()));
+        String sql=sqlBuilder.toString();
+        updateService.execute(new UpdateWordRunner(sql));
         sqlBuilder=new StringBuilder().append(insertPrefix);
         valueSize=0;
       }
