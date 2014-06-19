@@ -24,4 +24,9 @@ public class JsonTest {
     TopicUrls topicUrls=mapper.readValue(json,TopicUrls.class);
     System.out.println("hhhe");
   }
+  public void testStringBuilder(){
+    StringBuilder builder=new StringBuilder().append("hello,");
+    builder.deleteCharAt(builder.length()-1);
+
+  }
 }

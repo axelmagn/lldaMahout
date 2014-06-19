@@ -222,7 +222,8 @@ public class RegularDictionray {
       valueSize++;
       sqlBuilder.append("('" + entry.getKey() + "'," + entry.getValue() + "),");
       if(valueSize>=updateBatch){
-        sqlBuilder.deleteCharAt(sqlBuilder.length() - 1);
+        sqlBuilder.deleteCharAt(sqlBuilder.length()-1);
+        sqlBuilder.append(";");
         String sql=sqlBuilder.toString();
         updateService.execute(new UpdateWordRunner(sql));
         sqlBuilder=new StringBuilder().append(insertPrefix);
@@ -230,6 +231,7 @@ public class RegularDictionray {
       }
     }
     if(valueSize>0){
+      sqlBuilder.deleteCharAt(sqlBuilder.length()-1);
       String sqlStr = sqlBuilder.toString();
       updateService.execute(new UpdateWordRunner(sqlStr));
     }
