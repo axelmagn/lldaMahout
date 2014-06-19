@@ -262,7 +262,7 @@ public class RegularDictionray {
       for (Map.Entry<String, Integer> entry : freshDict.entrySet()) {
         writer.write(entry.getKey() + " " + entry.getValue() + "\t");
       }
-      if (dayDicts.size() >= 10)
+      if (dayDicts.size() >= 20)
         dayDicts.remove(dayDicts.size() - 1);
       for (Map.Entry<String, Integer> entry : latentDict.entrySet()) {
         writer.write(entry.getKey() + " " + entry.getValue() + "\t");
