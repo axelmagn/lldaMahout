@@ -231,7 +231,6 @@ public class RegularDictionray {
     }
     if(valueSize>0){
       String sqlStr = sqlBuilder.toString();
-      log.info("flush to mysql " + sqlStr);
       updateService.execute(new UpdateWordRunner(sqlStr));
     }
     updateService.shutdown();
@@ -293,6 +292,7 @@ public class RegularDictionray {
     @Override
     public void run() {
       try {
+        log.info("update sql is "+sql);
         Statement statement = connection.createStatement();
         statement.execute(sql);
         statement.close();
