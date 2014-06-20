@@ -206,6 +206,7 @@ public class Accumulate extends AbstractJob{
     Scan scan=new Scan();
     byte[] startRk=Bytes.add(Bytes.toBytesBinary("\\x01"),Bytes.toBytes(startTimeStamp));
     byte[] endRk=Bytes.add(Bytes.toBytesBinary("\\x01"),Bytes.toBytes(endTimeStamp));
+    System.out.println("start: "+Bytes.toStringBinary(startRk)+", end: "+Bytes.toStringBinary(endRk));
     scan.setStartRow(startRk);
     scan.setStopRow(endRk);
     scan.addColumn(Bytes.toBytes(Custom_Families[0]),Bytes.toBytes(URL));
