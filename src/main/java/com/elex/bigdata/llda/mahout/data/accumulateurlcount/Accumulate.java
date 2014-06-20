@@ -73,6 +73,10 @@ public class Accumulate extends AbstractJob{
   }
 
   public Accumulate(String outputBase,String startTime,String endTime) throws ParseException, IOException {
+     init(outputBase,startTime,endTime);
+  }
+
+  private void init(String outputBase,String startTime,String endTime) throws ParseException, IOException {
     this.outputBase=outputBase;
     this.startTime=startTime;
     this.endTime=endTime;
@@ -349,15 +353,7 @@ public class Accumulate extends AbstractJob{
     addOption(ENDTIME,"et","end time of url access");
     if(parseArguments(args)==null)
       return -1;
-    outputBase=getOption(OUTPUT_BASE);
-    startTime=getOption(STARTTIME);
-    endTime=getOption(ENDTIME);
-    SimpleDateFormat dateFormat=new SimpleDateFormat("yyyyMMddHHmmss");
-    startTimeStamp=dateFormat.parse(startTime).getTime();
-    endTimeStamp=dateFormat.parse(endTime).getTime();
-    conf=getConf();
-    fs=FileSystem.get(conf);
-    putUrlCount=new PutUrlCount(fs);
+    init(getOption(OUTPUT_BASE),getOption(STARTTIME),getOption(ENDTIME));
     getNavUidUrl();
     getAdUidUrl();
     getCustomUidUrl(PLUGIN_TABLE);
