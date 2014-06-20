@@ -9,10 +9,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Result;
-import org.apache.hadoop.hbase.client.ResultScanner;
-import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.ToolRunner;
@@ -43,6 +40,7 @@ public class Accumulate extends AbstractJob{
   private Map<Byte, String> projectMap = new HashMap<Byte, String>();
   private ExecutorService service = new ThreadPoolExecutor(3, 8, 10, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(20));
   private FileSystem fs;
+  private HBaseAdmin admin;
   private Configuration conf;
   private static String jogosUrl = "www.jogos.com", comprasUrl = "www.compras.com", otherUrl = "www.other.com",
     friendsUrl = "www.friends.com", tourismUrl = "www.tourism.com";
@@ -62,9 +60,12 @@ public class Accumulate extends AbstractJob{
   private static final int adUidIndex = 11;
 
   private static final String PLUGIN_TABLE = "dmp_user_action";
-  private static final String[] Plugin_Families = {"ua"};
+  private static final String YAC_TABLE="yac_user_action";
+  //custom table structure
+  private static final String[] Custom_Families = {"ua"};
   private static final String ACTION = "a", DURATION = "d", PROJECT_AREA = "pa", PROJECT = "p",  PLUG_CATEGORY = "cat",ORIG_URL="ou";
-  private static final int pluginUidIndex = 9;
+  private static final int customUidIndex = 9;
+
   private static  PutUrlCount putUrlCount=null;
 
   public Accumulate(){
@@ -80,6 +81,7 @@ public class Accumulate extends AbstractJob{
     endTimeStamp=dateFormat.parse(endTime).getTime();
     conf=HBaseConfiguration.create();
     fs=FileSystem.get(conf);
+    admin=new HBaseAdmin(conf);
     putUrlCount=new PutUrlCount(fs);
   }
 
@@ -155,6 +157,8 @@ public class Accumulate extends AbstractJob{
   }
 
   public void getNavUidUrl() throws IOException, InterruptedException {
+    if(!admin.tableExists(NAV_TABLE))
+      return;
     HTable hTable = new HTable(conf, NAV_TABLE);
     Map<String, List<String>> familyColumns = new HashMap<String, List<String>>();
     List<String> columns = new ArrayList<String>();
@@ -187,15 +191,20 @@ public class Accumulate extends AbstractJob{
     }
     putToHdfs(uidUrlCountMap,"navCustom");
   }
-
-  public void getPluginUidUrl() throws IOException {
-    HTable hTable = new HTable(conf, PLUGIN_TABLE);
+  /*
+     rk:  \x01 (8 bit timestamp) uid
+     url: ua:url
+   */
+  public void getCustomUidUrl(String tableName) throws IOException {
+    if(!admin.tableExists(tableName))
+      return;
+    HTable hTable = new HTable(conf, tableName);
     Scan scan=new Scan();
     byte[] startRk=Bytes.add(Bytes.toBytesBinary("\\x01"),Bytes.toBytes(startTimeStamp));
     byte[] endRk=Bytes.add(Bytes.toBytesBinary("\\x01"),Bytes.toBytes(endTimeStamp));
     scan.setStartRow(startRk);
     scan.setStopRow(endRk);
-    scan.addColumn(Bytes.toBytes(Plugin_Families[0]),Bytes.toBytes(URL));
+    scan.addColumn(Bytes.toBytes(Custom_Families[0]),Bytes.toBytes(URL));
     int cacheSize = 5096;
     scan.setCaching(cacheSize);
     ResultScanner scanner = hTable.getScanner(scan);
@@ -203,7 +212,7 @@ public class Accumulate extends AbstractJob{
     for (Result result : scanner) {
       for (KeyValue kv : result.raw()) {
         byte[] rk = kv.getRow();
-        String uid = Bytes.toString(Arrays.copyOfRange(rk, pluginUidIndex, rk.length));
+        String uid = Bytes.toString(Arrays.copyOfRange(rk, customUidIndex, rk.length));
         String url = Bytes.toString(kv.getValue());
         if(url.startsWith("http://"))
           url=url.substring(7);
@@ -224,11 +233,11 @@ public class Accumulate extends AbstractJob{
 
       }
       if(uidUrlCountMap.size()>100000){
-        putToHdfs(uidUrlCountMap,"plugin");
+        putToHdfs(uidUrlCountMap,tableName);
         uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
       }
     }
-    putToHdfs(uidUrlCountMap,"plugin");
+    putToHdfs(uidUrlCountMap,tableName);
   }
 
   /*
@@ -236,6 +245,8 @@ public class Accumulate extends AbstractJob{
      transfer category to a url,and give it a count 3.
    */
   public void getAdUidUrl() throws IOException, InterruptedException {
+    if(!admin.tableExists(AD_TABLE))
+      return;
     HTable hTable = new HTable(conf, AD_TABLE);
     Map<String, List<String>> familyColumns = new HashMap<String, List<String>>();
     List<String> columns = new ArrayList<String>();
@@ -349,15 +360,10 @@ public class Accumulate extends AbstractJob{
     putUrlCount=new PutUrlCount(fs);
     getNavUidUrl();
     getAdUidUrl();
-    getPluginUidUrl();
+    getCustomUidUrl(PLUGIN_TABLE);
+    getCustomUidUrl(YAC_TABLE);
     shutdown();
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public void getUidUrl() throws IOException, InterruptedException {
-    getAdUidUrl();
-    getNavUidUrl();
-    getPluginUidUrl();
-    shutdown();
-  }
 }
