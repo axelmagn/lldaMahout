@@ -219,6 +219,19 @@
             </build>
         </profile>
         <profile>
+            <id>dm</id>
+            <build>
+                <resources>
+                    <resource>
+                        <directory>${project.basedir}/src/main/resources/dmProductionm</directory>
+                        <includes>
+                            <include>*</include>
+                        </includes>
+                    </resource>
+                </resources>
+            </build>
+        </profile>
+        <profile>
             <id>test</id>
             <build>
                 <resources>
