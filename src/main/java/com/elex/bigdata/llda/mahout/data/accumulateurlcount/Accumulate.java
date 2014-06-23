@@ -210,10 +210,11 @@ public class Accumulate extends AbstractJob{
     scan.setStartRow(startRk);
     scan.setStopRow(endRk);
     scan.addColumn(Bytes.toBytes(Custom_Families[0]),Bytes.toBytes(URL));
-    int cacheSize = 2548;
+    int cacheSize = 5096;
     scan.setBatch(10);
     scan.setCaching(cacheSize);
     ResultScanner scanner = hTable.getScanner(scan);
+    int kvSize=0;
     Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
     for (Result result : scanner) {
       for (KeyValue kv : result.raw()) {
@@ -236,10 +237,11 @@ public class Accumulate extends AbstractJob{
           urlCountMap.put(url, new Integer(1));
         else
           urlCountMap.put(url, count + 1);
-
+        kvSize++;
       }
-      if(uidUrlCountMap.size()>100000){
+      if(kvSize>=100000){
         System.out.println("put to hdfs");
+        kvSize=0;
         putToHdfs(uidUrlCountMap,tableName);
         uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
       }
