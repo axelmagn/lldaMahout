@@ -219,8 +219,10 @@ public class Accumulate extends AbstractJob{
     ResultScanner scanner = hTable.getScanner(scan);
     int kvSize=0;
     Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
+    long transferCost=0,processCost=0,t1=System.currentTimeMillis();
     for (Result result : scanner) {
       for (KeyValue kv : result.raw()) {
+        long t2=System.currentTimeMillis();
         byte[] rk = kv.getRow();
         String uid = Bytes.toString(Arrays.copyOfRange(rk, customUidIndex, rk.length));
         String url = Bytes.toString(kv.getValue());
@@ -241,6 +243,7 @@ public class Accumulate extends AbstractJob{
         else
           urlCountMap.put(url, count + 1);
         kvSize++;
+        processCost+=(System.currentTimeMillis()-t2);
       }
       if(kvSize>=500000){
         System.out.println("put to hdfs");
@@ -249,6 +252,9 @@ public class Accumulate extends AbstractJob{
         uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
       }
     }
+    long totalCost=System.currentTimeMillis()-t1;
+    System.out.println("process cost "+processCost+" ms; transfer cost "+(totalCost-transferCost)+" ms");
+
     putToHdfs(uidUrlCountMap,tableName);
   }
 

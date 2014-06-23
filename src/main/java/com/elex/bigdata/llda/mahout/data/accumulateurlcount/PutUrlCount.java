@@ -52,6 +52,7 @@ public class PutUrlCount {
 
     @Override
     public void run() {
+      long t1=System.currentTimeMillis();
       try {
         for (Map.Entry<String, Map<String, Integer>> entry : uidUrlCountMap.entrySet()) {
           String uid = entry.getKey();
@@ -70,6 +71,8 @@ public class PutUrlCount {
       } catch (IOException e) {
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
       }
+      long cost=System.currentTimeMillis()-t1;
+      System.out.println("putUrlCountRunnable cost "+cost+" ms");
     }
   }
 }
