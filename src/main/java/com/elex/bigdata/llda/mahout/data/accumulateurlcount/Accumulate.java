@@ -148,7 +148,7 @@ public class Accumulate extends AbstractJob{
     scan.setFilter(filter);
     scan.setStartRow(keyRanges.get(0).getLowerRange());
     scan.setStopRow(keyRanges.get(keyRanges.size() - 1).getUpperRange());
-    int cacheSize = 5096;
+    int cacheSize = 10000;
     scan.setCaching(cacheSize);
     for (Map.Entry<String, List<String>> entry : familyColumns.entrySet()) {
       String family = entry.getKey();
@@ -169,6 +169,7 @@ public class Accumulate extends AbstractJob{
     columns.add(URL);
     familyColumns.put(Nav_Families[0], columns);
     ResultScanner scanner = hTable.getScanner(getScan(familyColumns, false));
+    int kvSize=0;
     Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
     for (Result result : scanner) {
       for (KeyValue kv : result.raw()) {
@@ -186,9 +187,11 @@ public class Accumulate extends AbstractJob{
           urlCountMap.put(url, new Integer(1));
         else
           urlCountMap.put(url, count + 1);
-
+        kvSize++;
       }
-      if(uidUrlCountMap.size()>100000){
+      if(kvSize>=500000){
+        kvSize=0;
+        System.out.println("put to hdfs");
         putToHdfs(uidUrlCountMap,"navCustom");
         uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
       }
@@ -210,7 +213,7 @@ public class Accumulate extends AbstractJob{
     scan.setStartRow(startRk);
     scan.setStopRow(endRk);
     scan.addColumn(Bytes.toBytes(Custom_Families[0]),Bytes.toBytes(URL));
-    int cacheSize = 5096;
+    int cacheSize = 10000;
     scan.setBatch(10);
     scan.setCaching(cacheSize);
     ResultScanner scanner = hTable.getScanner(scan);
@@ -239,7 +242,7 @@ public class Accumulate extends AbstractJob{
           urlCountMap.put(url, count + 1);
         kvSize++;
       }
-      if(kvSize>=100000){
+      if(kvSize>=500000){
         System.out.println("put to hdfs");
         kvSize=0;
         putToHdfs(uidUrlCountMap,tableName);
@@ -273,6 +276,7 @@ public class Accumulate extends AbstractJob{
     categoryToUrlMap.put(new Integer(4), tourismUrl);
     categoryToUrlMap.put(new Integer(99), otherUrl);
     Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
+    int kvSize=0;
     for (Result result : scanner) {
       byte[] rk = result.getRow();
       String uid = Bytes.toString(Arrays.copyOfRange(rk, adUidIndex, rk.length));
@@ -288,7 +292,10 @@ public class Accumulate extends AbstractJob{
         urlCountMap.put(url, new Integer(3));
       else
         urlCountMap.put(url, count + 3);
-      if(uidUrlCountMap.size()>100000){
+      kvSize++;
+      if(kvSize>=500000){
+        kvSize=0;
+        System.out.println("put to hdfs");
         putToHdfs(uidUrlCountMap,"navAd");
         uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
       }
