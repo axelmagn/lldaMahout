@@ -210,7 +210,8 @@ public class Accumulate extends AbstractJob{
     scan.setStartRow(startRk);
     scan.setStopRow(endRk);
     scan.addColumn(Bytes.toBytes(Custom_Families[0]),Bytes.toBytes(URL));
-    int cacheSize = 5096;
+    int cacheSize = 2548;
+    scan.setBatch(10);
     scan.setCaching(cacheSize);
     ResultScanner scanner = hTable.getScanner(scan);
     Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
