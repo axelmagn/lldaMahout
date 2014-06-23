@@ -366,11 +366,14 @@ public class Accumulate extends AbstractJob{
     if(parseArguments(args)==null)
       return -1;
     init(getOption(OUTPUT_BASE),getOption(STARTTIME),getOption(ENDTIME));
+    long t1=System.currentTimeMillis();
     getNavUidUrl();
     getAdUidUrl();
     getCustomUidUrl(PLUGIN_TABLE);
     getCustomUidUrl(YAC_TABLE);
     shutdown();
+    long t2=System.currentTimeMillis();
+    System.out.println("accumulate cost "+(t2-t1)+" ms");
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
