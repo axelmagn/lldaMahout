@@ -238,6 +238,7 @@ public class Accumulate extends AbstractJob{
 
       }
       if(uidUrlCountMap.size()>100000){
+        System.out.println("put to hdfs");
         putToHdfs(uidUrlCountMap,tableName);
         uidUrlCountMap=new HashMap<String, Map<String, Integer>>();
       }
