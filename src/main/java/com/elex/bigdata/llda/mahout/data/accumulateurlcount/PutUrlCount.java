@@ -64,6 +64,7 @@ public class PutUrlCount {
             writer.write(builder.toString() + "\r\n");
           }
         }
+        uidUrlCountMap.clear();
         writer.flush();
         System.out.println("finished");
       } catch (IOException e) {
