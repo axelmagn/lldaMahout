@@ -1,10 +1,12 @@
 package com.elex.bigdata.llda.mahout.data.generatedocs;
 
+import com.elex.bigdata.hashing.BDMD5;
+import com.elex.bigdata.hashing.HashingException;
+import com.elex.bigdata.llda.mahout.dictionary.Dictionary;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
@@ -29,7 +31,8 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVectorWritable> {
-  Map<String,Integer> dictionary=new HashMap<String,Integer>();
+  Dictionary dict;
+  BDMD5 bdmd5;
   Map<String,String> url_category_map=new HashMap<String,String>();
   Map<String,Integer> category_label_map=new HashMap<String, Integer>();
   SequenceFile.Writer uidWriter;
@@ -42,19 +45,17 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     */
     Configuration conf=context.getConfiguration();
     FileSystem fs=FileSystem.get(conf);
-    Path dictPath=new Path(conf.get(UpdateDictDriver.DICT_PATH));
     Path urlCategoryPath=new Path(conf.get(GenerateLDocDriver.URL_CATEGORY_PATH));
     Path categoryLabelPath=new Path(conf.get(GenerateLDocDriver.CATEGORY_LABEL_PATH));
     Path uidPath=new Path(conf.get(GenerateLDocDriver.UID_PATH));
     if(fs.exists(uidPath))
       fs.delete(uidPath);
-    SequenceFile.Reader dictReader=new SequenceFile.Reader(fs,dictPath,conf);
-    Text urlText=new Text();
-    IntWritable intWritable=new IntWritable();
-    while(dictReader.next(urlText,intWritable)){
-      dictionary.put(urlText.toString(),intWritable.get());
+    try {
+      bdmd5=BDMD5.getInstance();
+      dict=new Dictionary(conf.get(UpdateDictDriver.DICT_ROOT),fs,conf);
+    } catch (HashingException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
-    dictReader.close();
     //termSize=dictionary.size();
 
     BufferedReader urlCategoryReader=new BufferedReader(new InputStreamReader(fs.open(urlCategoryPath)));
@@ -90,10 +91,15 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     Set<Integer> labelSet=new HashSet<Integer>();
 
     for(Text url: values){
-      String urlStr=url.toString();
-      if(!dictionary.containsKey(urlStr))
+      String wordMd5= null;
+      try {
+        wordMd5 = bdmd5.toMD5(url.toString());
+      } catch (HashingException e) {
+        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      }
+      if(!dict.contains(wordMd5))
         continue;
-      int id=dictionary.get(urlStr);
+      int id=dict.getId(wordMd5);
       if(urlCounts.containsKey(id))
         urlCounts.put(id,urlCounts.get(id)+1l);
       else

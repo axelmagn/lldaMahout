@@ -1,7 +1,6 @@
 package com.elex.bigdata.llda.mahout.dictionary;
 
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
-import com.elex.bigdata.llda.mahout.data.preparedocs.PrepareInfDocsDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -23,10 +22,8 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class UpdateDictDriver extends AbstractJob{
-  public static final String DICT_PATH="dict_path";
-  public static final String DICT_SIZE_PATH="dict_size_path";
-  public static final String TMP_DICT_PATH="tmp_dict_path";
   public static final String DICT_OPTION_NAME="dictionary";
+  public static final String DICT_ROOT ="dict_root";
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
@@ -46,14 +43,9 @@ public class UpdateDictDriver extends AbstractJob{
   }
 
   public static Job  prepareJob(Configuration conf,Path inputPath,String dictRoot) throws IOException {
-    String dictPath=dictRoot+ File.separator+"dict";
-    String tmpDictPath=dictRoot+File.separator+"tmpDict";
-    String dictSizePath=dictRoot+File.separator+"dictSize";
     conf.setLong("mapred.max.split.size", 22485760); // 10m
     conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 22485760);
-    conf.set(UpdateDictDriver.DICT_PATH,dictPath);
-    conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictSizePath);
-    conf.set(UpdateDictDriver.TMP_DICT_PATH, tmpDictPath);
+    conf.set(DICT_ROOT,dictRoot);
     Path dictOutputPath=new Path(dictRoot+File.separator+"updateDictOut");
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(dictOutputPath))

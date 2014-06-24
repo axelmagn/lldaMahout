@@ -39,13 +39,13 @@ public class MergeLDocDriver extends AbstractJob {
   public int run(String[] args) throws Exception {
     addInputOption();
     addOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME,"li","previous lDocs");
-    addOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME,"docsRoot","docs root directory");
+    addOption(GenerateLDocDriver.DOC_ROOT,"docsRoot","docs root directory");
     addOption(UpdateDictDriver.DICT_OPTION_NAME,"dictRoot","dictionary root path");
     if(parseArguments(args)==null){
       return -1;
     }
     Path inputPath=getInputPath();
-    String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME);
+    String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT);
     String leftDir=getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
     Path leftInputPath=new Path(docsRoot+ File.separator+leftDir);
     Path outputPath=new Path(docsRoot+File.separator+"est");
@@ -59,7 +59,6 @@ public class MergeLDocDriver extends AbstractJob {
   }
 
   public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,String dictRoot) throws IOException {
-    conf.set(UpdateDictDriver.DICT_SIZE_PATH,dictRoot+ File.separator+"dictSize");
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath);

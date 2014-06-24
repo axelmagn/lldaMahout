@@ -1,24 +1,13 @@
 package com.elex.bigdata.llda.mahout.data.preparedocs;
 
-import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
 import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocDriver;
-import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocMapper;
-import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocReducer;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
-import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocMapper;
-import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
-import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
@@ -48,14 +37,14 @@ public class PrepareInfDocsDriver extends AbstractJob{
     /*
       lDocRoot:day--sequenceFile(uidUrlCount seperated by day),total(_day)(total url info to day),inf(the docs to inf)
      */
-    addOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME,"docsRoot","specify the lDocs Root Directory");
+    addOption(GenerateLDocDriver.DOC_ROOT,"docsRoot","specify the lDocs Root Directory");
     addOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME,"lIn","InputPath for previous lDocs");
-    addOption(GenerateLDocDriver.DOC_OPTION_NAME,"docsDir","specify the lDocs directory");
+    addOption(GenerateLDocDriver.DOC_DIR,"docsDir","specify the lDocs directory");
     /*
       resources:url_category,category_label
 
      */
-    addOption(GenerateLDocDriver.RESOURCE_OPTION_NAME,"rDir","specify the resources Dir");
+    addOption(GenerateLDocDriver.RESOURCE_DIR,"rDir","specify the resources Dir");
     if(parseArguments(args)==null){
       return -1;
     }
@@ -73,11 +62,11 @@ public class PrepareInfDocsDriver extends AbstractJob{
     jobControl.addJob(controlledDictJob);
     */
 
-    String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT_OPTION_NAME);
-    String docsDir=getOption(GenerateLDocDriver.DOC_OPTION_NAME);
+    String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT);
+    String docsDir=getOption(GenerateLDocDriver.DOC_DIR);
     String docsPath=docsRoot+File.separator+docsDir;
     String uidPath=docsRoot+File.separator+"uid";
-    String resourceDir=getOption(GenerateLDocDriver.RESOURCE_OPTION_NAME);
+    String resourceDir=getOption(GenerateLDocDriver.RESOURCE_DIR);
 
     Job generateDocJob=GenerateLDocDriver.prepareJob(conf,textInputPath,new Path(docsPath),dictRoot,resourceDir,uidPath);
     ControlledJob controlledGenLDocJob=new ControlledJob(conf);
@@ -88,7 +77,7 @@ public class PrepareInfDocsDriver extends AbstractJob{
     String preLDocPath=docsRoot+File.separator+getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
     String infLDocPath=docsRoot+File.separator+"inf";
     String currentDocPath=docsPath;
-    Job complementDocsJob= ComplementLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(infLDocPath),uidPath,dictRoot);
+    Job complementDocsJob= ComplementLDocDriver.prepareJob(conf,new Path[]{new Path(preLDocPath),new Path(currentDocPath)},new Path(infLDocPath),uidPath);
     ControlledJob controlledCompDocsJob=new ControlledJob(conf);
     controlledCompDocsJob.setJob(complementDocsJob);
     controlledCompDocsJob.addDependingJob(controlledGenLDocJob);

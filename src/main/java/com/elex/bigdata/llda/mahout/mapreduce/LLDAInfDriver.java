@@ -114,7 +114,7 @@ public class LLDAInfDriver extends AbstractJob{
     conf.set(MODEL_WEIGHT, "1"); // TODO
     conf.set(TEST_SET_FRACTION, String.valueOf(testFraction));
     conf.set(NUM_REDUCE_TASKS,String.valueOf(numReduceTasks));
-    Job infJob=writeDocTopicInference(conf,inputPath,topicModelOutputPath,docTopicOutputPath);
+    Job infJob=prepareJob(conf,inputPath,topicModelOutputPath,docTopicOutputPath);
     infJob.waitForCompletion(true);
 
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
@@ -134,7 +134,7 @@ public class LLDAInfDriver extends AbstractJob{
     return maxTermId + 1;
   }
 
-  private static Job writeDocTopicInference(Configuration conf, Path corpus, Path modelInput, Path output)
+  public static Job prepareJob(Configuration conf, Path corpus, Path modelInput, Path output)
     throws IOException, ClassNotFoundException, InterruptedException {
     String jobName = String.format("Writing final document/topic inference from %s to %s", corpus,
       output);
@@ -161,7 +161,7 @@ public class LLDAInfDriver extends AbstractJob{
     LLDADriver.setModelPaths(job,modelInput);
     FileInputFormat.addInputPath(job, corpus);
     FileOutputFormat.setOutputPath(job, output);
-    job.setJarByClass(LLDADriver.class);
+    job.setJarByClass(LLDAInfDriver.class);
     job.submit();
     return job;
   }
