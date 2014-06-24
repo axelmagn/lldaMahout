@@ -24,7 +24,7 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class CrondInfDriver extends AbstractJob{
-  public static final String MODEL_INPUT="modelInput";
+  public static final String MODEL_INPUT="model_input";
   private double default_term_topic_smoothing=0.01;
   private double default_doc_topic_smoothing=0.2;
 

@@ -17,6 +17,7 @@ import org.apache.mahout.math.MultiLabelVectorWritable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,6 +27,7 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class MergeLDocDriver extends AbstractJob {
+  public static final String MULTI_INPUT="multi_input";
   /*
      InputPaths: labeledDocs files
      conf.setDictSizePath
@@ -37,28 +39,26 @@ public class MergeLDocDriver extends AbstractJob {
    */
   @Override
   public int run(String[] args) throws Exception {
-    addInputOption();
-    addOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME,"li","previous lDocs");
-    addOption(GenerateLDocDriver.DOC_ROOT,"docsRoot","docs root directory");
-    addOption(UpdateDictDriver.DICT_OPTION_NAME,"dictRoot","dictionary root path");
+    addOption(MULTI_INPUT, "mI", "specify the input Path", true);
+    addOutputOption();
     if(parseArguments(args)==null){
       return -1;
     }
-    Path inputPath=getInputPath();
-    String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT);
-    String leftDir=getOption(ComplementLDocDriver.PRE_LDOC_OPTION_NAME);
-    Path leftInputPath=new Path(docsRoot+ File.separator+leftDir);
-    Path outputPath=new Path(docsRoot+File.separator+"est");
-    String dictRoot=getOption("dictionary");
+    String multiInputs=getOption(MULTI_INPUT);
+    String[] inputs=multiInputs.split(":");
+    Path[] inputPaths=new Path[inputs.length];
+    for(int i=0;i<inputs.length;i++)
+       inputPaths[i]=new Path(inputs[i]);
+    outputPath=getOutputPath();
     Configuration conf=new Configuration();
 
-    Job complementLDocJob=prepareJob(conf,new Path[]{leftInputPath,inputPath},outputPath,dictRoot);
-    complementLDocJob.submit();
-    complementLDocJob.waitForCompletion(true);
+    Job mergeLDocJob=prepareJob(conf,inputPaths,outputPath);
+    mergeLDocJob.submit();
+    mergeLDocJob.waitForCompletion(true);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,String dictRoot) throws IOException {
+  public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath) throws IOException {
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath);

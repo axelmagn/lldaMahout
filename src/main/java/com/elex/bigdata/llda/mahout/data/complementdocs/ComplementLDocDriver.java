@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.data.complementdocs;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
+import com.elex.bigdata.llda.mahout.data.mergedocs.MergeLDocDriver;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -38,32 +39,33 @@ public class ComplementLDocDriver extends AbstractJob {
          write them to hdfs
   */
   public static final String PRE_LDOC_OPTION_NAME="leftInput";
-  public static final String DOC_INF_DIR="inf";
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
-    addOption(PRE_LDOC_OPTION_NAME,"li","previous lDocs");
-    addOption(GenerateLDocDriver.DOC_ROOT,"docsRoot","docs root directory");
-    addOption(UpdateDictDriver.DICT_OPTION_NAME,"dictRoot","dictionary root path");
+    addOption(MergeLDocDriver.MULTI_INPUT, "mI", "specify the input Path", true);
+    addOption(GenerateLDocDriver.UID_PATH,"uidPath","specify the uid file Path",true);
+    addOutputOption();
     if(parseArguments(args)==null){
       return -1;
     }
-    Path inputPath=getInputPath();
-    String docsRoot=getOption(GenerateLDocDriver.DOC_ROOT);
-    String leftDir=getOption(PRE_LDOC_OPTION_NAME);
-    Path leftInputPath=new Path(docsRoot+ File.separator+leftDir);
-    Path outputPath=new Path(docsRoot+File.separator+"inf");
-    String uidFilePath=docsRoot+File.separator+"uid";
+    String multiInputs=getOption(MergeLDocDriver.MULTI_INPUT);
+    String[] inputs=multiInputs.split(":");
+    Path[] inputPaths=new Path[inputs.length];
+    for(int i=0;i<inputs.length;i++)
+      inputPaths[i]=new Path(inputs[i]);
+    outputPath=getOutputPath();
+    Path uidFilePath=new Path(getOption(GenerateLDocDriver.UID_PATH));
     Configuration conf=new Configuration();
 
-    Job complementLDocJob=prepareJob(conf,new Path[]{leftInputPath,inputPath},outputPath,uidFilePath);
+
+    Job complementLDocJob=prepareJob(conf,inputPaths,outputPath,uidFilePath);
     complementLDocJob.submit();
     complementLDocJob.waitForCompletion(true);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,String uidFilePath) throws IOException {
-    conf.set(GenerateLDocDriver.UID_PATH,uidFilePath);
+  public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath,Path uidFilePath) throws IOException {
+    conf.set(GenerateLDocDriver.UID_PATH,uidFilePath.toString());
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath);
