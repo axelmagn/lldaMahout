@@ -1,7 +1,5 @@
 package com.elex.bigdata.llda.mahout.data.mergedocs;
 
-import com.elex.bigdata.llda.mahout.data.LabeledDocument;
-import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.mahout.math.MultiLabelVectorWritable;
@@ -28,7 +26,7 @@ public class MergeLDocReducer extends Reducer<Text,MultiLabelVectorWritable,Text
      }
      if(lDocs.size()==1)
        context.write(key,lDocs.get(0));
-     MultiLabelVectorWritable finalLDoc=LabeledDocument.mergeDocs(lDocs);
+     MultiLabelVectorWritable finalLDoc=MergeLDocDriver.mergeDocs(lDocs);
      context.write(key,finalLDoc);
    }
 }

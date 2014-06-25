@@ -1,6 +1,10 @@
 #!/bin/bash
 baseDir=`dirname $0`/..
-preDay=`date +%Y%m%d -d "-1 days"`
+oneDayAgo=`date +%Y%m%d -d "-1 days"`
+twoDayAgo=`date +%Y%m%d -d "-2 days"`
 day=`date +%Y%m%d `
-sh ${baseDir}/bin/getEstDocs.sh url_count/*/${day}* to${preDay} ${day}
-sh ${baseDir}/bin/estDocs.sh to${day}
+rootPath=/user/hadoop/user_category/lldaMahout
+multiInput=${rootPath}/docs/to${twoDayAgo}:${rootPath}/docs/${oneDayAgo}
+mergeOutput=${rootPath}/docs/to${oneDayAgo}
+sh ${baseDir}/bin/mergeLDocs.sh  ${multiInput} ${mergeOutput}
+sh ${baseDir}/bin/estDocs.sh ${mergeOutput}

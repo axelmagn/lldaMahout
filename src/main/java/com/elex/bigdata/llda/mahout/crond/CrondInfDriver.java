@@ -1,7 +1,7 @@
 package com.elex.bigdata.llda.mahout.crond;
 
-import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
+import com.elex.bigdata.llda.mahout.data.mergedocs.MergeLDocDriver;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import com.elex.bigdata.llda.mahout.mapreduce.LLDADriver;
 import com.elex.bigdata.llda.mahout.mapreduce.LLDAInfDriver;
@@ -25,6 +25,8 @@ import java.io.IOException;
  */
 public class CrondInfDriver extends AbstractJob{
   public static final String MODEL_INPUT="model_input";
+  public static final String DOC_ROOT="doc_root";
+  public static final String INF_DOC_DIR ="inf";
   private double default_term_topic_smoothing=0.01;
   private double default_doc_topic_smoothing=0.2;
 
@@ -58,11 +60,11 @@ public class CrondInfDriver extends AbstractJob{
     // text input path
     addInputOption();
     //lDocs root path
-    addOption(GenerateLDocDriver.DOC_ROOT,"dR","docs Root Path");
+    addOption(DOC_ROOT,"dR","docs Root Path");
     //dictionary root path
     addOption(UpdateDictDriver.DICT_ROOT,"dictRoot","dictionary root Path");
     //resources root path
-    addOption(GenerateLDocDriver.RESOURCE_DIR,"rDir","specify the resources Dir");
+    addOption(GenerateLDocDriver.RESOURCE_ROOT,"rDir","specify the resources Dir");
     //num of topics
     addOption(LLDADriver.NUM_TOPICS,"numTopics","specify topic nums ",true);
     //model path
@@ -78,31 +80,34 @@ public class CrondInfDriver extends AbstractJob{
 
     Path inputPath=getInputPath();
     String startTime=inputPath.getName().split("_")[0];
+    String endTime=inputPath.getName().split("_")[1];
     String day=startTime.substring(0,8);
     String Minute=startTime.substring(8,12);
+    String nextMinute=endTime.substring(8,12);
 
-    Path docsRootPath=new Path(getOption(GenerateLDocDriver.DOC_ROOT));
+    Path docsRootPath=new Path(getOption(DOC_ROOT));
     Path todayDocsPath=new Path(docsRootPath,day);
     Path historyDocsPath=new Path(docsRootPath,"to"+day);
     if(!fs.exists(todayDocsPath))
       fs.mkdirs(todayDocsPath);
-    Path currentDocsPath=new Path(todayDocsPath,Minute);
-    Path docsForInfPath=new Path(docsRootPath,ComplementLDocDriver.DOC_INF_DIR);
+    Path currentDocsPath=new Path(todayDocsPath,Minute+"_"+nextMinute);
+    Path docsForInfPath=new Path(docsRootPath, INF_DOC_DIR);
 
     Path dictRootPath=new Path(getOption(UpdateDictDriver.DICT_ROOT));
 
-    Path resourceRootPath=new Path(getOption(GenerateLDocDriver.RESOURCE_DIR));
+    Path resourceRootPath=new Path(getOption(GenerateLDocDriver.RESOURCE_ROOT));
 
     Path uidFilePath=new Path(docsRootPath,GenerateLDocDriver.UID_FILE);
 
     JobControl jobControl=new JobControl("crondInf");
 
-    Job generateLDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,currentDocsPath,dictRootPath.toString(),resourceRootPath.toString(),uidFilePath.toString());
+    Job generateLDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,dictRootPath,resourceRootPath,currentDocsPath,uidFilePath);
     ControlledJob controlledGenJob=new ControlledJob(conf);
     controlledGenJob.setJob(generateLDocJob);
     jobControl.addJob(controlledGenJob);
 
-    Job complementJob= ComplementLDocDriver.prepareJob(conf,new Path[]{historyDocsPath,todayDocsPath},docsForInfPath,uidFilePath.toString());
+    conf.set(GenerateLDocDriver.UID_PATH,uidFilePath.toString());
+    Job complementJob= MergeLDocDriver.prepareJob(conf, new Path[]{historyDocsPath, todayDocsPath}, docsForInfPath);
     ControlledJob controlledComplementJob=new ControlledJob(conf);
     controlledComplementJob.setJob(complementJob);
     controlledComplementJob.addDependingJob(controlledGenJob);

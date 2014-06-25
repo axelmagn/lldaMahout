@@ -1,6 +1,5 @@
 package com.elex.bigdata.llda.mahout.mapreduce;
 
-import com.elex.bigdata.llda.mahout.data.LabeledDocumentWritable;
 import com.elex.bigdata.llda.mahout.model.LabeledModelTrainer;
 import com.elex.bigdata.llda.mahout.model.LabeledTopicModel;
 import org.apache.hadoop.conf.Configuration;

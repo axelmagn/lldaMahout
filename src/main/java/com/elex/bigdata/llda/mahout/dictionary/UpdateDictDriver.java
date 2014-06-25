@@ -22,27 +22,26 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class UpdateDictDriver extends AbstractJob{
-  public static final String DICT_OPTION_NAME="dictionary";
   public static final String DICT_ROOT ="dict_root";
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
-    addOption(DICT_OPTION_NAME,"dict","dictionary root Path");
+    addOption(DICT_ROOT,"dict","dictionary root Path");
     if(parseArguments(args)==null)
       return -1;
     Path textInputPath=getInputPath();
-    String dictRoot=getOption(DICT_OPTION_NAME);
+    String dictRoot=getOption(DICT_ROOT);
     Configuration conf=new Configuration();
     Job updateDictJob=prepareJob(conf,textInputPath,dictRoot);
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return 0;
   }
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(),new UpdateDictDriver(),args);
   }
 
-  public static Job  prepareJob(Configuration conf,Path inputPath,String dictRoot) throws IOException {
+  public static Job prepareJob(Configuration conf,Path inputPath,String dictRoot) throws IOException {
     conf.setLong("mapred.max.split.size", 22485760); // 10m
     conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 22485760);
     conf.set(DICT_ROOT,dictRoot);

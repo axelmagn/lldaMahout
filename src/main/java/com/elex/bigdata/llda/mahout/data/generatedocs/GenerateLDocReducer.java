@@ -31,11 +31,13 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVectorWritable> {
-  Dictionary dict;
-  BDMD5 bdmd5;
-  Map<String,String> url_category_map=new HashMap<String,String>();
-  Map<String,Integer> category_label_map=new HashMap<String, Integer>();
-  SequenceFile.Writer uidWriter;
+  public static final String URL_CATEGORY ="url_category";
+  public static final String CATEGORY_LABEL ="category_label";
+  private Dictionary dict;
+  private BDMD5 bdmd5;
+  private Map<String,String> url_category_map=new HashMap<String,String>();
+  private Map<String,Integer> category_label_map=new HashMap<String, Integer>();
+  private SequenceFile.Writer uidWriter;
   //int termSize;
   public void setup(Context context) throws IOException {
     /*
@@ -45,8 +47,10 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     */
     Configuration conf=context.getConfiguration();
     FileSystem fs=FileSystem.get(conf);
-    Path urlCategoryPath=new Path(conf.get(GenerateLDocDriver.URL_CATEGORY_PATH));
-    Path categoryLabelPath=new Path(conf.get(GenerateLDocDriver.CATEGORY_LABEL_PATH));
+    Path resourcesPath=new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
+    Path urlCategoryPath=new Path(resourcesPath,URL_CATEGORY);
+    Path categoryLabelPath=new Path(resourcesPath,CATEGORY_LABEL);
+
     Path uidPath=new Path(conf.get(GenerateLDocDriver.UID_PATH));
     if(fs.exists(uidPath))
       fs.delete(uidPath);

@@ -1,8 +1,6 @@
 package com.elex.bigdata.llda.mahout.data.mergedocs;
 
-import com.elex.bigdata.llda.mahout.data.complementdocs.ComplementLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
-import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -14,10 +12,15 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.MultiLabelVectorWritable;
+import org.apache.mahout.math.RandomAccessSparseVector;
+import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 
-import java.io.File;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -34,12 +37,13 @@ public class MergeLDocDriver extends AbstractJob {
      MergeLDocMapper:
         create a new labeledDocument with size of dictSize and clone from value
      MergeLDocReducer:
-        merge labels and urlCounts for uid:Iterable<LabeledDocument>
+        merge labels and urlCounts for uid:Iterable<MultiLabelVector>
         context.write(uid,labeledDocument)
    */
   @Override
   public int run(String[] args) throws Exception {
     addOption(MULTI_INPUT, "mI", "specify the input Path", true);
+    addOption(GenerateLDocDriver.UID_PATH,"uidPath","specify the uid file Path");
     addOutputOption();
     if(parseArguments(args)==null){
       return -1;
@@ -51,7 +55,9 @@ public class MergeLDocDriver extends AbstractJob {
        inputPaths[i]=new Path(inputs[i]);
     outputPath=getOutputPath();
     Configuration conf=new Configuration();
-
+    String uid_file_path=getOption(GenerateLDocDriver.UID_PATH);
+    if(uid_file_path!=null)
+      conf.set(GenerateLDocDriver.UID_PATH,uid_file_path);
     Job mergeLDocJob=prepareJob(conf,inputPaths,outputPath);
     mergeLDocJob.submit();
     mergeLDocJob.waitForCompletion(true);
@@ -82,5 +88,31 @@ public class MergeLDocDriver extends AbstractJob {
   }
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new MergeLDocDriver(), args);
+  }
+  public static MultiLabelVectorWritable mergeDocs(List<MultiLabelVectorWritable> lDocs){
+    Set<Integer> labelSet=new HashSet<Integer>();
+    OpenIntDoubleHashMap urlCountMap=new OpenIntDoubleHashMap();
+
+    for(int i=0;i<lDocs.size();i++){
+      MultiLabelVectorWritable labelVectorWritable=lDocs.get(i);
+      for(Integer label: labelVectorWritable.getLabels())
+        labelSet.add(label);
+      Vector tmpUrlCounts=lDocs.get(i).getVector();
+      Iterator<Vector.Element> tmpUrlCountIter=tmpUrlCounts.iterateNonZero();
+      while(tmpUrlCountIter.hasNext()){
+        Vector.Element urlCount=tmpUrlCountIter.next();
+        int termIndex=urlCount.index();
+        urlCountMap.put(termIndex,urlCount.get()+urlCountMap.get(termIndex));
+      }
+    }
+    Vector finalUrlCounts=new RandomAccessSparseVector(urlCountMap.size()*2);
+    for(Integer url: urlCountMap.keys().elements()){
+      finalUrlCounts.setQuick(url,urlCountMap.get(url));
+    }
+    int[] labels=new int[labelSet.size()];
+    int i=0;
+    for(Integer label: labelSet)
+      labels[i++]=label;
+    return new MultiLabelVectorWritable(finalUrlCounts,labels);
   }
 }
