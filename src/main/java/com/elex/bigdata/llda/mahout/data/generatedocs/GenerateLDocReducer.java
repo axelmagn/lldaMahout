@@ -92,6 +92,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
        uidWriter.write(key,NullWritable)
 
      */
+    int hitCount=0;
     Map<Integer,Double> urlCounts=new HashMap<Integer, Double>();
     Set<Integer> labelSet=new HashSet<Integer>();
 
@@ -104,6 +105,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
       }
       if(!dict.contains(wordMd5))
         continue;
+      hitCount++;
       int id=dict.getId(wordMd5);
       if(urlCounts.containsKey(id))
         urlCounts.put(id,urlCounts.get(id)+1l);
@@ -117,6 +119,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
         }
       }
     }
+    log.info("hitCount is "+hitCount);
     Vector urlCountsVector=new RandomAccessSparseVector(urlCounts.size()*2);
     for(Map.Entry<Integer,Double> urlCount: urlCounts.entrySet()){
        urlCountsVector.setQuick(urlCount.getKey(),urlCount.getValue());
@@ -129,13 +132,13 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCountsVector,labels);
     uidNum++;
     if((index++)>=sampleRatio){
-      System.out.println(" uidNum "+uidNum);
+      log.info(" uidNum "+uidNum);
       index=0;
       StringBuilder vectorStr=new StringBuilder();
-      Iterator<Vector.Element> iterator=urlCountsVector.iterator();
+      Iterator<Vector.Element> iterator=urlCountsVector.iterateNonZero();
       while(iterator.hasNext()){
         Vector.Element e=iterator.next();
-        vectorStr.append(e.index()+":"+e.get()+" ");
+        vectorStr.append(e.index()+":"+e.get()+"  ");
       }
       log.info("vector is : "+vectorStr.toString());
       StringBuilder labelStr=new StringBuilder();
