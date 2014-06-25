@@ -20,7 +20,7 @@ import java.util.Set;
  */
 public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
   private Set<String> eliminated_urls=new HashSet<String>();
-  private int index=0,sampleRatio=10000;
+  private int index=0,sampleRatio=20000;
   public void setup(Context context){
     InputStream inputStream = this.getClass().getResourceAsStream("/eliminated_urls");
     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
