@@ -38,7 +38,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
   private Map<String,Integer> category_label_map=new HashMap<String, Integer>();
   private SequenceFile.Writer uidWriter;
   private int uidNum=0;
-  private int sampleRatio=100,index=0;
+  private int sampleRatio=10000,index=0;
   //int termSize;
   public void setup(Context context) throws IOException {
     /*
@@ -119,7 +119,9 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
         }
       }
     }
-    log.info("hitCount is "+hitCount);
+    //
+    if(urlCounts.size()==0)
+      return;
     Vector urlCountsVector=new RandomAccessSparseVector(urlCounts.size()*2);
     for(Map.Entry<Integer,Double> urlCount: urlCounts.entrySet()){
        urlCountsVector.setQuick(urlCount.getKey(),urlCount.getValue());
@@ -131,7 +133,9 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     }
     MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCountsVector,labels);
     uidNum++;
-    if((index++)>=sampleRatio){
+
+    if((++index)>=sampleRatio){
+      log.info("hitCount is "+hitCount);
       log.info(" uidNum "+uidNum);
       index=0;
       StringBuilder vectorStr=new StringBuilder();
