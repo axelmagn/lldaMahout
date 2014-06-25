@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Iterator;
 
 /**
  * Created with IntelliJ IDEA.
@@ -94,13 +95,17 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     //train
     if((index++)>=sampleRatio){
       StringBuilder vectorStr=new StringBuilder();
-      for(Vector.Element e :doc.getVector()){
-        vectorStr.append(e.index()+":"+e.get()+" ");
+      Iterator<Vector.Element> docIter=doc.getVector().iterateNonZero();
+      while(docIter.hasNext()){
+        Vector.Element e=docIter.next();
+        vectorStr.append(e.index()+":"+e.get()+"  ");
       }
       log.info("vector is : "+vectorStr.toString());
       StringBuilder labelStr=new StringBuilder();
-      for(Vector.Element e: labels){
-        labelStr.append(e.index()+":"+e.get());
+      Iterator<Vector.Element> labelIter=labels.iterateNonZero();
+      while(labelIter.hasNext()){
+        Vector.Element e=labelIter.next();
+        labelStr.append(e.index()+":"+e.get()+"  ");
       }
       log.info("labels is: "+labelStr.toString());
     }
