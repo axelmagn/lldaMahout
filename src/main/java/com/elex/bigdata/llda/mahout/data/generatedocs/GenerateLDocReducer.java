@@ -129,7 +129,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCountsVector,labels);
     uidNum++;
     if((index++)>=sampleRatio){
-      log.info(" uidNum "+uidNum);
+      System.out.println(" uidNum "+uidNum);
       index=0;
       StringBuilder vectorStr=new StringBuilder();
       Iterator<Vector.Element> iterator=urlCountsVector.iterator();

@@ -81,20 +81,19 @@ public class Dictionary {
       dictSize = new AtomicInteger(dictSizeWritable.get());
     }
 
-    BDMD5 bdmd5 = BDMD5.getInstance();
     if (fs.exists(dictPath)) {
       SequenceFile.Reader dictReader = new SequenceFile.Reader(fs, dictPath, conf);
       Text word = new Text();
       IntWritable wordId = new IntWritable();
       while (dictReader.next(word, wordId)) {
-        word_id_map.put(bdmd5.toMD5(word.toString()), wordId.get());
+        word_id_map.put(word.toString(), wordId.get());
       }
       if (dictSize.intValue() != word_id_map.size()) {
         System.out.println("dictSize not equal word_id_map.size ");
         dictSize = new AtomicInteger(word_id_map.size());
       }
     }
-    log.info("load dict. dict size is "+dictSize.intValue());
+    System.out.println("load dict. dict size is "+dictSize.intValue());
   }
 
   public void update(String word) {

@@ -20,6 +20,7 @@ import java.util.Set;
  */
 public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
   private Set<String> eliminated_urls=new HashSet<String>();
+  private int index=0,sampleRatio=1000;
   public void setup(Context context){
     InputStream inputStream = this.getClass().getResourceAsStream("/eliminated_urls");
     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
@@ -50,6 +51,8 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
       return;
     }
     int count=Integer.parseInt(uidUrlCount[2]);
+    if((index++)>sampleRatio)
+      System.out.println(value.toString()+" count is "+count);
     for(int i=0;i<count;i++){
       context.write(new Text(uidUrlCount[0]),new Text(uidUrlCount[1]));
     }
