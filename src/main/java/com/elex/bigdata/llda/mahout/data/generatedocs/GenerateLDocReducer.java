@@ -11,6 +11,7 @@ import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.log4j.Logger;
 import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
@@ -31,6 +32,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVectorWritable> {
+  private Logger log=Logger.getLogger(GenerateLDocReducer.class);
   public static final String URL_CATEGORY ="url_category";
   public static final String CATEGORY_LABEL ="category_label";
   private Dictionary dict;
@@ -38,6 +40,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
   private Map<String,String> url_category_map=new HashMap<String,String>();
   private Map<String,Integer> category_label_map=new HashMap<String, Integer>();
   private SequenceFile.Writer uidWriter;
+  private int uidNum=0;
   //int termSize;
   public void setup(Context context) throws IOException {
     /*
@@ -126,11 +129,13 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
       labels[i++]=label;
     }
     MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCountsVector,labels);
+    uidNum++;
     uidWriter.append(key,NullWritable.get());
     context.write(key,labelVectorWritable);
   }
 
   public void cleanup(Context context) throws IOException {
+    log.info("uidNum is "+uidNum);
     uidWriter.hflush();
     uidWriter.close();
   }

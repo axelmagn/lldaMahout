@@ -42,6 +42,8 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
      int wordCount=0;
      for(IntWritable countWritable:values){
         wordCount+=countWritable.get();
+        if(wordCount>=wordCountBoundary)
+          break;
      }
      if(wordCount<wordCountBoundary)
        return;
