@@ -19,10 +19,7 @@ import org.apache.mahout.math.Vector;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -41,7 +38,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
   private Map<String,Integer> category_label_map=new HashMap<String, Integer>();
   private SequenceFile.Writer uidWriter;
   private int uidNum=0;
-  private int sampleRatio=1000,index=0;
+  private int sampleRatio=100,index=0;
   //int termSize;
   public void setup(Context context) throws IOException {
     /*
@@ -132,9 +129,12 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCountsVector,labels);
     uidNum++;
     if((index++)>=sampleRatio){
-       index=0;
+      log.info(" uidNum "+uidNum);
+      index=0;
       StringBuilder vectorStr=new StringBuilder();
-      for(Vector.Element e : urlCountsVector){
+      Iterator<Vector.Element> iterator=urlCountsVector.iterator();
+      while(iterator.hasNext()){
+        Vector.Element e=iterator.next();
         vectorStr.append(e.index()+":"+e.get()+" ");
       }
       log.info("vector is : "+vectorStr.toString());
