@@ -95,7 +95,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     if((index++)>=sampleRatio){
       StringBuilder vectorStr=new StringBuilder();
       for(Vector.Element e :doc.getVector()){
-        vectorStr.append(e.index()+":"+e.get());
+        vectorStr.append(e.index()+":"+e.get()+" ");
       }
       log.info("vector is : "+vectorStr.toString());
       StringBuilder labelStr=new StringBuilder();

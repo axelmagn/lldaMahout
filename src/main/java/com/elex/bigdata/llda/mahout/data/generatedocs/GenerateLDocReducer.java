@@ -41,6 +41,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
   private Map<String,Integer> category_label_map=new HashMap<String, Integer>();
   private SequenceFile.Writer uidWriter;
   private int uidNum=0;
+  private int sampleRatio=1000,index=0;
   //int termSize;
   public void setup(Context context) throws IOException {
     /*
@@ -130,6 +131,19 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     }
     MultiLabelVectorWritable labelVectorWritable=new MultiLabelVectorWritable(urlCountsVector,labels);
     uidNum++;
+    if((index++)>=sampleRatio){
+       index=0;
+      StringBuilder vectorStr=new StringBuilder();
+      for(Vector.Element e : urlCountsVector){
+        vectorStr.append(e.index()+":"+e.get()+" ");
+      }
+      log.info("vector is : "+vectorStr.toString());
+      StringBuilder labelStr=new StringBuilder();
+      for(int label: labels){
+        labelStr.append(label+" ");
+      }
+      log.info("labels is: "+labelStr.toString());
+    }
     uidWriter.append(key,NullWritable.get());
     context.write(key,labelVectorWritable);
   }
