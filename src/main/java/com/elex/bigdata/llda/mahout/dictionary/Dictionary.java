@@ -9,6 +9,7 @@ import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -43,82 +44,92 @@ public class Dictionary {
       flushDict():flush dict;use sequenceFile
 
    */
-  private Map<String,Integer> word_id_map;
+  private Logger log=Logger.getLogger(Dictionary.class);
+  private Map<String, Integer> word_id_map;
   private AtomicInteger dictSize;
   private FileSystem fs;
   private Configuration conf;
   private Path dictRootPath;
 
-  private static String DICT="dict";
-  private static String TMP_DICT="tmpDict";
-  private static String DICT_SIZE="dictSize";
+  private static String DICT = "dict";
+  private static String TMP_DICT = "tmpDict";
+  private static String DICT_SIZE = "dictSize";
 
-  public Dictionary(){
-    dictSize=new AtomicInteger(0);
-    word_id_map=new HashMap<String, Integer>();
+  public Dictionary() {
+    dictSize = new AtomicInteger(0);
+    word_id_map = new HashMap<String, Integer>();
   }
 
-  public Dictionary(String dictRootPath,FileSystem fs,Configuration conf) throws IOException, HashingException {
-    this.fs=fs;
-    this.conf=conf;
-    this.dictRootPath=new Path(dictRootPath);
-    word_id_map=new HashMap<String, Integer>();
-    dictSize=new AtomicInteger(0);
+  public Dictionary(String dictRootPath, FileSystem fs, Configuration conf) throws IOException, HashingException {
+    this.fs = fs;
+    this.conf = conf;
+    this.dictRootPath = new Path(dictRootPath);
+    word_id_map = new HashMap<String, Integer>();
+    dictSize = new AtomicInteger(0);
     loadDict();
   }
 
   private void loadDict() throws IOException, HashingException {
-    Path dictPath=new Path(dictRootPath,DICT);
-    Path dictSizePath=new Path(dictRootPath,DICT_SIZE);
-    SequenceFile.Reader dictSizeReader=new SequenceFile.Reader(fs,dictSizePath,conf);
-    IntWritable dictSizeWritable=new IntWritable();
-    dictSizeReader.next(dictSizeWritable,NullWritable.get());
-    dictSize=new AtomicInteger(dictSizeWritable.get());
-
-    BDMD5 bdmd5=BDMD5.getInstance();
-    SequenceFile.Reader dictReader=new SequenceFile.Reader(fs,dictPath,conf);
-    Text word=new Text();
-    IntWritable wordId=new IntWritable();
-    while(dictReader.next(word,wordId)){
-      word_id_map.put(bdmd5.toMD5(word.toString()),wordId.get());
+    if (!fs.exists(dictRootPath))
+      fs.mkdirs(dictRootPath);
+    Path dictPath = new Path(dictRootPath, DICT);
+    Path dictSizePath = new Path(dictRootPath, DICT_SIZE);
+    if (fs.exists(dictSizePath)) {
+      SequenceFile.Reader dictSizeReader = new SequenceFile.Reader(fs, dictSizePath, conf);
+      IntWritable dictSizeWritable = new IntWritable();
+      dictSizeReader.next(dictSizeWritable, NullWritable.get());
+      dictSize = new AtomicInteger(dictSizeWritable.get());
     }
-    if(dictSize.intValue()!=word_id_map.size())
-    {
-      System.out.println("dictSize not equal word_id_map.size ");
-      dictSize=new AtomicInteger(word_id_map.size());
+
+    BDMD5 bdmd5 = BDMD5.getInstance();
+    if (fs.exists(dictPath)) {
+      SequenceFile.Reader dictReader = new SequenceFile.Reader(fs, dictPath, conf);
+      Text word = new Text();
+      IntWritable wordId = new IntWritable();
+      while (dictReader.next(word, wordId)) {
+        word_id_map.put(bdmd5.toMD5(word.toString()), wordId.get());
+      }
+      if (dictSize.intValue() != word_id_map.size()) {
+        System.out.println("dictSize not equal word_id_map.size ");
+        dictSize = new AtomicInteger(word_id_map.size());
+      }
     }
   }
 
-  public void update(String word){
-    if(word_id_map.containsKey(word))
+  public void update(String word) {
+    if (word_id_map.containsKey(word))
       return;
-    word_id_map.put(word,dictSize.getAndIncrement());
+    word_id_map.put(word, dictSize.getAndIncrement());
   }
 
-  public boolean contains(String word){
-    if(word_id_map.containsKey(word))
+  public boolean contains(String word) {
+    if (word_id_map.containsKey(word))
       return true;
     return false;
   }
 
-  public Integer getId(String word){
+  public Integer getId(String word) {
     return word_id_map.get(word);
   }
 
 
   public void flushDict() throws IOException {
-    Path tmpDictPath=new Path(dictRootPath,TMP_DICT);
-    Path dictPath=new Path(dictRootPath,DICT);
-    Path dictSizePath=new Path(dictRootPath,DICT_SIZE);
-    SequenceFile.Writer dictWriter=SequenceFile.createWriter(fs,conf,tmpDictPath,Text.class,IntWritable.class);
-    for(Map.Entry<String,Integer> entry:word_id_map.entrySet()){
-       dictWriter.append(new Text(entry.getKey()), new IntWritable(entry.getValue()));
+    if(!fs.exists(dictRootPath)){
+       log.warn(dictRootPath.toString()+" not exists");
+       fs.mkdirs(dictRootPath);
+    }
+    Path tmpDictPath = new Path(dictRootPath, TMP_DICT);
+    Path dictPath = new Path(dictRootPath, DICT);
+    Path dictSizePath = new Path(dictRootPath, DICT_SIZE);
+    SequenceFile.Writer dictWriter = SequenceFile.createWriter(fs, conf, tmpDictPath, Text.class, IntWritable.class);
+    for (Map.Entry<String, Integer> entry : word_id_map.entrySet()) {
+      dictWriter.append(new Text(entry.getKey()), new IntWritable(entry.getValue()));
     }
     dictWriter.hflush();
     dictWriter.close();
-    fs.rename(tmpDictPath,dictPath);
-    SequenceFile.Writer dictSizeWriter=SequenceFile.createWriter(fs,conf,dictSizePath,IntWritable.class,NullWritable.class);
-    dictSizeWriter.append(new IntWritable(dictSize.intValue()),NullWritable.get());
+    fs.rename(tmpDictPath, dictPath);
+    SequenceFile.Writer dictSizeWriter = SequenceFile.createWriter(fs, conf, dictSizePath, IntWritable.class, NullWritable.class);
+    dictSizeWriter.append(new IntWritable(dictSize.intValue()), NullWritable.get());
     dictSizeWriter.hflush();
     dictSizeWriter.close();
   }
