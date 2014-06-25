@@ -58,7 +58,7 @@ public class UpdateDictDriver extends AbstractJob{
     SequenceFileOutputFormat.setOutputPath(updateDictJob, dictOutputPath);
     updateDictJob.setOutputFormatClass(SequenceFileOutputFormat.class);
     updateDictJob.setMapOutputKeyClass(Text.class);
-    updateDictJob.setMapOutputValueClass(NullWritable.class);
+    updateDictJob.setMapOutputValueClass(IntWritable.class);
     updateDictJob.setJarByClass(UpdateDictDriver.class);
     updateDictJob.setJobName("update Dict");
     return updateDictJob;
