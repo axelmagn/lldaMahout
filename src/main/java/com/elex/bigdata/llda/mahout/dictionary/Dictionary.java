@@ -94,6 +94,7 @@ public class Dictionary {
         dictSize = new AtomicInteger(word_id_map.size());
       }
     }
+    log.info("load dict. dict size is "+dictSize.intValue());
   }
 
   public void update(String word) {
@@ -128,6 +129,7 @@ public class Dictionary {
     dictWriter.hflush();
     dictWriter.close();
     fs.rename(tmpDictPath, dictPath);
+    log.info("dictSize is "+dictSize.intValue());
     SequenceFile.Writer dictSizeWriter = SequenceFile.createWriter(fs, conf, dictSizePath, IntWritable.class, NullWritable.class);
     dictSizeWriter.append(new IntWritable(dictSize.intValue()), NullWritable.get());
     dictSizeWriter.hflush();
