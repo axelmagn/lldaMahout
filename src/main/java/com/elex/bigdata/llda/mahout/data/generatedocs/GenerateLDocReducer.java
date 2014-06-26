@@ -38,7 +38,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
   private Map<String,Integer> category_label_map=new HashMap<String, Integer>();
   private SequenceFile.Writer uidWriter;
   private int uidNum=0;
-  private int sampleRatio=20000,index=0;
+  private int sampleRatio=500000,index=0;
   //int termSize;
   public void setup(Context context) throws IOException {
     /*

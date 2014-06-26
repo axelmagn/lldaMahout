@@ -32,7 +32,7 @@ public class UpdateDictDriver extends AbstractJob{
     Path textInputPath=getInputPath();
     String dictRoot=getOption(DICT_ROOT);
     Configuration conf=new Configuration();
-    Job updateDictJob=prepareJob(conf,textInputPath,dictRoot);
+    Job updateDictJob=prepareJob(conf,textInputPath,new Path(dictRoot));
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);
     return 0;
@@ -41,11 +41,11 @@ public class UpdateDictDriver extends AbstractJob{
     ToolRunner.run(new Configuration(),new UpdateDictDriver(),args);
   }
 
-  public static Job prepareJob(Configuration conf,Path inputPath,String dictRoot) throws IOException {
+  public static Job prepareJob(Configuration conf,Path inputPath,Path dictRootPath) throws IOException {
     conf.setLong("mapred.max.split.size", 22485760); // 10m
     conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 22485760);
-    conf.set(DICT_ROOT,dictRoot);
-    Path dictOutputPath=new Path(dictRoot+File.separator+"updateDictOut");
+    conf.set(DICT_ROOT,dictRootPath.toString());
+    Path dictOutputPath=new Path(dictRootPath,"updateDictOut");
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(dictOutputPath))
       fs.delete(dictOutputPath);
