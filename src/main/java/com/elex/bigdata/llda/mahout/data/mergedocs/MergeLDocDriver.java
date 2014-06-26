@@ -58,6 +58,8 @@ public class MergeLDocDriver extends AbstractJob {
     String uid_file_path=getOption(GenerateLDocDriver.UID_PATH);
     if(uid_file_path!=null)
       conf.set(GenerateLDocDriver.UID_PATH,uid_file_path);
+    else
+      System.out.println("uid_file_path is null");
     Job mergeLDocJob=prepareJob(conf,inputPaths,outputPath);
     mergeLDocJob.submit();
     mergeLDocJob.waitForCompletion(true);

@@ -50,6 +50,7 @@ public class MergeLDocMapper extends Mapper<Text,MultiLabelVectorWritable,Text,M
       uids.add(uid.toString());
     }
     uidReader.close();
+    System.out.println("filtering is "+filtering);
   }
   public void map(Text key,MultiLabelVectorWritable value,Context context) throws IOException, InterruptedException {
      /*
