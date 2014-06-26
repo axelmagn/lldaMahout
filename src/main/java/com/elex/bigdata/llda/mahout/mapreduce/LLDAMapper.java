@@ -31,7 +31,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
   private LabeledTopicModel writeModel;
   private int maxIters;
   private int numTopics;
-  private int sampleRatio=20000,index=0;
+  private int sampleRatio=50000,index=0;
 
   protected LabeledModelTrainer getModelTrainer() {
     return modelTrainer;
