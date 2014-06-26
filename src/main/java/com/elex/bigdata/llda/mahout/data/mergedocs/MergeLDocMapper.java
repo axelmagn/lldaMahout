@@ -41,7 +41,7 @@ public class MergeLDocMapper extends Mapper<Text,MultiLabelVectorWritable,Text,M
   private void initFiltering(Configuration conf) throws IOException {
     String uid_file=conf.get(GenerateLDocDriver.UID_PATH);
     if(uid_file==null){
-      System.out.println(uid_file+" is "+uid_file);
+      System.out.println("uid file is "+uid_file);
       return;
     }
     Path uidPath = new Path(uid_file);
@@ -53,6 +53,7 @@ public class MergeLDocMapper extends Mapper<Text,MultiLabelVectorWritable,Text,M
     }
     System.out.println("uids is "+uids.size());
     uidReader.close();
+    filtering=true;
     System.out.println("filtering is "+filtering);
   }
   public void map(Text key,MultiLabelVectorWritable value,Context context) throws IOException, InterruptedException {
