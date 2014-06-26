@@ -53,8 +53,10 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
       return;
     }
     int count=Integer.parseInt(uidUrlCount[2]);
+    /*
     if((++index)>sampleRatio)
       log.info(value.toString() + " count is " + count);
+      */
     for(int i=0;i<count;i++){
       context.write(new Text(uidUrlCount[0]),new Text(uidUrlCount[1]));
     }
