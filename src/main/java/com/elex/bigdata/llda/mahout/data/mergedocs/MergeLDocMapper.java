@@ -40,8 +40,10 @@ public class MergeLDocMapper extends Mapper<Text,MultiLabelVectorWritable,Text,M
 
   private void initFiltering(Configuration conf) throws IOException {
     String uid_file=conf.get(GenerateLDocDriver.UID_PATH);
-    if(uid_file==null)
+    if(uid_file==null){
+      System.out.println(uid_file+" is "+uid_file);
       return;
+    }
     Path uidPath = new Path(uid_file);
     SequenceFile.Reader uidReader = new SequenceFile.Reader(FileSystem.get(conf), uidPath, conf);
     Text uid = new Text();
@@ -49,6 +51,7 @@ public class MergeLDocMapper extends Mapper<Text,MultiLabelVectorWritable,Text,M
     while (uidReader.next(uid, nullWritable)) {
       uids.add(uid.toString());
     }
+    System.out.println("uids is "+uids.size());
     uidReader.close();
     System.out.println("filtering is "+filtering);
   }
