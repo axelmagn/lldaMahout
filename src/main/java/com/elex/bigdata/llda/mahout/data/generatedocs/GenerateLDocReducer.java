@@ -38,7 +38,7 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
   private Map<String,Integer> category_label_map=new HashMap<String, Integer>();
   private SequenceFile.Writer uidWriter;
   private int uidNum=0;
-  private int sampleRatio=500000,index=0;
+  private int sampleRatio=100*10000,index=0;
   //int termSize;
   public void setup(Context context) throws IOException {
     /*
@@ -96,8 +96,11 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
     Map<Integer,Double> urlCounts=new HashMap<Integer, Double>();
     Set<Integer> labelSet=new HashSet<Integer>();
 
-    for(Text url: values){
+    for(Text value: values){
       String wordMd5= null;
+      String[] tokens=value.toString().split("\t");
+      String url=tokens[0];
+
       try {
         wordMd5 = bdmd5.toMD5(url.toString());
       } catch (HashingException e) {
@@ -107,10 +110,11 @@ public class GenerateLDocReducer extends Reducer<Text,Text,Text,MultiLabelVector
         continue;
       hitCount++;
       int id=dict.getId(wordMd5);
+      int count=Integer.parseInt(tokens[1]);
       if(urlCounts.containsKey(id))
-        urlCounts.put(id,urlCounts.get(id)+1l);
+        urlCounts.put(id,urlCounts.get(id)+count);
       else
-        urlCounts.put(id,1.0);
+        urlCounts.put(id,(double)count);
       String category=url_category_map.get(url.toString());
       if(category!=null){
         Integer label=category_label_map.get(category);

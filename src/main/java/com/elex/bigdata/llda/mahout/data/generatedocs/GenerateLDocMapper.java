@@ -52,14 +52,10 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
     }
     if(eliminated_urls.contains(uidUrlCount[1]))
       return;
-
-    int count=Integer.parseInt(uidUrlCount[2]);
     /*
     if((++index)>sampleRatio)
       log.info(value.toString() + " count is " + count);
       */
-    for(int i=0;i<count;i++){
-      context.write(new Text(uidUrlCount[0]),new Text(uidUrlCount[1]));
-    }
+    context.write(new Text(uidUrlCount[0]),new Text(uidUrlCount[1]+"\t"+uidUrlCount[2]));
   }
 }

@@ -53,8 +53,8 @@ public class GenerateLDocDriver extends AbstractJob {
   }
 
   public static Job prepareJob(Configuration conf,Path inputPath,Path dictRootPath,Path resourcesPath,Path outputPath,Path uidFilePath) throws IOException {
-    conf.setLong("mapred.max.split.size", 22485760); // 10m
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 22485760);
+    conf.setLong("mapred.max.split.size", 100*1000*1000); // 100m
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 100*1000*1000);
     conf.set(UID_PATH, uidFilePath.toString());
     conf.set(UpdateDictDriver.DICT_ROOT,dictRootPath.toString());
     conf.set(RESOURCE_ROOT,resourcesPath.toString());
