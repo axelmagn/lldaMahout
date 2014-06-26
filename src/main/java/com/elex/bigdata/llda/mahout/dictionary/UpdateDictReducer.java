@@ -43,15 +43,15 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
      for(IntWritable countWritable:values){
         wordCount+=countWritable.get();
         if(wordCount>=wordCountBoundary)
-          break;
+        {
+          try {
+            dict.update(bdmd5.toMD5(key.toString()));
+          } catch (HashingException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+          }
+          return;
+        }
      }
-     if(wordCount<wordCountBoundary)
-       return;
-    try {
-      dict.update(bdmd5.toMD5(key.toString()));
-    } catch (HashingException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
   }
   public void cleanup(Context context) throws IOException {
      dict.flushDict();
