@@ -146,6 +146,8 @@ public class Dictionary {
     }
     dictWriter.hflush();
     dictWriter.close();
+    if(fs.exists(dictPath))
+      fs.delete(dictPath);
     fs.rename(tmpDictPath, dictPath);
     log.info("dictSize is "+dictSize.intValue());
     SequenceFile.Writer dictSizeWriter = SequenceFile.createWriter(fs, conf, dictSizePath, IntWritable.class, NullWritable.class);
