@@ -27,7 +27,7 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
   private BDMD5 bdmd5;
   private int wordCountBoundary;
   public void setup(Context context) throws IOException, InterruptedException {
-    wordCountBoundary=5;
+    wordCountBoundary=6;
     Configuration conf=context.getConfiguration();
     FileSystem fs=FileSystem.get(conf);
     String dictRoot=conf.get(UpdateDictDriver.DICT_ROOT);
