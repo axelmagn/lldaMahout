@@ -15,6 +15,10 @@ import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -85,11 +89,21 @@ public class CrondInfDriver extends AbstractJob{
     String Minute=startTime.substring(8,12);
     String nextMinute=endTime.substring(8,12);
 
+    SimpleDateFormat dateFormat=new SimpleDateFormat("yyyyMMdd");
+    Date date=dateFormat.parse(day);
+    date.setDate(date.getDate()-1);
+    String oneDayAgo=dateFormat.format(date);
+    date.setDate(date.getDate()-1);
+    String twoDayAgo=dateFormat.format(date);
+
     Path docsRootPath=new Path(getOption(DOC_ROOT));
+
     Path todayDocsPath=new Path(docsRootPath,day);
-    Path historyDocsPath=new Path(docsRootPath,"to"+day);
+    Path historyDocsPath=new Path(docsRootPath,"to"+oneDayAgo);
+    Path backupHistDocsPath=new Path(docsRootPath,"to"+twoDayAgo);
     if(!fs.exists(todayDocsPath))
       fs.mkdirs(todayDocsPath);
+
     Path currentDocsPath=new Path(todayDocsPath,Minute+"_"+nextMinute);
     Path docsForInfPath=new Path(docsRootPath, INF_DOC_DIR);
 
@@ -106,8 +120,18 @@ public class CrondInfDriver extends AbstractJob{
     controlledGenJob.setJob(generateLDocJob);
     jobControl.addJob(controlledGenJob);
 
+    List<Path> comJobInputPaths=new ArrayList<Path>();
+    comJobInputPaths.add(todayDocsPath);
+    if(!fs.exists(historyDocsPath))
+    {
+      comJobInputPaths.add(backupHistDocsPath);
+      comJobInputPaths.add(new Path(docsRootPath,oneDayAgo));
+    }else{
+      comJobInputPaths.add(historyDocsPath);
+    }
+
     conf.set(GenerateLDocDriver.UID_PATH,uidFilePath.toString());
-    Job complementJob= MergeLDocDriver.prepareJob(conf, new Path[]{historyDocsPath, todayDocsPath}, docsForInfPath);
+    Job complementJob= MergeLDocDriver.prepareJob(conf, comJobInputPaths.toArray(new Path[comJobInputPaths.size()]), docsForInfPath);
     ControlledJob controlledComplementJob=new ControlledJob(conf);
     controlledComplementJob.setJob(complementJob);
     controlledComplementJob.addDependingJob(controlledGenJob);
