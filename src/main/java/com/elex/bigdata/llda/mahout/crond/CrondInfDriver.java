@@ -14,6 +14,7 @@ import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -98,7 +99,7 @@ public class CrondInfDriver extends AbstractJob{
 
     Path docsRootPath=new Path(getOption(DOC_ROOT));
 
-    Path todayDocsPath=new Path(docsRootPath,day);
+    Path todayDocsPath=new Path(docsRootPath,day+ File.separator+"*");
     Path historyDocsPath=new Path(docsRootPath,"to"+oneDayAgo);
     Path backupHistDocsPath=new Path(docsRootPath,"to"+twoDayAgo);
     if(!fs.exists(todayDocsPath))
