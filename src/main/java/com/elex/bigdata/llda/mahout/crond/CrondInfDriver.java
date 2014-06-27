@@ -99,7 +99,7 @@ public class CrondInfDriver extends AbstractJob{
 
     Path docsRootPath=new Path(getOption(DOC_ROOT));
 
-    Path todayDocsPath=new Path(docsRootPath,day+ File.separator+"*");
+    Path todayDocsPath=new Path(docsRootPath,day);
     Path historyDocsPath=new Path(docsRootPath,"to"+oneDayAgo);
     Path backupHistDocsPath=new Path(docsRootPath,"to"+twoDayAgo);
     if(!fs.exists(todayDocsPath))
@@ -122,7 +122,7 @@ public class CrondInfDriver extends AbstractJob{
     jobControl.addJob(controlledGenJob);
 
     List<Path> comJobInputPaths=new ArrayList<Path>();
-    comJobInputPaths.add(todayDocsPath);
+    comJobInputPaths.add(new Path(todayDocsPath,"*"));
     if(!fs.exists(historyDocsPath))
     {
       comJobInputPaths.add(backupHistDocsPath);
