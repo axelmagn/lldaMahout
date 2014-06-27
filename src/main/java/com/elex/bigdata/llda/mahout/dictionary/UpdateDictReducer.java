@@ -28,6 +28,7 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
   private int wordCountBoundary;
   public void setup(Context context) throws IOException, InterruptedException {
     wordCountBoundary=8;
+    System.out.println("word count boundary is "+wordCountBoundary);
     Configuration conf=context.getConfiguration();
     FileSystem fs=FileSystem.get(conf);
     String dictRoot=conf.get(UpdateDictDriver.DICT_ROOT);
