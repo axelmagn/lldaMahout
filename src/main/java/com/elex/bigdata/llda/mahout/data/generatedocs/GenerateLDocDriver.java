@@ -31,7 +31,7 @@ public class GenerateLDocDriver extends AbstractJob {
     addInputOption();
     addOption(UpdateDictDriver.DICT_ROOT,"dict","dictionary root Path",true);
     addOption(RESOURCE_ROOT,"rDir","specify the resources Dir",true);
-    addOption(UID_PATH,"uid_path","specify the file's path which save uids in the input file",true);
+    addOption(UID_PATH,"uid_path","specify the file's path which save uids in the input file");
     addOutputOption();
 
     if(parseArguments(args)==null){
@@ -39,23 +39,25 @@ public class GenerateLDocDriver extends AbstractJob {
     }
     inputPath=getInputPath();
     Path dictRootPath=new Path(getOption(UpdateDictDriver.DICT_ROOT));
-    Path uidPath=new Path(getOption(UID_PATH));
+
     Path resourcesPath=new Path(getOption(RESOURCE_ROOT));
     outputPath=getOutputPath();
     Configuration conf=new Configuration();
     FileSystem fs= FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath);
-    Job genLDocJob=prepareJob(conf,inputPath,dictRootPath,resourcesPath,outputPath,uidPath);
+    String uidFile=getOption(UID_PATH);
+    if(uidFile!=null)
+      conf.set(GenerateLDocDriver.UID_PATH,uidFile);
+    Job genLDocJob=prepareJob(conf,inputPath,dictRootPath,resourcesPath,outputPath);
     genLDocJob.submit();
     genLDocJob.waitForCompletion(true);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
-  public static Job prepareJob(Configuration conf,Path inputPath,Path dictRootPath,Path resourcesPath,Path outputPath,Path uidFilePath) throws IOException {
+  public static Job prepareJob(Configuration conf,Path inputPath,Path dictRootPath,Path resourcesPath,Path outputPath) throws IOException {
     conf.setLong("mapred.max.split.size", 100*1000*1000); // 100m
     conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 100*1000*1000);
-    conf.set(UID_PATH, uidFilePath.toString());
     conf.set(UpdateDictDriver.DICT_ROOT,dictRootPath.toString());
     conf.set(RESOURCE_ROOT,resourcesPath.toString());
     FileSystem fs=FileSystem.get(conf);

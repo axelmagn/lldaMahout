@@ -170,7 +170,9 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
 
   public void cleanup(Context context) throws IOException {
     log.info("uidNum is " + uidNum);
-    uidWriter.hflush();
-    uidWriter.close();
+    if(saveUids){
+      uidWriter.hflush();
+      uidWriter.close();
+    }
   }
 }

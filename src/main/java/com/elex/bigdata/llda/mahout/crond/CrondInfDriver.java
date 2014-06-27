@@ -120,7 +120,8 @@ public class CrondInfDriver extends AbstractJob{
 
     JobControl jobControl=new JobControl("crondInf");
 
-    Job generateLDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,dictRootPath,resourceRootPath,currentDocsPath,uidFilePath);
+    conf.set(GenerateLDocDriver.UID_PATH,uidFilePath.toString());
+    Job generateLDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,dictRootPath,resourceRootPath,currentDocsPath);
     ControlledJob controlledGenJob=new ControlledJob(conf);
     controlledGenJob.setJob(generateLDocJob);
     jobControl.addJob(controlledGenJob);
