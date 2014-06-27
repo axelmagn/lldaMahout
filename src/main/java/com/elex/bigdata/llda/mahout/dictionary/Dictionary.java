@@ -53,7 +53,7 @@ public class Dictionary {
 
   private static String DICT = "dict";
   private static String TMP_DICT = "tmpDict";
-  private static String DICT_SIZE = "dictSize";
+  public static String DICT_SIZE = "dictSize";
 
   public Dictionary() {
     dictSize = new AtomicInteger(0);
@@ -110,6 +110,25 @@ public class Dictionary {
 
   public Integer getId(String word) {
     return word_id_map.get(word);
+  }
+
+  public static int getNumTerms(Configuration conf,Path dictRootPath) throws IOException {
+    Path dictSizePath=new Path(dictRootPath, DICT_SIZE);
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(dictSizePath)){
+    SequenceFile.Reader reader=new SequenceFile.Reader(fs, dictSizePath, conf);
+    IntWritable dictSize=new IntWritable();
+    reader.next(dictSize, NullWritable.get());
+    return dictSize.get();
+    }else{
+      try {
+        Dictionary dict=new Dictionary(dictRootPath.toString(),fs,conf);
+        return dict.dictSize.intValue();
+      } catch (HashingException e) {
+        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      }
+    }
+    return -1;
   }
 
 

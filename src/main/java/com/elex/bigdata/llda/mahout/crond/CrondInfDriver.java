@@ -2,24 +2,28 @@ package com.elex.bigdata.llda.mahout.crond;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.mergedocs.MergeLDocDriver;
+import com.elex.bigdata.llda.mahout.dictionary.Dictionary;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import com.elex.bigdata.llda.mahout.mapreduce.LLDADriver;
 import com.elex.bigdata.llda.mahout.mapreduce.LLDAInfDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.NullWritable;
+import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.ControlledJob;
 import org.apache.hadoop.mapreduce.lib.jobcontrol.JobControl;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 
 /**
  * Created with IntelliJ IDEA.
@@ -142,6 +146,10 @@ public class CrondInfDriver extends AbstractJob{
     Path docTopicPath= getOutputPath();
     Job infJob=LLDAInfDriver.prepareJob(conf,docsForInfPath,modelInputPath,docTopicPath);
     setInfConf(infJob);
+    int numTerms = hasOption(LLDADriver.NUM_TERMS)
+      ? Integer.parseInt(getOption(LLDADriver.NUM_TERMS))
+      : Dictionary.getNumTerms(conf, dictRootPath);
+    conf.set(LLDADriver.NUM_TERMS,String.valueOf(numTerms));
     ControlledJob controlledInfJob=new ControlledJob(conf);
     controlledInfJob.setJob(infJob);
     controlledInfJob.addDependingJob(controlledComplementJob);
@@ -169,7 +177,9 @@ public class CrondInfDriver extends AbstractJob{
     conf.set(LLDADriver.NUM_TOPICS, getOption(LLDADriver.NUM_TOPICS));
     conf.set(LLDADriver.DOC_TOPIC_SMOOTHING,String.valueOf(default_doc_topic_smoothing));
     conf.set(LLDADriver.TERM_TOPIC_SMOOTHING,String.valueOf(default_term_topic_smoothing));
+
   }
+
 
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(),new CrondInfDriver(),args);

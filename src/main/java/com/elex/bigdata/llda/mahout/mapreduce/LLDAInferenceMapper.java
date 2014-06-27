@@ -60,6 +60,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     Path[] modelPaths = LLDADriver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new LabeledTopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
+      numTerms=readModel.getNumTerms();
     } else {
       log.info("No model files found");
       readModel = new LabeledTopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
