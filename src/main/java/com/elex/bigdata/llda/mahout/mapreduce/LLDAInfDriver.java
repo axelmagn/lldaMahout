@@ -115,6 +115,7 @@ public class LLDAInfDriver extends AbstractJob{
     conf.set(TEST_SET_FRACTION, String.valueOf(testFraction));
     conf.set(NUM_REDUCE_TASKS,String.valueOf(numReduceTasks));
     Job infJob=prepareJob(conf,inputPath,topicModelOutputPath,docTopicOutputPath);
+    infJob.submit();
     infJob.waitForCompletion(true);
 
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
@@ -162,7 +163,7 @@ public class LLDAInfDriver extends AbstractJob{
     FileInputFormat.addInputPath(job, corpus);
     FileOutputFormat.setOutputPath(job, output);
     job.setJarByClass(LLDAInfDriver.class);
-    job.submit();
+    //job.submit();
     return job;
   }
 
