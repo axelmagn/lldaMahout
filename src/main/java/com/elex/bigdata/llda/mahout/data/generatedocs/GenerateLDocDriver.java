@@ -31,7 +31,7 @@ public class GenerateLDocDriver extends AbstractJob {
     addInputOption();
     addOption(UpdateDictDriver.DICT_ROOT,"dict","dictionary root Path",true);
     addOption(RESOURCE_ROOT,"rDir","specify the resources Dir",true);
-    addOption(UID_PATH,"uid_path","specify the file's path which save uids in the input file");
+    addOption(UID_PATH,"uid_path","specify the file's path which save uids in the input file",false);
     addOutputOption();
 
     if(parseArguments(args)==null){
@@ -46,9 +46,8 @@ public class GenerateLDocDriver extends AbstractJob {
     FileSystem fs= FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath);
-    String uidFile=getOption(UID_PATH);
-    if(uidFile!=null)
-      conf.set(GenerateLDocDriver.UID_PATH,uidFile);
+    if(hasOption(UID_PATH))
+      conf.set(GenerateLDocDriver.UID_PATH,getOption(UID_PATH));
     Job genLDocJob=prepareJob(conf,inputPath,dictRootPath,resourcesPath,outputPath);
     genLDocJob.submit();
     genLDocJob.waitForCompletion(true);
