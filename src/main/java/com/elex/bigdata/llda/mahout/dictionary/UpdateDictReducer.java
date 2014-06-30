@@ -32,6 +32,7 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
     word_count_threshold=Integer.parseInt(conf.get(UpdateDictDriver.COUNT_THRESHOLD));
     System.out.println("word count boundary is "+ word_count_threshold);
     String dictRoot=conf.get(UpdateDictDriver.DICT_ROOT);
+    System.out.println("dict Root is "+dictRoot);
     try {
       dict=new Dictionary(dictRoot,fs,conf);
       bdmd5=BDMD5.getInstance();
