@@ -6,5 +6,5 @@ multiInput=$1
 output=$2
 logFile=logFile=/data/log/user_category/processLog/llda/mergeDocs.log
 echo `date` >> $logFile
-echo "hadoop jar $JAR $MAIN --multi_input $multiInput --output $output >> $logFile"
-hadoop jar $JAR $MAIN --multi_input $multiInput --output $output >> $logFile
+echo "hadoop jar $JAR $MAIN --multi_input $multiInput --output $output >> $logFile 2>&1"
+hadoop jar $JAR $MAIN --multi_input $multiInput --output $output >> $logFile 2>&1

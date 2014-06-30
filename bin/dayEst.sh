@@ -9,7 +9,7 @@ now=`date`
 multiInput=${rootPath}/docs/to${twoDayAgo}:${rootPath}/docs/${oneDayAgo}/*
 mergeOutput=${rootPath}/docs/to${oneDayAgo}
 echo ${now} >> $logFile
-sh ${baseDir}/bin/updateDict.sh  url_count/all_projects/${oneDayAgo}*  >> $logFile
-sh ${baseDir}/bin/mergeLDocs.sh  ${multiInput} ${mergeOutput}   >> $logFile
+sh ${baseDir}/bin/updateDict.sh  url_count/all_projects/${oneDayAgo}*  >> $logFile 2>&1
+sh ${baseDir}/bin/mergeLDocs.sh  ${multiInput} ${mergeOutput}   >> $logFile 2>&1
 hadoop fs -rm -r ${rootPath}/tmpModels/*
-sh ${baseDir}/bin/estDocs.sh ${mergeOutput}  >> $logFile
+sh ${baseDir}/bin/estDocs.sh ${mergeOutput}  >> $logFile  2>&1
