@@ -46,8 +46,8 @@ public class UpdateDictDriver extends AbstractJob{
   }
 
   public static Job prepareJob(Configuration conf,Path inputPath,Path dictRootPath) throws IOException {
-    conf.setLong("mapred.max.split.size", 100*1000*1000); // 100m
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 100*1000*1000);
+    conf.setLong("mapred.max.split.size", 1000*1000*1000); // 1000m
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 1000*1000*1000);
     conf.set(DICT_ROOT,dictRootPath.toString());
     Path dictOutputPath=new Path(dictRootPath,"updateDictOut");
     FileSystem fs=FileSystem.get(conf);
