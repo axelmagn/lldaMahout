@@ -2,8 +2,10 @@ package com.elex.bigdata.llda.mahout.data.mergedocs;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.PathFilter;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
@@ -17,10 +19,7 @@ import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.map.OpenIntDoubleHashMap;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -87,6 +86,35 @@ public class MergeLDocDriver extends AbstractJob {
     job.setJobName("merge docs");
     job.setJarByClass(MergeLDocDriver.class);
     return job;
+  }
+
+  private Path[] getAdaptivePath(Configuration conf,Path[] orignalPaths) throws IOException {
+    FileSystem fs=FileSystem.get(conf);
+    List<Path> finalPaths=new ArrayList<Path>();
+    for(Path origPath: orignalPaths){
+      if(!fs.isDirectory(origPath))
+        continue;
+      FileStatus[] statuses=fs.listStatus(origPath,new PathFilter() {
+        @Override
+        public boolean accept(Path path) {
+          return !path.getName().equals("_logs");
+        }
+      });
+      boolean containFile=false;
+      for(FileStatus fileStatus:statuses){
+        if(fileStatus.isFile())
+        {
+          containFile=true;
+          break;
+        }
+      }
+      if(containFile)
+        finalPaths.add(origPath);
+      else
+        for(FileStatus fileStatus:statuses)
+          finalPaths.add(fileStatus.getPath());
+    }
+    return finalPaths.toArray(new Path[finalPaths.size()]);
   }
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new MergeLDocDriver(), args);
