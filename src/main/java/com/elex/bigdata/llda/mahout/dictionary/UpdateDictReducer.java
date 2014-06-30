@@ -21,16 +21,16 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
   /*
      fields:
          dict: Dictionary
-         wordCountBoundary:
+         word_count_threshold:
    */
   private Dictionary dict;
   private BDMD5 bdmd5;
-  private int wordCountBoundary;
+  private int word_count_threshold;
   public void setup(Context context) throws IOException, InterruptedException {
-    wordCountBoundary=8;
-    System.out.println("word count boundary is "+wordCountBoundary);
     Configuration conf=context.getConfiguration();
     FileSystem fs=FileSystem.get(conf);
+    word_count_threshold=Integer.parseInt(conf.get(UpdateDictDriver.COUNT_THRESHOLD));
+    System.out.println("word count boundary is "+ word_count_threshold);
     String dictRoot=conf.get(UpdateDictDriver.DICT_ROOT);
     try {
       dict=new Dictionary(dictRoot,fs,conf);
@@ -43,7 +43,7 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
      int wordCount=0;
      for(IntWritable countWritable:values){
         wordCount+=countWritable.get();
-        if(wordCount>=wordCountBoundary)
+        if(wordCount>= word_count_threshold)
         {
           try {
             dict.update(bdmd5.toMD5(key.toString()));

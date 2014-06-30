@@ -23,15 +23,19 @@ import java.io.IOException;
  */
 public class UpdateDictDriver extends AbstractJob{
   public static final String DICT_ROOT ="dict_root";
+  public static final String COUNT_THRESHOLD="count_threshold";
+  public static final int DEFAULT_COUNT_THRESHOLD=8;
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
     addOption(DICT_ROOT,"dict","dictionary root Path");
+    addOption(COUNT_THRESHOLD,"count_threshold","specify the word count threshold to add to dictionary",false);
     if(parseArguments(args)==null)
       return -1;
     Path textInputPath=getInputPath();
     String dictRoot=getOption(DICT_ROOT);
     Configuration conf=new Configuration();
+    conf.set(COUNT_THRESHOLD,getOption(COUNT_THRESHOLD,String.valueOf(DEFAULT_COUNT_THRESHOLD)));
     Job updateDictJob=prepareJob(conf,textInputPath,new Path(dictRoot));
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);
