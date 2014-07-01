@@ -24,48 +24,61 @@ import java.util.Date;
  * Time: 11:17 AM
  * To change this template use File | Settings | File Templates.
  */
-public class ResultEtlDriver extends AbstractJob{
-  private static String LOCAL_RESULT_PAHT="localResultPath";
+public class ResultEtlDriver extends AbstractJob {
+  public static String LOCAL_RESULT_PAHT = "localResultPath";
+  public static final String RESULT_TIME = "result_time";
 
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
-    addOption(LOCAL_RESULT_PAHT,"lrp","local result output path","/data/log/user_category_result/pr");
-    if(parseArguments(args)==null)
+    addOption(LOCAL_RESULT_PAHT, "lrp", "local result output path", "/data/log/user_category_result/pr");
+    addOption(RESULT_TIME, "result_time", "specify the inf result time", false);
+    if (parseArguments(args) == null)
       return -1;
-    Date date=new Date();
-    DateFormat dateFormat=new SimpleDateFormat("yyyyMMdd");
-    String day=dateFormat.format(date);
-    int hour=date.getHours();
-    int index=date.getMinutes()/5;
-    Path inputPath=getInputPath();
-    Path outputPath=getOutputPath();
-    String localResultPath=getOption(LOCAL_RESULT_PAHT);
-    if(localResultPath.endsWith("/"))
-      localResultPath=localResultPath.substring(0,localResultPath.length()-1);
-    Job etlJob=prepareJob(getConf(),inputPath,outputPath);
+    String day;
+    int hour, index;
+    if (hasOption(RESULT_TIME)) {
+      String time = getOption(RESULT_TIME);
+      day = time.substring(0, 8);
+      hour = Integer.parseInt(time.substring(8, 10));
+      index = Integer.parseInt(time.substring(10, 12)) / 5;
+    } else {
+      Date date = new Date();
+      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+      day = dateFormat.format(date);
+      hour = date.getHours();
+      index = date.getMinutes() / 5;
+    }
+    Path inputPath = getInputPath();
+    Path outputPath = getOutputPath();
+    String localResultPath = getOption(LOCAL_RESULT_PAHT);
+    if (localResultPath.endsWith("/"))
+      localResultPath = localResultPath.substring(0, localResultPath.length() - 1);
+    Job etlJob = prepareJob(getConf(), inputPath, outputPath);
     etlJob.waitForCompletion(true);
-    Runtime.getRuntime().exec("hadoop fs -getmerge "+outputPath.toString()+" "+localResultPath+ File.separator+"result."+day+"."+hour+"."+index);
+    Runtime.getRuntime().exec("hadoop fs -getmerge " + outputPath.toString() + " " + localResultPath + File.separator + "result." + day + "." + hour + "." + index);
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
-  public static Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException, ClassNotFoundException, InterruptedException {
-    Job job=new Job(conf);
-    FileSystem fs=FileSystem.get(conf);
-    if(fs.exists(outputPath))
+
+  public static Job prepareJob(Configuration conf, Path inputPath, Path outputPath) throws IOException, ClassNotFoundException, InterruptedException {
+    Job job = new Job(conf);
+    FileSystem fs = FileSystem.get(conf);
+    if (fs.exists(outputPath))
       fs.delete(outputPath);
     job.setMapperClass(ResultEtlMapper.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
     job.setNumReduceTasks(0);
     FileInputFormat.addInputPath(job, inputPath);
-    TextOutputFormat.setOutputPath(job,outputPath);
-    job.setJobName("etl "+inputPath.toString());
+    TextOutputFormat.setOutputPath(job, outputPath);
+    job.setJobName("etl " + inputPath.toString());
     job.setJarByClass(ResultEtlDriver.class);
     job.submit();
     return job;
   }
+
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new ResultEtlDriver(),args);
+    ToolRunner.run(new Configuration(), new ResultEtlDriver(), args);
   }
 }
