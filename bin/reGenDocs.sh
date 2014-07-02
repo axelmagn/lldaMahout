@@ -9,5 +9,5 @@ dayCount=$1
 for((i=1;i<${dayCount};i++))do
   specialDay=`date +%Y%m%d -d "-${i} days"`
   echo "sh ${baseDir}/bin/genDocs.sh  ${textInputRoot}/${specialDay}* ${rootPath}/docs/${specialDay}"
-  sh ${baseDir}/bin/genDocs.sh  ${textInputRoot}/${specialDay}* ${rootPath}/${specialDay} &
+  sh ${baseDir}/bin/genDocs.sh  ${textInputRoot}/${specialDay}* ${rootPath}/docs/${specialDay} &
 done
