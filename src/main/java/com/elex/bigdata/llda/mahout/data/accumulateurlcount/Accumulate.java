@@ -295,9 +295,9 @@ public class Accumulate extends AbstractJob{
       }
       Integer count = urlCountMap.get(url);
       if (count == null)
-        urlCountMap.put(url, new Integer(3));
+        urlCountMap.put(url, new Integer(8));
       else
-        urlCountMap.put(url, count + 3);
+        urlCountMap.put(url, count + 8);
       kvSize++;
       if(kvSize>=500000){
         kvSize=0;

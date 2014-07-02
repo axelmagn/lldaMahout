@@ -1,4 +1,4 @@
-package com.elex.bigdata.llda.mahout.mapreduce;
+package com.elex.bigdata.llda.mahout.mapreduce.est;
 
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.mapreduce.Mapper;

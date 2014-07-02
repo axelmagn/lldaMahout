@@ -1,4 +1,4 @@
-package com.elex.bigdata.llda.mahout.mapreduce;
+package com.elex.bigdata.llda.mahout.mapreduce.est;
 
 import com.elex.bigdata.llda.mahout.model.LabeledModelTrainer;
 import com.elex.bigdata.llda.mahout.model.LabeledTopicModel;
@@ -8,14 +8,11 @@ import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.mahout.clustering.lda.cvb.CVB0Driver;
-import org.apache.mahout.clustering.lda.cvb.ModelTrainer;
-import org.apache.mahout.clustering.lda.cvb.TopicModel;
 import org.apache.mahout.common.MemoryUtil;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.Vector;
-import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

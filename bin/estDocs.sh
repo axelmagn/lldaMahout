@@ -1,7 +1,7 @@
 #!/bin/bash
 baseDir=`dirname $0`/..
 JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
-MAIN=com.elex.bigdata.llda.mahout.mapreduce.LLDADriver
+MAIN=com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver
 rootPath=/user/hadoop/user_category/lldaMahout
 inputDocs=$1
 logFile=/data/log/user_category/processLog/llda/est.log

@@ -1,37 +1,34 @@
-package com.elex.bigdata.llda.mahout.mapreduce;
+package com.elex.bigdata.llda.mahout.mapreduce.inf;
 
+import com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver;
 import com.elex.bigdata.llda.mahout.model.LabeledModelTrainer;
 import com.elex.bigdata.llda.mahout.model.LabeledTopicModel;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.mahout.clustering.lda.cvb.CVB0Driver;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.math.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 /**
  * Created with IntelliJ IDEA.
  * User: yb
  * Date: 4/22/14
- * Time: 4:58 PM
+ * Time: 5:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritable, VectorWritable> {
-  private static final Logger log = LoggerFactory.getLogger(LLDAMapper.class);
-
+public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, Text, Text> {
+  private static final Logger log = LoggerFactory.getLogger(LLDAInferenceMapper.class);
   private LabeledModelTrainer modelTrainer;
   private LabeledTopicModel readModel;
   private LabeledTopicModel writeModel;
   private int maxIters;
   private int numTopics;
-  private int sampleRatio=50000,index=0;
+
 
   protected LabeledModelTrainer getModelTrainer() {
     return modelTrainer;
@@ -59,71 +56,80 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     maxIters = conf.getInt(LLDADriver.MAX_ITERATIONS_PER_DOC, 10);
     float modelWeight = conf.getFloat(LLDADriver.MODEL_WEIGHT, 1.0f);
 
-    log.info("Initializing read model");
+    System.out.println("Initializing read model");
     Path[] modelPaths = LLDADriver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new LabeledTopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
+      numTerms=readModel.getNumTerms();
     } else {
       log.info("No model files found");
       readModel = new LabeledTopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
         numTrainThreads, modelWeight);
     }
 
-    log.info("Initializing write model");
+    System.out.println("Initializing write model");
     writeModel = modelWeight == 1
       ? new LabeledTopicModel(numTopics, numTerms, eta, alpha, null, numUpdateThreads)
       : readModel;
 
-    log.info("Initializing model trainer");
+    System.out.println("Initializing model trainer");
     modelTrainer = new LabeledModelTrainer(readModel, writeModel, numTrainThreads, numTopics, numTerms);
     modelTrainer.start();
   }
 
+
   @Override
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
-    /* where to get docTopics? */
-    //long t1=System.currentTimeMillis();
+    /*
+    int numTopics = getNumTopics();
+    int[] labels = doc.getLabels();
+    Vector topicVector = new DenseVector(numTopics);
+    if (labels.length > 0) {
+      topicVector.assign(0);
+      for (int i = 0; i < labels.length; i++) {
+        topicVector.set(labels[i], (double) 1l / labels.length);
+      }
+    } else {
+      topicVector.assign(1l/topicVector.size());
+    }
+    Matrix docModel = new SparseRowMatrix(numTopics, doc.getVector().size());
+    int maxIters = getMaxIters();
+    ModelTrainer modelTrainer = getModelTrainer();
+    for (int i = 0; i < maxIters; i++) {
+      modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(), topicVector, docModel);
+    }
+    topics.set(topicVector);
+    context.write(uid, topics);
+    */
     Vector labels=new RandomAccessSparseVector(numTopics);
-    for(int label: doc.getLabels())
-      labels.setQuick(label,1.0);
+    //labels.assign(0.0);
+    StringBuilder builder=new StringBuilder();
+    builder.append("[");
+    for(int label: doc.getLabels()){
+      labels.set(label,1.0);
+      builder.append(label+" ");
+    }
+    builder.append("]\t");
     if(doc.getLabels().length==0){
       labels.assign(1.0);
     }
-    //long t2=System.currentTimeMillis();
-    //log.info("create labels using "+(t2-t1)+" ms");
-    //train
-    if((index++)>=sampleRatio){
-      StringBuilder vectorStr=new StringBuilder();
-      Iterator<Vector.Element> docIter=doc.getVector().iterateNonZero();
-      while(docIter.hasNext()){
-        Vector.Element e=docIter.next();
-        vectorStr.append(e.index()+":"+e.get()+"  ");
-      }
-      log.info("vector is : "+vectorStr.toString());
-      StringBuilder labelStr=new StringBuilder();
-      Iterator<Vector.Element> labelIter=labels.iterateNonZero();
-      while(labelIter.hasNext()){
-        Vector.Element e=labelIter.next();
-        labelStr.append(e.index()+":"+e.get()+"  ");
-      }
-      log.info("labels is: "+labelStr.toString());
+    Matrix docModel = new SparseRowMatrix(numTopics,doc.getVector().size());
+    //int maxIters=getMaxIters();
+    LabeledModelTrainer modelTrainer=getModelTrainer();
+    //System.out.println("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
+    //for(int i=0;i<maxIters;i++){
+    modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel,true);
+    //}
+    for(Vector.Element e: labels){
+       builder.append(e.index()+":"+e.get()+",");
     }
-    modelTrainer.train(doc.getVector(), labels, true, maxIters,false);
-    //log.info("train using "+(System.currentTimeMillis()-t2)+" ms");
+    builder.deleteCharAt(builder.length()-1);
+    context.write(uid,new Text(builder.toString()));
   }
 
   @Override
-  protected void cleanup(Context context) throws IOException, InterruptedException {
-    log.info("Stopping model trainer");
-    modelTrainer.stop();
-
-    log.info("Writing model");
-    LabeledTopicModel readFrom = modelTrainer.getReadModel();
-    for (MatrixSlice topic : readFrom) {
-      context.write(new IntWritable(topic.index()), new VectorWritable(topic.vector()));
-    }
-    readModel.stop();
-    writeModel.stop();
+  protected void cleanup(Context context) {
+    getModelTrainer().stop();
   }
 }

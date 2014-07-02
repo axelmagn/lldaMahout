@@ -1,5 +1,6 @@
-package com.elex.bigdata.llda.mahout.mapreduce;
+package com.elex.bigdata.llda.mahout.mapreduce.est;
 
+import com.elex.bigdata.llda.mahout.mapreduce.inf.LLDAInferenceMapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -20,7 +21,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
-import org.apache.mahout.clustering.lda.cvb.*;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.HadoopUtil;
 import org.apache.mahout.common.Pair;
