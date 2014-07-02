@@ -15,8 +15,9 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class AnalysisReducer extends Reducer<Text,IntWritable,Text,Text> {
-  private int[] thresholds=new int[]{2,4,6,8,12,16,20,28,56,112,224,448,896,1772};
+  private int[] thresholds=new int[]{2,4,8,16,32,64,128,256,512,1024,2048,4096,9192,18384};
   private int[] counts=new int[thresholds.length+1];
+  private int allCount=0;
   public void setup(Context context){
     for(int i=0;i<counts.length;i++){
       counts[i]=0;
@@ -28,12 +29,13 @@ public class AnalysisReducer extends Reducer<Text,IntWritable,Text,Text> {
     while(iterator.hasNext()){
       count+=iterator.next().get();
     }
-    int i=0;
+    int i;
     for(i=0;i<thresholds.length;i++){
       if(count<=thresholds[i])
         break;
     }
     counts[i]+=1;
+    allCount+=1;
   }
 
   public void cleanup(Context context) throws IOException, InterruptedException {
@@ -46,5 +48,6 @@ public class AnalysisReducer extends Reducer<Text,IntWritable,Text,Text> {
       context.write(key,value);
     }
     context.write(new Text(thresholds[thresholds.length-1]+"~"),new Text(String.valueOf(counts[counts.length-1])));
+    context.write(new Text("all"),new Text(String.valueOf(allCount)));
   }
 }
