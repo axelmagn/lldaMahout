@@ -3,10 +3,12 @@ package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
@@ -43,8 +45,10 @@ public class AnalysisDriver extends AbstractJob{
     job.setMapperClass(AnalysisMapper.class);
     job.setReducerClass(AnalysisReducer.class);
     job.setMapOutputKeyClass(Text.class);
-    job.setMapOutputValueClass(Text.class);
+    job.setMapOutputValueClass(IntWritable.class);
+    job.setInputFormatClass(SequenceFileInputFormat.class);
     SequenceFileInputFormat.addInputPath(job, inputPath);
+    job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job,outputPath);
     job.setJarByClass(AnalysisDriver.class);
     job.setJobName("analysis");
