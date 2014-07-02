@@ -41,7 +41,7 @@ public class AnalysisReducer extends Reducer<Text,IntWritable,Text,Text> {
     Text value=new Text(String.valueOf(counts[0]));
     context.write(key,value);
     for(int i=1;i<thresholds.length;i++){
-      key=new Text(counts[i-1]+"~"+counts[i]);
+      key=new Text(thresholds[i-1]+"~"+thresholds[i]);
       value=new Text(String.valueOf(counts[i]));
       context.write(key,value);
     }
