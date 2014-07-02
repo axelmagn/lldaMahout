@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -24,6 +25,8 @@ public class AnalysisDriver extends AbstractJob{
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
+    if(parseArguments(args)==null)
+      return -1;
     inputPath=getInputPath();
     outputPath=getOutputPath();
     Configuration conf=getConf();
@@ -34,6 +37,9 @@ public class AnalysisDriver extends AbstractJob{
   }
   private Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
     Job job=new Job(conf);
+    FileSystem fs= FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(outputPath);
     job.setMapperClass(AnalysisMapper.class);
     job.setReducerClass(AnalysisReducer.class);
     job.setMapOutputKeyClass(Text.class);
