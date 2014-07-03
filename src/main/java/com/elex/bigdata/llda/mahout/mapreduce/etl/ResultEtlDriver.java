@@ -68,9 +68,11 @@ public class ResultEtlDriver extends AbstractJob {
     if (fs.exists(outputPath))
       fs.delete(outputPath);
     job.setMapperClass(ResultEtlMapper.class);
+    job.setReducerClass(ResultEtlReducer.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
-    job.setNumReduceTasks(0);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(Text.class);
     FileInputFormat.addInputPath(job, inputPath);
     TextOutputFormat.setOutputPath(job, outputPath);
     job.setJobName("etl " + inputPath.toString());

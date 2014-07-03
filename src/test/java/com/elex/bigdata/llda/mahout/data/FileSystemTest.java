@@ -1,7 +1,10 @@
 package com.elex.bigdata.llda.mahout.data;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.util.bloom.BloomFilter;
 import org.junit.Test;
 
@@ -43,5 +46,11 @@ public class FileSystemTest {
     System.out.println(file.getName());
     File childFile=new File(file,"share");
     System.out.println(childFile.toString());
+  }
+  @Test
+  public void testHex() throws DecoderException {
+    String str="0a";
+    byte[] bytes=Hex.decodeHex(str.toCharArray());
+    System.out.println(Bytes.toShort(bytes));
   }
 }
