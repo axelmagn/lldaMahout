@@ -21,7 +21,7 @@ import java.io.IOException;
  * Time: 3:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AnalysisDriver extends AbstractJob{
+public class UserAnalysisDriver extends AbstractJob{
 
   @Override
   public int run(String[] args) throws Exception {
@@ -42,19 +42,19 @@ public class AnalysisDriver extends AbstractJob{
     FileSystem fs= FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath);
-    job.setMapperClass(AnalysisMapper.class);
-    job.setReducerClass(AnalysisReducer.class);
+    job.setMapperClass(UserAnalysisMapper.class);
+    job.setReducerClass(UserAnalysisReducer.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     SequenceFileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job,outputPath);
-    job.setJarByClass(AnalysisDriver.class);
+    job.setJarByClass(UserAnalysisDriver.class);
     job.setJobName("analysis");
     return job;
   }
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new AnalysisDriver(),args);
+    ToolRunner.run(new Configuration(),new UserAnalysisDriver(),args);
   }
 }

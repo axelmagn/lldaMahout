@@ -14,7 +14,7 @@ import java.util.Iterator;
  * Time: 3:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AnalysisReducer extends Reducer<Text,IntWritable,Text,Text> {
+public class UserAnalysisReducer extends Reducer<Text,IntWritable,Text,Text> {
   private int[] thresholds=new int[]{2,4,8,16,32,64,128,256,512,1024,2048,4096,9192,18384};
   private int[] counts=new int[thresholds.length+1];
   private int allCount=0;

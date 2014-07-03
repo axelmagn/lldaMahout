@@ -7,7 +7,7 @@ echo " hadoop fs -ls url_count/all_projects/ | grep ${pattern} "
 files=`hadoop fs -ls url_count/all_projects/ | grep ${pattern} | tr -s " " " " | cut -f8 -d" "`
 echo ${files[@]}
 for file in ${files[@]};do
-  startTime=${files##*/}
+  startTime=${file##*/}
   startTime=${startTime%%_*}
   echo $startTime
   sh $baseDir/bin/crondInf.sh ${file}

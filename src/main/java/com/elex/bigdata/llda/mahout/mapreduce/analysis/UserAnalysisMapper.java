@@ -16,7 +16,7 @@ import java.util.Iterator;
  * Time: 3:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class AnalysisMapper extends Mapper<Text,MultiLabelVectorWritable,Text,IntWritable> {
+public class UserAnalysisMapper extends Mapper<Text,MultiLabelVectorWritable,Text,IntWritable> {
   public void map(Text key,MultiLabelVectorWritable value,Context context) throws IOException, InterruptedException {
      Vector vector=value.getVector();
      Iterator<Vector.Element> iter=vector.iterateNonZero();
