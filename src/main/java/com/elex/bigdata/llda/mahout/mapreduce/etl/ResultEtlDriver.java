@@ -24,14 +24,14 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultEtlDriver extends AbstractJob {
-  public static String LOCAL_RESULT_PAHT = "localResultPath";
+  public static String LOCAL_RESULT_ROOT = "local_result_root";
   public static final String RESULT_TIME = "result_time";
 
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
-    addOption(LOCAL_RESULT_PAHT, "lrp", "local result output path", "/data/log/user_category_result/pr");
+    addOption(LOCAL_RESULT_ROOT, "lrp", "local result output path", "/data/log/user_category_result/pr");
     addOption(RESULT_TIME, "result_time", "specify the inf result time", false);
     if (parseArguments(args) == null)
       return -1;
@@ -51,12 +51,14 @@ public class ResultEtlDriver extends AbstractJob {
     }
     Path inputPath = getInputPath();
     Path outputPath = getOutputPath();
-    String localResultPath = getOption(LOCAL_RESULT_PAHT);
-    if (localResultPath.endsWith("/"))
-      localResultPath = localResultPath.substring(0, localResultPath.length() - 1);
+    File localResultRoot = new File(getOption(LOCAL_RESULT_ROOT));
+    File localResultDir=new File(localResultRoot,day);
+    if(!localResultDir.exists())
+      localResultDir.mkdirs();
+    File localResultFile=new File(localResultDir, hour + "." + index);
     Job etlJob = prepareJob(getConf(), inputPath, outputPath);
     etlJob.waitForCompletion(true);
-    Runtime.getRuntime().exec("hadoop fs -getmerge " + outputPath.toString() + " " + localResultPath + File.separator + "result." + day + "." + hour + "." + index);
+    Runtime.getRuntime().exec("hadoop fs -getmerge " + outputPath.toString() + " " + localResultFile.toString());
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 

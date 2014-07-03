@@ -6,12 +6,12 @@ rootPath=/user/hadoop/user_category/lldaMahout
 logFile=/data/log/user_category/processLog/llda/etl.log
 if [ $# -lt 3 ];then
   echo "hadoop jar $JAR $MAIN --input ${rootPath}/docTopics/$1 --output ${rootPath}/docTopics/$2 \
-  --localResultPath /data/log/user_category_result/pr >> $logFile 2>&1"
+  --local_result_root /data/log/user_category_result/pr >> $logFile 2>&1"
   hadoop jar $JAR $MAIN --input ${rootPath}/docTopics/$1 --output ${rootPath}/docTopics/$2 \
-  --localResultPath /data/log/user_category_result/pr  >> $logFile 2>&1
+  --local_result_root /data/log/user_category_result/pr  >> $logFile 2>&1
 else
   echo "hadoop jar $JAR $MAIN --input ${rootPath}/docTopics/$1 --output ${rootPath}/docTopics/$2 \
-  --localResultPath /data/log/user_category_result/pr --result_time $3 >> $logFile 2>&1"
+  --local_result_root /data/log/user_category_result/pr --result_time $3 >> $logFile 2>&1"
   hadoop jar $JAR $MAIN --input ${rootPath}/docTopics/$1 --output ${rootPath}/docTopics/$2 \
-  --localResultPath /data/log/user_category_result/pr --result_time $3 >> $logFile 2>&1
+  --local_result_root /data/log/user_category_result/pr --result_time $3 >> $logFile 2>&1
 fi

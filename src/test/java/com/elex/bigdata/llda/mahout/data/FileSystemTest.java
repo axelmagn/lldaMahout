@@ -6,6 +6,7 @@ import org.apache.hadoop.util.bloom.BloomFilter;
 import org.junit.Test;
 
 import java.io.DataInput;
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,5 +35,13 @@ public class FileSystemTest {
     BloomFilter bloomFilter=new BloomFilter();
     bloomFilter.readFields(dataInput);
     System.out.println("hhh") ;
+  }
+  @Test
+  public void testFile(){
+    File file=new File("/home/yb/windows");
+    System.out.println(file.toString());
+    System.out.println(file.getName());
+    File childFile=new File(file,"share");
+    System.out.println(childFile.toString());
   }
 }
