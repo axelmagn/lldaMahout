@@ -11,4 +11,4 @@ now=`date`
 echo $now >> $logFile
 sh $baseDir/bin/accumulateUrlCount.sh $startTime $endTime >> $logFile
 sh $baseDir/bin/crondInf.sh ${textInputRoot}/${startTime}_${endTime} >> $logFile
-sh $baseDir/bin/etl.sh inf result  >> $logFile
+sh $baseDir/bin/etl.sh inf result $startTime  >> $logFile
