@@ -27,32 +27,33 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class WordAnalysisDriver {
-  public static final String SPECIAL="special";
-  public static final String REPEAT="repeat";
-  public static final String NOREPEAT="noRepeat";
-  public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
-    Path inputPath=new Path(args[0]);
-    Path outputPath=new Path(args[1]);
-    Configuration conf=new Configuration();
-    conf.setLong("mapred.max.split.size", 5*1024*1024*1024); // 5G
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 5*1000*1000*1000);
+  public static final String SPECIAL = "special";
+  public static final String REPEAT = "repeat";
+  public static final String NOREPEAT = "noRepeat";
 
-    Job job=new Job(conf);
-    FileSystem fs= FileSystem.get(conf);
-    if(fs.exists(outputPath))
+  public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
+    Path inputPath = new Path(args[0]);
+    Path outputPath = new Path(args[1]);
+    Configuration conf = new Configuration();
+    conf.setLong("mapred.max.split.size", 5 * 1024 * 1024 * 1024); // 5G
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 5 * 1000 * 1000 * 1000);
+
+    Job job = new Job(conf);
+    FileSystem fs = FileSystem.get(conf);
+    if (fs.exists(outputPath))
       fs.delete(outputPath);
     job.setMapperClass(WordAnalysisMapper.class);
-    //job.setReducerClass(WordAnalysisReducer.class);
-    //job.setCombinerClass(WordAnalysisCombiner.class);
-    job.setReducerClass(WordAnalysisCombiner.class);
+    job.setReducerClass(WordAnalysisReducer.class);
+    job.setCombinerClass(WordAnalysisCombiner.class);
+    //job.setReducerClass(WordAnalysisCombiner.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
     job.setInputFormatClass(CombineTextInputFormat.class);
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
-    FileOutputFormat.setOutputPath(job,outputPath);
+    FileOutputFormat.setOutputPath(job, outputPath);
     job.setJarByClass(WordAnalysisDriver.class);
-    job.setJobName("word analysis "+inputPath.toString());
+    job.setJobName("word analysis " + inputPath.toString());
     job.submit();
     job.waitForCompletion(true);
   }
@@ -74,41 +75,41 @@ public class WordAnalysisDriver {
     private int[] wordCounts = new int[wordLens.length + 1];
     private int[] noRepeatWordCounts = new int[wordLens.length + 1];
     private int specialUrlCount = 0;
-    public void setup(Context context){
-      Arrays.fill(wordCounts,0);
-      Arrays.fill(noRepeatWordCounts,0);
+    private int keyNum=0;
+    public void setup(Context context) {
+      Arrays.fill(wordCounts, 0);
+      Arrays.fill(noRepeatWordCounts, 0);
     }
 
     public void reduce(Text key, Iterable<IntWritable> values, Context context) {
+      keyNum+=1;
       int count = 0;
       Iterator<IntWritable> iter = values.iterator();
       while (iter.hasNext())
         count += iter.next().get();
-      String word = key.toString();
-      int wordLen = word.length();
+      int wordLen = key.getLength();
       int i;
       for (i = 0; i < wordLens.length; i++) {
         if (wordLen <= wordLens[i]) {
-          wordCounts[i] += count;
-          noRepeatWordCounts[i] += 1;
           break;
         }
       }
-      if (i == wordLens.length) {
-        wordCounts[i] += count;
-        noRepeatWordCounts[i] += 1;
-      }
-      Matcher matcher = pattern.matcher(word);
+      wordCounts[i] += count;
+      noRepeatWordCounts[i] += 1;
+      Matcher matcher = pattern.matcher(key.toString());
       if (matcher.find())
         specialUrlCount += count;
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
-       for (int i=0;i<wordCounts.length;i++){
-         context.write(new Text(REPEAT+" "+i),new IntWritable(wordCounts[i]));
-         context.write(new Text(NOREPEAT+" "+i),new IntWritable(noRepeatWordCounts[i]));
-       }
-       context.write(new Text(SPECIAL+" "+0),new IntWritable(specialUrlCount));
+      System.out.println("keyNum "+keyNum);
+      for (int i = 0; i < wordCounts.length; i++) {
+        context.write(new Text(REPEAT + " " + i), new IntWritable(wordCounts[i]));
+        System.out.println(REPEAT+" "+i+" "+wordCounts[i]);
+        System.out.println(NOREPEAT+" "+i+" "+noRepeatWordCounts[i]);
+        context.write(new Text(NOREPEAT + " " + i), new IntWritable(noRepeatWordCounts[i]));
+      }
+      context.write(new Text(SPECIAL + " " + 0), new IntWritable(specialUrlCount));
     }
   }
 
@@ -126,7 +127,7 @@ public class WordAnalysisDriver {
 
     public void reduce(Text key, Iterable<IntWritable> values, Context context) {
       String[] tokens = key.toString().split(" ");
-      if(tokens.length<2)
+      if (tokens.length < 2)
         return;
       int index = Integer.parseInt(tokens[1]);
       if (index < 0 || index > wordCounts.length - 1) {
@@ -150,22 +151,22 @@ public class WordAnalysisDriver {
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
-      context.write(new Text("total count"),new Text(" "+totalWordCount));
+      context.write(new Text("total count"), new Text(" " + totalWordCount));
 
-      context.write(new Text("repeat word count"),new Text(wordCounts.length+" groups"));
-      context.write(new Text("~"+wordLens[0]),new Text(" "+wordCounts[0]));
-      for(int i=1;i<wordCounts.length-1;i++){
-        context.write(new Text(wordLens[i-1]+"~"+wordLens[i]),new Text(" "+wordCounts[i]));
+      context.write(new Text("repeat word count"), new Text(wordCounts.length + " groups"));
+      context.write(new Text("~" + wordLens[0]), new Text(" " + wordCounts[0]));
+      for (int i = 1; i < wordCounts.length - 1; i++) {
+        context.write(new Text(wordLens[i - 1] + "~" + wordLens[i]), new Text(" " + wordCounts[i]));
       }
-      context.write(new Text(wordLens[wordLens.length-1]+"~"),new Text(" "+wordCounts[wordCounts.length-1]));
-      context.write(new Text("no repeat total count"),new Text(" "+noRepeatTotalWordCount));
-      context.write(new Text("no repeat word count"),new Text(noRepeatWordCounts.length+" groups"));
-      context.write(new Text("~"+wordLens[0]),new Text(" "+noRepeatWordCounts[0]));
-      for(int i=1;i<noRepeatWordCounts.length-1;i++){
-        context.write(new Text(wordLens[i-1]+"~"+wordLens[i]),new Text(" "+noRepeatWordCounts[i]));
+      context.write(new Text(wordLens[wordLens.length - 1] + "~"), new Text(" " + wordCounts[wordCounts.length - 1]));
+      context.write(new Text("no repeat total count"), new Text(" " + noRepeatTotalWordCount));
+      context.write(new Text("no repeat word count"), new Text(noRepeatWordCounts.length + " groups"));
+      context.write(new Text("~" + wordLens[0]), new Text(" " + noRepeatWordCounts[0]));
+      for (int i = 1; i < noRepeatWordCounts.length - 1; i++) {
+        context.write(new Text(wordLens[i - 1] + "~" + wordLens[i]), new Text(" " + noRepeatWordCounts[i]));
       }
-      context.write(new Text(wordLens[wordLens.length-1]+"~"),new Text(" "+noRepeatWordCounts[noRepeatWordCounts.length-1]));
-      context.write(new Text("special word "),new Text(" "+specialUrlCount));
+      context.write(new Text(wordLens[wordLens.length - 1] + "~"), new Text(" " + noRepeatWordCounts[noRepeatWordCounts.length - 1]));
+      context.write(new Text("special word "), new Text(" " + specialUrlCount));
     }
 
 
