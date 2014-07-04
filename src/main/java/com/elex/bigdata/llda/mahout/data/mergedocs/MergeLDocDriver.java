@@ -68,7 +68,7 @@ public class MergeLDocDriver extends AbstractJob {
   public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath) throws IOException {
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
-      fs.delete(outputPath);
+      fs.delete(outputPath,true);
     Job job=new Job(conf);
     job.setNumReduceTasks(1);
     job.setMapperClass(MergeLDocMapper.class);
