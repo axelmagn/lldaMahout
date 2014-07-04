@@ -68,21 +68,22 @@ public class WordAnalysisDriver {
     }
   }
 
-  public static class WordAnalysisCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {
+  public static class WordAnalysisCombiner extends Reducer<Text, IntWritable, Text, Text> {
     Pattern pattern = Pattern.compile("(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
       "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)$");
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
     private int[] wordCounts = new int[wordLens.length + 1];
     private int[] noRepeatWordCounts = new int[wordLens.length + 1];
     private int specialUrlCount = 0;
-    private int keyNum=0;
+    private int keyNum = 0;
+
     public void setup(Context context) {
       Arrays.fill(wordCounts, 0);
       Arrays.fill(noRepeatWordCounts, 0);
     }
 
     public void reduce(Text key, Iterable<IntWritable> values, Context context) {
-      keyNum+=1;
+      keyNum += 1;
       int count = 0;
       Iterator<IntWritable> iter = values.iterator();
       while (iter.hasNext())
@@ -102,18 +103,19 @@ public class WordAnalysisDriver {
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
-      System.out.println("keyNum "+keyNum);
+      System.out.println("keyNum " + keyNum);
       for (int i = 0; i < wordCounts.length; i++) {
-        context.write(new Text(REPEAT + " " + i), new IntWritable(wordCounts[i]));
-        System.out.println(REPEAT+" "+i+" "+wordCounts[i]);
-        System.out.println(NOREPEAT+" "+i+" "+noRepeatWordCounts[i]);
-        context.write(new Text(NOREPEAT + " " + i), new IntWritable(noRepeatWordCounts[i]));
+        context.write(new Text(REPEAT + " " + i), new Text(String.valueOf(wordCounts[i])));
+        System.out.println(REPEAT + " " + i + " " + wordCounts[i]);
+        context.write(new Text(NOREPEAT + " " + i), new Text(String.valueOf(noRepeatWordCounts[i])));
+        System.out.println(NOREPEAT + " " + i + " " + noRepeatWordCounts[i]);
       }
-      context.write(new Text(SPECIAL + " " + 0), new IntWritable(specialUrlCount));
+      System.out.println(SPECIAL + " " + specialUrlCount);
+      context.write(new Text(SPECIAL + " " + 0), new Text(String.valueOf(specialUrlCount)));
     }
   }
 
-  public static class WordAnalysisReducer extends Reducer<Text, IntWritable, Text, Text> {
+  public static class WordAnalysisReducer extends Reducer<Text, Text, Text, Text> {
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
     private int[] wordCounts = new int[wordLens.length + 1];
     private int[] noRepeatWordCounts = new int[wordLens.length + 1];
@@ -125,7 +127,7 @@ public class WordAnalysisDriver {
       Arrays.fill(noRepeatWordCounts, 0);
     }
 
-    public void reduce(Text key, Iterable<IntWritable> values, Context context) {
+    public void reduce(Text key, Iterable<Text> values, Context context) {
       String[] tokens = key.toString().split(" ");
       if (tokens.length < 2)
         return;
@@ -136,9 +138,9 @@ public class WordAnalysisDriver {
       }
 
       int count = 0;
-      Iterator<IntWritable> iter = values.iterator();
+      Iterator<Text> iter = values.iterator();
       while (iter.hasNext())
-        count += iter.next().get();
+        count += Integer.parseInt(iter.next().toString());
       if (tokens[0].equals(REPEAT)) {
         wordCounts[index] += count;
         totalWordCount += count;
