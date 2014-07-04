@@ -103,7 +103,7 @@ public class WordAnalysisDriver {
          context.write(new Text(REPEAT+" "+i),new IntWritable(wordCounts[i]));
          context.write(new Text(NOREPEAT+" "+i),new IntWritable(noRepeatWordCounts[i]));
        }
-       context.write(new Text(SPECIAL),new IntWritable(specialUrlCount));
+       context.write(new Text(SPECIAL+" "+0),new IntWritable(specialUrlCount));
     }
   }
 
@@ -121,6 +121,8 @@ public class WordAnalysisDriver {
 
     public void reduce(Text key, Iterable<IntWritable> values, Context context) {
       String[] tokens = key.toString().split(" ");
+      if(tokens.length<2)
+        return;
       int index = Integer.parseInt(tokens[1]);
       if (index < 0 || index > wordCounts.length - 1) {
         System.out.println("index is " + index + ". error!");
