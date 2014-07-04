@@ -128,7 +128,7 @@ public class WordAnalysisDriver {
     Pattern pattern = Pattern.compile("(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
       "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)$");
 
-    private int specialUrlCount = 0, totalWordCount = 0, noRepeatTotalWordCount = 0;
+    private int specialUrlCount = 0, totalWordCount = 0;
 
     public void setup(Context context) {
       Arrays.fill(wordCounts, 0);
@@ -148,6 +148,7 @@ public class WordAnalysisDriver {
           }
         }
         wordCounts[i] += count;
+        totalWordCount+=count;
       }
       Matcher matcher = pattern.matcher(key.toString());
       if (matcher.find())
