@@ -34,8 +34,8 @@ public class WordAnalysisDriver {
     Path inputPath=new Path(args[0]);
     Path outputPath=new Path(args[1]);
     Configuration conf=new Configuration();
-    conf.setLong("mapred.max.split.size", 20*1024*1024*1024); // 20G
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 20*1000*1000*1000);
+    conf.setLong("mapred.max.split.size", 10*1024*1024*1024); // 20G
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 10*1000*1000*1000);
 
     Job job=new Job(conf);
     FileSystem fs= FileSystem.get(conf);
@@ -56,7 +56,7 @@ public class WordAnalysisDriver {
     job.waitForCompletion(true);
   }
 
-  public class WordAnalysisMapper extends Mapper<Object, Text, Text, IntWritable> {
+  public static class WordAnalysisMapper extends Mapper<Object, Text, Text, IntWritable> {
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
       String line = value.toString();
       String[] tokens = line.split("\t");
@@ -66,7 +66,7 @@ public class WordAnalysisDriver {
     }
   }
 
-  public class WordAnalysisCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {
+  public static class WordAnalysisCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {
     Pattern pattern = Pattern.compile("(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
       "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)$");
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
@@ -107,7 +107,7 @@ public class WordAnalysisDriver {
     }
   }
 
-  public class WordAnalysisReducer extends Reducer<Text, IntWritable, Text, Text> {
+  public static class WordAnalysisReducer extends Reducer<Text, IntWritable, Text, Text> {
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
     private int[] wordCounts = new int[wordLens.length + 1];
     private int[] noRepeatWordCounts = new int[wordLens.length + 1];
