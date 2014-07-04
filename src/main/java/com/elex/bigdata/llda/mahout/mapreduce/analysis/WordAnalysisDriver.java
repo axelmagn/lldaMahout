@@ -42,8 +42,9 @@ public class WordAnalysisDriver {
     if(fs.exists(outputPath))
       fs.delete(outputPath);
     job.setMapperClass(WordAnalysisMapper.class);
-    job.setReducerClass(WordAnalysisReducer.class);
-    job.setCombinerClass(WordAnalysisCombiner.class);
+    //job.setReducerClass(WordAnalysisReducer.class);
+    //job.setCombinerClass(WordAnalysisCombiner.class);
+    job.setReducerClass(WordAnalysisCombiner.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
     job.setInputFormatClass(CombineTextInputFormat.class);
