@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class WordAnalysisDriver {
-  public static final String SPECIAL = "special";
+  public static final String SPECIAL = "www.special.jpeg";
   public static final String REPEAT = "repeat";
   public static final String NOREPEAT = "noRepeat";
 
@@ -68,18 +68,26 @@ public class WordAnalysisDriver {
     }
   }
 
-  public static class WordAnalysisCombiner extends Reducer<Text, IntWritable, Text, Text> {
+  public static class WordAnalysisCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {
     Pattern pattern = Pattern.compile("(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
       "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)$");
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
+    private String[] replaceStr = new String[wordLens.length + 1];
     private int[] wordCounts = new int[wordLens.length + 1];
-    private int[] noRepeatWordCounts = new int[wordLens.length + 1];
     private int specialUrlCount = 0;
     private int keyNum = 0;
 
     public void setup(Context context) {
       Arrays.fill(wordCounts, 0);
-      Arrays.fill(noRepeatWordCounts, 0);
+      for (int i = 0; i < replaceStr.length - 1; i++) {
+        char[] str = new char[wordLens[i]];
+        Arrays.fill(str, 'a');
+        replaceStr[i] = new String(str);
+        System.out.println(replaceStr[i].length());
+      }
+      char[] str = new char[wordLens[wordLens.length - 1] + 100];
+      Arrays.fill(str, 'a');
+      replaceStr[replaceStr.length - 1] = new String(str);
     }
 
     public void reduce(Text key, Iterable<IntWritable> values, Context context) {
@@ -88,15 +96,16 @@ public class WordAnalysisDriver {
       Iterator<IntWritable> iter = values.iterator();
       while (iter.hasNext())
         count += iter.next().get();
-      int wordLen = key.getLength();
-      int i;
-      for (i = 0; i < wordLens.length; i++) {
-        if (wordLen <= wordLens[i]) {
-          break;
+      if (!key.toString().equals(SPECIAL)) {
+        int wordLen = key.getLength();
+        int i;
+        for (i = 0; i < wordLens.length; i++) {
+          if (wordLen <= wordLens[i]) {
+            break;
+          }
         }
+        wordCounts[i] += count;
       }
-      wordCounts[i] += count;
-      noRepeatWordCounts[i] += 1;
       Matcher matcher = pattern.matcher(key.toString());
       if (matcher.find())
         specialUrlCount += count;
@@ -105,17 +114,14 @@ public class WordAnalysisDriver {
     public void cleanup(Context context) throws IOException, InterruptedException {
       System.out.println("keyNum " + keyNum);
       for (int i = 0; i < wordCounts.length; i++) {
-        context.write(new Text(REPEAT + " " + i), new Text(String.valueOf(wordCounts[i])));
+        context.write(new Text(replaceStr[i]), new IntWritable(wordCounts[i]));
         System.out.println(REPEAT + " " + i + " " + wordCounts[i]);
-        context.write(new Text(NOREPEAT + " " + i), new Text(String.valueOf(noRepeatWordCounts[i])));
-        System.out.println(NOREPEAT + " " + i + " " + noRepeatWordCounts[i]);
       }
-      System.out.println(SPECIAL + " " + specialUrlCount);
-      context.write(new Text(SPECIAL + " " + 0), new Text(String.valueOf(specialUrlCount)));
+      context.write(new Text(SPECIAL), new IntWritable(specialUrlCount));
     }
   }
 
-  public static class WordAnalysisReducer extends Reducer<Text, Text, Text, Text> {
+  public static class WordAnalysisReducer extends Reducer<Text, IntWritable, Text, Text> {
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
     private int[] wordCounts = new int[wordLens.length + 1];
     private int[] noRepeatWordCounts = new int[wordLens.length + 1];
@@ -127,7 +133,7 @@ public class WordAnalysisDriver {
       Arrays.fill(noRepeatWordCounts, 0);
     }
 
-    public void reduce(Text key, Iterable<Text> values, Context context) {
+    public void reduce(Text key, Iterable<IntWritable> values, Context context) {
       String[] tokens = key.toString().split(" ");
       if (tokens.length < 2)
         return;
@@ -138,9 +144,9 @@ public class WordAnalysisDriver {
       }
 
       int count = 0;
-      Iterator<Text> iter = values.iterator();
+      Iterator<IntWritable> iter = values.iterator();
       while (iter.hasNext())
-        count += Integer.parseInt(iter.next().toString());
+        count += iter.next().get();
       if (tokens[0].equals(REPEAT)) {
         wordCounts[index] += count;
         totalWordCount += count;
