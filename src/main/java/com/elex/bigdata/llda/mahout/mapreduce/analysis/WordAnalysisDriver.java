@@ -155,7 +155,7 @@ public class WordAnalysisDriver {
       context.write(new Text(wordLens[wordLens.length-1]+"~"),new Text(" "+wordCounts[wordCounts.length-1]));
       context.write(new Text("no repeat total count"),new Text(" "+noRepeatTotalWordCount));
       context.write(new Text("no repeat word count"),new Text(noRepeatWordCounts.length+" groups"));
-      context.write(new Text("~"+wordLens[0]),new Text(" "+wordCounts[0]));
+      context.write(new Text("~"+wordLens[0]),new Text(" "+noRepeatWordCounts[0]));
       for(int i=1;i<noRepeatWordCounts.length-1;i++){
         context.write(new Text(wordLens[i-1]+"~"+wordLens[i]),new Text(" "+noRepeatWordCounts[i]));
       }
