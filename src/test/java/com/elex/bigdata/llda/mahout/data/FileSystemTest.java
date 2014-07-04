@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -52,5 +54,12 @@ public class FileSystemTest {
     String str="0a";
     byte[] bytes=Hex.decodeHex(str.toCharArray());
     System.out.println(Bytes.toShort(bytes));
+  }
+  @Test
+  public void testRegex(){
+    Pattern pattern=Pattern.compile("(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
+      "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)$");
+    Matcher matcher=pattern.matcher("www.google.com/bmp.hello");
+    System.out.println(matcher.find());
   }
 }
