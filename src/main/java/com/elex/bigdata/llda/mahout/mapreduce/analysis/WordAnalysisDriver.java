@@ -73,6 +73,10 @@ public class WordAnalysisDriver {
     private int[] wordCounts = new int[wordLens.length + 1];
     private int[] noRepeatWordCounts = new int[wordLens.length + 1];
     private int specialUrlCount = 0;
+    public void setup(Context context){
+      Arrays.fill(wordCounts,0);
+      Arrays.fill(noRepeatWordCounts,0);
+    }
 
     public void reduce(Text key, Iterable<IntWritable> values, Context context) {
       int count = 0;
