@@ -1,6 +1,8 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 
+import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -32,13 +34,20 @@ public class WordAnalysisDriver {
     Path inputPath=new Path(args[0]);
     Path outputPath=new Path(args[1]);
     Configuration conf=new Configuration();
+    conf.setLong("mapred.max.split.size", 20*1024*1024*1024); // 20G
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 20*1000*1000*1000);
+
     Job job=new Job(conf);
+    FileSystem fs= FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(outputPath);
     job.setMapperClass(WordAnalysisMapper.class);
     job.setReducerClass(WordAnalysisReducer.class);
     job.setCombinerClass(WordAnalysisCombiner.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
-    FileInputFormat.addInputPath(job,inputPath);
+    job.setInputFormatClass(CombineTextInputFormat.class);
+    FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job,outputPath);
     job.setJarByClass(WordAnalysisDriver.class);
