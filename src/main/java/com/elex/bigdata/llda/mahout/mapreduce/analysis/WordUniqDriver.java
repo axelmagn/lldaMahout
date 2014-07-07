@@ -1,12 +1,16 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.ClusterStatus;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapreduce.Cluster;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -40,7 +44,7 @@ public class WordUniqDriver {
       fs.delete(new Path(outputPath),true);
     analysisJob.setMapperClass(UniqWordAnalysisMapper.class);
     analysisJob.setReducerClass(WordAnalysisDriver.WordAnalysisReducer.class);
-    //job.setReducerClass(WordAnalysisCombiner.class);
+    analysisJob.setCombinerClass(WordAnalysisDriver.WordAnalysisCombiner.class);
     analysisJob.setMapOutputKeyClass(Text.class);
     analysisJob.setMapOutputValueClass(IntWritable.class);
     analysisJob.setInputFormatClass(CombineTextInputFormat.class);
@@ -54,13 +58,21 @@ public class WordUniqDriver {
   }
 
   public static Job prepareJob(Configuration conf, Path inputPath, Path outputPath) throws IOException {
+    Job job = new Job(conf);
+    JobClient jobClient=new JobClient(conf);
+    ClusterStatus clusterStatus=jobClient.getClusterStatus();
+    int maxMapTaskNum=clusterStatus.getMaxMapTasks();
+    System.out.println("max Map Task Num "+maxMapTaskNum);
+    long totalSize= FileSystemUtil.getLen(conf,inputPath);
+    System.out.println("total input Size "+totalSize);
+
     conf.setLong("mapred.max.split.size", 1024 * 1024 * 1024); // 1G
     conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 1024 * 1000 * 1000);
     conf.setLong("mapred.min.split.size.per.node",512*1024*1024);
     conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node",512 * 1000 * 1000);
     conf.setLong("mapred.min.split.size.per.rack",768*1024*1024);
     conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack",768*1000*1000);
-    Job job = new Job(conf);
+
     job.setMapperClass(WordUniqMapper.class);
     job.setReducerClass(WordUniqReducer.class);
     job.setInputFormatClass(CombineTextInputFormat.class);
