@@ -60,7 +60,9 @@ public class FileSystemTest {
   public void testRegex(){
     Pattern pattern=Pattern.compile("(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
       "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)$");
-    Matcher matcher=pattern.matcher("www.google.com/bmp.hello");
+    Pattern anoPattern= Pattern.compile("\\.(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
+      "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)(\\?.+)?$");
+    Matcher matcher=anoPattern.matcher("www.google.com/hello.bmp?");
     System.out.println(matcher.find());
     String str="showads.pubmatic.com/adserver/adserverservlet?pubid=50055&siteid=50058&adid=90495&kadwidth=728&kadheight=90&saversion=2&js=1&kdntuid=1&pageurl=http%3a%2f%2fib.adnxs.com%2ftt%3fid%3d2785280%26referrer%3d%24%7breferer_url%7d&refurl=http%3a%2f%2fib.adnxs.com%2ftt%3fid%3d3124862%26referrer%3dhttp%253a%252f%252fwww.365vivo.com%252flogin.aspx%26cb%3d327593506&iniframe=1&kadpageurl=%24%7breferer_url%7d&operid=3&kltstamp=2014-7-2%2017%3a57%3a42&timezone=2&screenresolution=1366x768&ranreq=0.16519579873420298&pmuniadid=0&at_payload=k8a44ifbbnly5du4uxukrnz2ci9xkprwvl6tqahbrmqklrus_43wuzpup_nh2t05oayahrcpmxe6dbur5xj6kkt8fsbq91nbbqgxk_pmtd0shp815lyjay2.rinj.rin4wzcjftckckyad65hz74wysxvoxwaw4b6y8ggedd5ihorovyfgh8cmvsuckzilny6xljqlprdhproxxvgn8xf7_olgipfmsnrmpsb6meqhvaupfnmbsu1nbjlpmpwonsuc56mngwpwonn5uq32scvcnfd9..4hevmatjs0m_djjky_aw7q_h.4tfsqr95qdxmejv.lv9dwgodmx.ua9zc9z1euvr9z.amvurnw5cfuxtstkje4pidxo9sprsimtkqnllznjwcquhky5bspbkw.4yl";
     System.out.println(str.length());

@@ -70,8 +70,8 @@ public class WordAnalysisDriver {
   }
 
   public static class WordAnalysisCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {
-    Pattern pattern = Pattern.compile("(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
-      "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)$");
+    Pattern pattern = Pattern.compile("\\.(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|\" +\n" +
+      "      \"pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)(\\?.+)?$");
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
     private String[] replaceStr = new String[wordLens.length + 1];
     private int[] wordCounts = new int[wordLens.length + 1];
@@ -166,22 +166,7 @@ public class WordAnalysisDriver {
       context.write(new Text("special word "), new Text(" " + specialUrlCount));
     }
 
-    public static class UniqWordReducer extends Reducer<Text,NullWritable,Text,NullWritable>{
-      public void reduce(Text key,Iterable<NullWritable> values,Context context) throws IOException, InterruptedException {
-        context.write(key, NullWritable.get());
 
-      }
-    }
-
-    public static class UniqWordMapper extends Mapper<Object,Text,Text,NullWritable>{
-      public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
-        String line = value.toString();
-        String[] tokens = line.split("\t");
-        if (tokens.length < 3)
-          return;
-        context.write(new Text(tokens[1]), NullWritable.get());
-      }
-    }
 
 
   }
