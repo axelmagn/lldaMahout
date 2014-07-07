@@ -35,11 +35,15 @@ public class WordUniqDriver {
     job.waitForCompletion(true);
 
     Job analysisJob = new Job(conf);
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(new Path(outputPath)))
+      fs.delete(new Path(outputPath),true);
     analysisJob.setMapperClass(UniqWordAnalysisMapper.class);
     analysisJob.setReducerClass(WordAnalysisDriver.WordAnalysisReducer.class);
     //job.setReducerClass(WordAnalysisCombiner.class);
     analysisJob.setMapOutputKeyClass(Text.class);
     analysisJob.setMapOutputValueClass(IntWritable.class);
+    analysisJob.setInputFormatClass(CombineTextInputFormat.class);
     FileInputFormat.addInputPath(analysisJob, new Path(uniqWordPath));
     analysisJob.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(analysisJob, new Path(outputPath));
@@ -50,10 +54,12 @@ public class WordUniqDriver {
   }
 
   public static Job prepareJob(Configuration conf, Path inputPath, Path outputPath) throws IOException {
-    conf.setLong("mapred.max.split.size", 1024 * 1024 * 1024); // 2G
+    conf.setLong("mapred.max.split.size", 1024 * 1024 * 1024); // 1G
     conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 1024 * 1000 * 1000);
-    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node",500 * 1000 * 1000);
-    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack",500*1000*1000);
+    conf.setLong("mapred.min.split.size.per.node",512*1024*1024);
+    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node",512 * 1000 * 1000);
+    conf.setLong("mapred.min.split.size.per.rack",768*1024*1024);
+    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack",768*1000*1000);
     Job job = new Job(conf);
     job.setMapperClass(WordUniqMapper.class);
     job.setReducerClass(WordUniqReducer.class);
