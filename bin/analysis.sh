@@ -12,7 +12,7 @@ fi
 type=$1
 if [[ $type = user ]]
   then
-     MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.UserAnalysisDriver
+     MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCountByUserDriver
      echo "hadoop jar $JAR $MAIN --input ${rootPath}/$2 --output ${rootPath}/$3 >> $logFile 2>&1"
      hadoop jar $JAR $MAIN --input ${rootPath}/$2 --output ${rootPath}/$3 >> $logFile 2>&1
   elif [[ $type = uniqWord ]]
@@ -21,7 +21,7 @@ if [[ $type = user ]]
      echo "hadoop jar $JAR $MAIN $2 ${rootPath}/analysis/tmp $3 >> $logFile 2>&1"
      hadoop jar $JAR $MAIN $2 ${rootPath}/analysis/tmp $3 >> $logFile 2>&1
   else
-     MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordAnalysisDriver
+     MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordLenDriver
      echo "hadoop jar $JAR $MAIN $2 $3 >> $logFile 2>&1"
      hadoop jar $JAR $MAIN $2 $3 >> $logFile 2>&1
 fi

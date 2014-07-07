@@ -8,14 +8,10 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.ClusterStatus;
-import org.apache.hadoop.mapred.JobClient;
-import org.apache.hadoop.mapreduce.Cluster;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
@@ -44,8 +40,8 @@ public class WordUniqDriver {
     if(fs.exists(new Path(outputPath)))
       fs.delete(new Path(outputPath),true);
     analysisJob.setMapperClass(UniqWordAnalysisMapper.class);
-    analysisJob.setReducerClass(WordAnalysisDriver.WordAnalysisReducer.class);
-    analysisJob.setCombinerClass(WordAnalysisDriver.WordAnalysisCombiner.class);
+    analysisJob.setReducerClass(WordLenDriver.WordAnalysisReducer.class);
+    analysisJob.setCombinerClass(WordLenDriver.WordAnalysisCombiner.class);
     analysisJob.setMapOutputKeyClass(Text.class);
     analysisJob.setMapOutputValueClass(IntWritable.class);
     analysisJob.setInputFormatClass(CombineTextInputFormat.class);

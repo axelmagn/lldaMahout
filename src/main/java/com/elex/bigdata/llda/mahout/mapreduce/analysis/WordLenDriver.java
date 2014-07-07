@@ -1,11 +1,11 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * Time: 5:55 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WordAnalysisDriver {
+public class WordLenDriver {
   public static final String SPECIAL = "www.special.jpeg";
   public static final String REPEAT = "repeat";
   public static final String NOREPEAT = "noRepeat";
@@ -36,8 +36,7 @@ public class WordAnalysisDriver {
     Path inputPath = new Path(args[0]);
     Path outputPath = new Path(args[1]);
     Configuration conf = new Configuration();
-    conf.setLong("mapred.max.split.size", 2 * 1024 * 1024 * 1024); // 2G
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 2 * 1000 * 1000 * 1000);
+    FileSystemUtil.setCombineInputSplitSize(conf,inputPath);
 
     Job job = new Job(conf);
     FileSystem fs = FileSystem.get(conf);
@@ -53,7 +52,7 @@ public class WordAnalysisDriver {
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
-    job.setJarByClass(WordAnalysisDriver.class);
+    job.setJarByClass(WordLenDriver.class);
     job.setJobName("word analysis " + inputPath.toString());
     job.submit();
     job.waitForCompletion(true);
@@ -125,8 +124,8 @@ public class WordAnalysisDriver {
   public static class WordAnalysisReducer extends Reducer<Text, IntWritable, Text, Text> {
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
     private int[] wordCounts = new int[wordLens.length + 1];
-    Pattern pattern = Pattern.compile("(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|" +
-      "pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)$");
+    Pattern pattern = Pattern.compile("\\.(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|\" +\n" +
+      "      \"pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)(\\?.+)?$");
 
     private int specialUrlCount = 0, totalWordCount = 0;
 
