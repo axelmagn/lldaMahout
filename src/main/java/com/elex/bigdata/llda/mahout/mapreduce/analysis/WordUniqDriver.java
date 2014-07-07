@@ -50,8 +50,8 @@ public class WordUniqDriver {
   }
 
   public static Job prepareJob(Configuration conf, Path inputPath, Path outputPath) throws IOException {
-    conf.setLong("mapred.max.split.size", 500 * 1024 * 1024); // 2G
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 500 * 1000 * 1000);
+    conf.setLong("mapred.max.split.size", 1024 * 1024 * 1024); // 2G
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 1024 * 1000 * 1000);
     conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node",500 * 1000 * 1000);
     conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack",500*1000*1000);
     Job job = new Job(conf);
