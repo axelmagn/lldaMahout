@@ -40,7 +40,7 @@ public class WordUniqDriver {
     //job.setReducerClass(WordAnalysisCombiner.class);
     analysisJob.setMapOutputKeyClass(Text.class);
     analysisJob.setMapOutputValueClass(IntWritable.class);
-    analysisJob.setInputFormatClass(CombineTextInputFormat.class);
+    analysisJob.setInputFormatClass(TextInputFormat.class);
     FileInputFormat.addInputPath(analysisJob, new Path(uniqWordPath));
     analysisJob.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(analysisJob, new Path(outputPath));
