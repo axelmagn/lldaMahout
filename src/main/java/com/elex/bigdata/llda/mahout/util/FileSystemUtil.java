@@ -15,21 +15,31 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class FileSystemUtil {
-  public static long getLen(Configuration conf,Path path) throws IOException {
-    FileSystem fs= FileSystem.get(conf);
-    return getLen(fs,path);
+  public static long getLen(Configuration conf, Path path) throws IOException {
+    FileSystem fs = FileSystem.get(conf);
+    return getLen(fs, path);
   }
 
-  public static long getLen(FileSystem fs,Path path) throws IOException {
-    if(fs.isFile(path))
-      return fs.getFileStatus(path).getLen();
-    else {
-      FileStatus[] fileStatuses=fs.listStatus(path);
+  public static long getLen(FileSystem fs, Path path) throws IOException {
+    FileStatus[] totalStatus = fs.globStatus(path);
+    if (totalStatus.length > 1) {
       long len=0l;
-      for(FileStatus fileStatus: fileStatuses){
-        len+=getLen(fs,fileStatus.getPath());
+      for(FileStatus status: totalStatus){
+        System.out.println(status.getPath().toString());
+        len+=getLen(fs,status.getPath());
       }
       return len;
+    } else {
+      if (fs.isFile(path))
+        return fs.getFileStatus(path).getLen();
+      else {
+        FileStatus[] fileStatuses = fs.listStatus(path);
+        long len = 0l;
+        for (FileStatus fileStatus : fileStatuses) {
+          len += getLen(fs, fileStatus.getPath());
+        }
+        return len;
+      }
     }
   }
 }
