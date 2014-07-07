@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 
+import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,9 +34,11 @@ public class WordUniqDriver {
 
   public static Job prepareJob(Configuration conf, Path inputPath, Path outputPath) throws IOException {
     Job job = new Job(conf);
+    conf.setLong("mapred.max.split.size", 5 * 1024 * 1024 * 1024); // 5G
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 5 * 1000 * 1000 * 1000);
     job.setMapperClass(WordUniqMapper.class);
     job.setReducerClass(WordUniqReducer.class);
-    job.setInputFormatClass(TextInputFormat.class);
+    job.setInputFormatClass(CombineTextInputFormat.class);
     FileInputFormat.addInputPath(job, inputPath);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(NullWritable.class);
