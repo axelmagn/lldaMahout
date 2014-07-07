@@ -4,6 +4,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.ClusterStatus;
+import org.apache.hadoop.mapred.JobClient;
 
 import java.io.IOException;
 
@@ -41,5 +43,25 @@ public class FileSystemUtil {
         return len;
       }
     }
+  }
+  public static void setCombineInputSplitSize(Configuration conf,Path inputPath) throws IOException {
+    JobClient jobClient=new JobClient(conf);
+    ClusterStatus clusterStatus=jobClient.getClusterStatus();
+    int maxMapTaskNum=clusterStatus.getMaxMapTasks();
+    System.out.println("max Map Task Num "+maxMapTaskNum);
+    long totalSize= FileSystemUtil.getLen(conf,inputPath);
+    System.out.println("total input Size "+totalSize);
+    long maxSplitSize=totalSize/maxMapTaskNum;
+    System.out.println("mapred.max.split.size "+maxSplitSize);
+    conf.setLong("mapred.max.split.size", maxSplitSize); // 1G
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", maxSplitSize);
+    long minSplitSizePerNode=maxSplitSize/2;
+    System.out.println("mapred.min.split.size.per.node "+minSplitSizePerNode);
+    conf.setLong("mapred.min.split.size.per.node",minSplitSizePerNode);
+    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node",minSplitSizePerNode);
+    long minSplitSizePerRack=(maxSplitSize/3)*2;
+    System.out.println("mapred.min.split.size.per.rack "+minSplitSizePerRack);
+    conf.setLong("mapred.min.split.size.per.rack",minSplitSizePerRack);
+    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack",minSplitSizePerRack);
   }
 }
