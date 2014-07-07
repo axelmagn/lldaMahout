@@ -20,7 +20,7 @@ if [[ $type = user ]]
      MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordUniqDriver
      echo "hadoop jar $JAR $MAIN $2 ${rootPath}/analysis/tmp $3 >> $logFile 2>&1"
      hadoop jar $JAR $MAIN $2 ${rootPath}/analysis/tmp $3 >> $logFile 2>&1
-  elif [[ $type= wordCount ]]
+  elif [[ $type = wordCount ]]
      then
      MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCountDriver
      echo "hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1"
