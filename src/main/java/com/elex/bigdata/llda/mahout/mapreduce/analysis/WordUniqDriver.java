@@ -44,7 +44,7 @@ public class WordUniqDriver {
     FileInputFormat.addInputPath(analysisJob, new Path(uniqWordPath));
     analysisJob.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(analysisJob, new Path(outputPath));
-    analysisJob.setJarByClass(WordAnalysisDriver.class);
+    analysisJob.setJarByClass(WordUniqDriver.class);
     analysisJob.setJobName("uniq word analysis " + inputPath.toString());
     analysisJob.submit();
     analysisJob.waitForCompletion(true);
