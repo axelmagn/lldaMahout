@@ -33,14 +33,13 @@ public class WordUniqDriver {
     Job job = prepareJob(conf, new Path(inputPath), new Path(uniqWordPath));
     job.submit();
     job.waitForCompletion(true);
+
     Job analysisJob = new Job(conf);
     analysisJob.setMapperClass(UniqWordAnalysisMapper.class);
     analysisJob.setReducerClass(WordAnalysisDriver.WordAnalysisReducer.class);
-    analysisJob.setCombinerClass(WordAnalysisDriver.WordAnalysisCombiner.class);
     //job.setReducerClass(WordAnalysisCombiner.class);
     analysisJob.setMapOutputKeyClass(Text.class);
     analysisJob.setMapOutputValueClass(IntWritable.class);
-    analysisJob.setInputFormatClass(TextInputFormat.class);
     FileInputFormat.addInputPath(analysisJob, new Path(uniqWordPath));
     analysisJob.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(analysisJob, new Path(outputPath));
@@ -51,6 +50,7 @@ public class WordUniqDriver {
   }
 
   public static Job prepareJob(Configuration conf, Path inputPath, Path outputPath) throws IOException {
+    conf.setLong("mapred.max.split.size", 500 * 1024 * 1024); // 2G
     conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 500 * 1000 * 1000);
     conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node",500 * 1000 * 1000);
     conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack",500*1000*1000);
