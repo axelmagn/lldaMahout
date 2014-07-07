@@ -36,8 +36,8 @@ public class WordAnalysisDriver {
     Path inputPath = new Path(args[0]);
     Path outputPath = new Path(args[1]);
     Configuration conf = new Configuration();
-    conf.setLong("mapred.max.split.size", 5 * 1024 * 1024 * 1024); // 5G
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 5 * 1000 * 1000 * 1000);
+    conf.setLong("mapred.max.split.size", 2 * 1024 * 1024 * 1024); // 2G
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 2 * 1000 * 1000 * 1000);
 
     Job job = new Job(conf);
     FileSystem fs = FileSystem.get(conf);
