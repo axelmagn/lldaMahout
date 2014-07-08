@@ -98,8 +98,8 @@ public class WordCountDriver extends AbstractJob {
         if (count <= thredhold[i])
           break;
       }
-      wordCount[i - 1] += count;
-      totalCount+=count;
+      wordCount[i - 1] += 1;
+      totalCount+=1;
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
