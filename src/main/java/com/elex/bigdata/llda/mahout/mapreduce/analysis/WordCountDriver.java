@@ -82,7 +82,7 @@ public class WordCountDriver extends AbstractJob {
   public static class WordCountReducer extends Reducer<Text, IntWritable, Text, Text> {
     private int[] thredhold = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 40, 60, 80, 100, 200, 400, 800, 1600, 3200, 6400};
     private int[] wordCount = new int[thredhold.length];
-
+    private int totalCount=0;
     public void setup(Context context) {
       Arrays.fill(wordCount, 0);
     }
@@ -99,13 +99,18 @@ public class WordCountDriver extends AbstractJob {
           break;
       }
       wordCount[i - 1] += count;
+      totalCount+=count;
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
       int i;
+      context.write(new Text("totolCount"),new Text(String.valueOf(totalCount)));
+      int count=0;
       for (i = 1; i < thredhold.length; i++) {
-        context.write(new Text(thredhold[i - 1] + "~" + thredhold[i]), new Text(String.valueOf(wordCount[i - 1])));
+        count+=wordCount[i-1];
+        context.write(new Text(thredhold[i - 1] + "~" + thredhold[i]+"\t"+wordCount[i - 1]), new Text("~"+thredhold[i]+"\t"+count));
       }
+      context.write(new Text(thredhold[i-1]+"~"),new Text(String.valueOf(wordCount[i-1])));
     }
   }
   public static void main(String[] args) throws Exception {
