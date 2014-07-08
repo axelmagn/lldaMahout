@@ -122,8 +122,8 @@ public class WordLenDriver {
   }
 
   public static class WordAnalysisReducer extends Reducer<Text, IntWritable, Text, Text> {
-    private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
-    private int[] wordCounts = new int[wordLens.length + 1];
+    private int[] wordLens = new int[]{0,10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
+    private int[] wordCounts = new int[wordLens.length ];
     Pattern pattern = Pattern.compile("\\.(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|\" +\n" +
       "      \"pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)(\\?.+)?$");
 
@@ -141,12 +141,12 @@ public class WordLenDriver {
       if (!key.toString().equals(SPECIAL)) {
         int wordLen = key.getLength();
         int i;
-        for (i = 0; i < wordLens.length; i++) {
+        for (i = 1; i < wordLens.length; i++) {
           if (wordLen <= wordLens[i]) {
             break;
           }
         }
-        wordCounts[i] += count;
+        wordCounts[i-1] += count;
         totalWordCount+=count;
       }
       Matcher matcher = pattern.matcher(key.toString());
@@ -156,12 +156,12 @@ public class WordLenDriver {
 
     public void cleanup(Context context) throws IOException, InterruptedException {
       context.write(new Text("total count"), new Text(" " + totalWordCount));
-
-      context.write(new Text("~" + wordLens[0]), new Text(" " + wordCounts[0]));
-      for (int i = 1; i < wordCounts.length - 1; i++) {
-        context.write(new Text(wordLens[i - 1] + "~" + wordLens[i]), new Text(" " + wordCounts[i]));
+      int count=0,i;
+      for (i = 1; i < wordLens.length ; i++) {
+        count+=wordCounts[i-1];
+        context.write(new Text(wordLens[i-1]+"~"+wordLens[i]+"\t"+wordCounts[i-1]),new Text("~"+wordLens[i]+"\t"+count));
       }
-      context.write(new Text(wordLens[wordLens.length - 1] + "~"), new Text(" " + wordCounts[wordCounts.length - 1]));
+      context.write(new Text(wordLens[i-1] + "~"), new Text(" " + wordCounts[i-1]));
       context.write(new Text("special word "), new Text(" " + specialUrlCount));
     }
 
