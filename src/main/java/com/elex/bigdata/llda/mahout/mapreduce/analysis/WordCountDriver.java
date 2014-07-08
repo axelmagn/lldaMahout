@@ -105,10 +105,10 @@ public class WordCountDriver extends AbstractJob {
     public void cleanup(Context context) throws IOException, InterruptedException {
       int i;
       context.write(new Text("totolCount"),new Text(String.valueOf(totalCount)));
-      int count=0;
+      int count=totalCount;
       for (i = 1; i < thredhold.length; i++) {
-        count+=wordCount[i-1];
-        context.write(new Text(thredhold[i - 1] + "~" + thredhold[i]+"\t"+wordCount[i - 1]), new Text("~"+thredhold[i]+"\t"+count));
+        count-=wordCount[i-1];
+        context.write(new Text(thredhold[i - 1] + "~" + thredhold[i]+"\t"+wordCount[i - 1]), new Text(thredhold[i]+"~"+"\t"+count));
       }
       context.write(new Text(thredhold[i-1]+"~"),new Text(String.valueOf(wordCount[i-1])));
     }
