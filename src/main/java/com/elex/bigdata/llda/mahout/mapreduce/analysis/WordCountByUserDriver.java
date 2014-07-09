@@ -75,8 +75,8 @@ public class WordCountByUserDriver extends AbstractJob{
     }
   }
   public static class WordCountByUserReducer extends Reducer<Text,IntWritable,Text,Text> {
-    private int[] thresholds=new int[]{2,4,8,16,32,64,128,256,512,1024,2048,4096,9192,18384};
-    private int[] counts=new int[thresholds.length+1];
+    private int[] thresholds=new int[]{0,2,4,8,16,32,64,128,256,512,1024,2048,4096,9192,18384};
+    private int[] counts=new int[thresholds.length];
     private int allCount=0;
     public void setup(Context context){
       for(int i=0;i<counts.length;i++){
@@ -90,25 +90,21 @@ public class WordCountByUserDriver extends AbstractJob{
         count+=iterator.next().get();
       }
       int i;
-      for(i=0;i<thresholds.length;i++){
+      for(i=1;i<thresholds.length;i++){
         if(count<=thresholds[i])
           break;
       }
-      counts[i]+=1;
+      counts[i-1]+=1;
       allCount+=1;
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
-      context.write(new Text("all"),new Text(String.valueOf(allCount)));
-      Text key=new Text("0~"+thresholds[0]);
-      Text value=new Text(String.valueOf(counts[0]));
-      context.write(key,value);
-      for(int i=1;i<thresholds.length;i++){
-        key=new Text(thresholds[i-1]+"~"+thresholds[i]);
-        value=new Text(String.valueOf(counts[i]));
-        context.write(key,value);
+      context.write(new Text("all user"),new Text(String.valueOf(allCount)));
+      int i;
+      for(i=1;i<thresholds.length;i++){
+        context.write(new Text(thresholds[i-1]+"~"+thresholds[i]),new Text(String.valueOf(counts[i-1])));
       }
-      context.write(new Text(thresholds[thresholds.length-1]+"~"),new Text(String.valueOf(counts[counts.length-1])));
+      context.write(new Text(thresholds[i-1]+"~"),new Text(String.valueOf(counts[i-1])));
 
     }
   }
