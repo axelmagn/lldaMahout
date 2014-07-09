@@ -1,5 +1,7 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 
+import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -43,6 +45,7 @@ public class WordCountByUserDriver extends AbstractJob{
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
   private Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
+    FileSystemUtil.setCombineInputSplitSize(conf,inputPath);
     Job job=new Job(conf);
     FileSystem fs= FileSystem.get(conf);
     if(fs.exists(outputPath))
@@ -51,27 +54,23 @@ public class WordCountByUserDriver extends AbstractJob{
     job.setReducerClass(WordCountByUserReducer.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
-    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setInputFormatClass(CombineTextInputFormat.class);
     SequenceFileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job,outputPath);
     job.setJarByClass(WordCountByUserDriver.class);
-    job.setJobName("analysis");
+    job.setJobName("word count by user analysis "+inputPath.toString());
     return job;
   }
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(),new WordCountByUserDriver(),args);
   }
-  public static class WordCountByUserMapper extends Mapper<Text,MultiLabelVectorWritable,Text,IntWritable> {
-    public void map(Text key,MultiLabelVectorWritable value,Context context) throws IOException, InterruptedException {
-      Vector vector=value.getVector();
-      Iterator<Vector.Element> iter=vector.iterateNonZero();
-      int count=0;
-      while(iter.hasNext()){
-        Vector.Element e=iter.next();
-        count+=e.get();
-      }
-      context.write(key,new IntWritable(count));
+  public static class WordCountByUserMapper extends Mapper<Object,Text,Text,IntWritable> {
+    public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
+      String[] tokens=value.toString().split("\t");
+      if(tokens.length<3)
+        return ;
+      context.write(new Text(tokens[0]),new IntWritable(Integer.parseInt(tokens[2])));
     }
   }
   public static class WordCountByUserReducer extends Reducer<Text,IntWritable,Text,Text> {

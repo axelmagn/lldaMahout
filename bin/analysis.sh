@@ -10,11 +10,16 @@ then
   exit 1
 fi
 type=$1
-if [[ $type = user ]]
+if [[ $type = userTrained ]]
   then
      MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCountByUserDriver
      echo "hadoop jar $JAR $MAIN --input ${rootPath}/$2 --output ${rootPath}/$3 >> $logFile 2>&1"
      hadoop jar $JAR $MAIN --input ${rootPath}/$2 --output ${rootPath}/$3 >> $logFile 2>&1
+  elif [[ $type = user ]]
+  then
+     MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.UserTrainedDriver
+     echo "hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1"
+     hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1
   elif [[ $type = uniqWord ]]
     then
      MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordUniqDriver
