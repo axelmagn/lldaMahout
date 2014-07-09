@@ -99,6 +99,7 @@ public class WordCountByUserDriver extends AbstractJob{
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
+      context.write(new Text("all"),new Text(String.valueOf(allCount)));
       Text key=new Text("0~"+thresholds[0]);
       Text value=new Text(String.valueOf(counts[0]));
       context.write(key,value);
@@ -108,7 +109,7 @@ public class WordCountByUserDriver extends AbstractJob{
         context.write(key,value);
       }
       context.write(new Text(thresholds[thresholds.length-1]+"~"),new Text(String.valueOf(counts[counts.length-1])));
-      context.write(new Text("all"),new Text(String.valueOf(allCount)));
+
     }
   }
 
