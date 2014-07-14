@@ -4,6 +4,7 @@ import com.elex.bigdata.hashing.BDMD5;
 import com.elex.bigdata.hashing.HashingException;
 import com.elex.bigdata.llda.mahout.dictionary.Dictionary;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
+import com.elex.bigdata.llda.mahout.util.PrefixTrie;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -36,8 +37,10 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   private BDMD5 bdmd5;
   private Map<String, String> url_category_map = new HashMap<String, String>();
   private Map<String, Integer> category_label_map = new HashMap<String, Integer>();
+  private Map<String, PrefixTrie> categoryUrlTries = new HashMap<String, PrefixTrie>();
+  private String[] destCategories = new String[]{"jogos", "compras", "Friends", "Tourism"};
   private SequenceFile.Writer uidWriter;
-  private boolean saveUids=false;
+  private boolean saveUids = false;
   private int uidNum = 0;
   private int sampleRatio = 100 * 10000, index = 0;
 
@@ -54,9 +57,13 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     Path urlCategoryPath = new Path(resourcesPath, URL_CATEGORY);
     Path categoryLabelPath = new Path(resourcesPath, CATEGORY_LABEL);
 
+    for (String category : destCategories) {
+      categoryUrlTries.put(category, new PrefixTrie());
+    }
+
     String uidFile = conf.get(GenerateLDocDriver.UID_PATH);
     if (uidFile != null) {
-      saveUids=true;
+      saveUids = true;
       Path uidPath = new Path(uidFile);
       if (fs.exists(uidPath))
         fs.delete(uidPath);
@@ -74,8 +81,14 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     String line = "";
     while ((line = urlCategoryReader.readLine()) != null) {
       String[] categoryUrls = line.split(" ");
-      for (int i = 1; i < categoryUrls.length; i++) {
-        url_category_map.put(categoryUrls[i], categoryUrls[0]);
+      if (categoryUrlTries.containsKey(categoryUrls[0])) {
+        PrefixTrie prefixTrie = categoryUrlTries.get(categoryUrls[0]);
+        for (int i = 1; i < categoryUrls.length; i++)
+          prefixTrie.insert(categoryUrls[i]);
+      } else {
+        for (int i = 1; i < categoryUrls.length; i++) {
+          url_category_map.put(categoryUrls[i], categoryUrls[0]);
+        }
       }
     }
     urlCategoryReader.close();
@@ -85,8 +98,6 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       String[] categoryLabels = line.split("=");
       category_label_map.put(categoryLabels[0], Integer.parseInt(categoryLabels[1]));
     }
-
-
   }
 
   public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
@@ -124,6 +135,14 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       else
         urlCounts.put(id, (double) count);
       String category = url_category_map.get(url.toString());
+      if(category==null){
+        for(Map.Entry<String,PrefixTrie> entry: categoryUrlTries.entrySet()){
+          if(entry.getValue().prefixSearch(url.toString())){
+            category=entry.getKey();
+            break;
+          }
+        }
+      }
       if (category != null) {
         Integer label = category_label_map.get(category);
         if (label != null) {
@@ -163,14 +182,14 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       }
       log.info("labels is: " + labelStr.toString());
     }
-    if(saveUids)
+    if (saveUids)
       uidWriter.append(key, NullWritable.get());
     context.write(key, labelVectorWritable);
   }
 
   public void cleanup(Context context) throws IOException {
     log.info("uidNum is " + uidNum);
-    if(saveUids){
+    if (saveUids) {
       uidWriter.hflush();
       uidWriter.close();
     }

@@ -1,0 +1,107 @@
+package com.elex.bigdata.llda.mahout.util;
+
+import java.util.LinkedList;
+
+/**
+ * Created with IntelliJ IDEA.
+ * User: yb
+ * Date: 7/11/14
+ * Time: 3:01 PM
+ * To change this template use File | Settings | File Templates.
+ */
+public class PrefixTrie {
+  private Node root;
+
+  public PrefixTrie(){
+    root = new Node(' ');
+  }
+
+  public void insert(String word){
+    if(search(word) == true) return;
+
+    Node current = root;
+    for(int i = 0; i < word.length(); i++){
+      Node child = current.subNode(word.charAt(i));
+      if(child != null){
+        current = child;
+      } else {
+        current.childList.add(new Node(word.charAt(i)));
+        current = current.subNode(word.charAt(i));
+      }
+      current.count++;
+    }
+    // Set isEnd to indicate end of the word
+    current.isEnd = true;
+  }
+  public boolean search(String word){
+    Node current = root;
+
+    for(int i = 0; i < word.length(); i++){
+      if(current.subNode(word.charAt(i)) == null)
+        return false;
+      else
+        current = current.subNode(word.charAt(i));
+    }
+        /*
+        * This means that a string exists, but make sure its
+        * a word by checking its 'isEnd' flag
+        */
+    if (current.isEnd == true) return true;
+    else return false;
+  }
+
+  public boolean prefixSearch(String word){
+    Node current = root;
+
+    for(int i = 0; i < word.length(); i++){
+      if(current.subNode(word.charAt(i)) == null)
+        return false;
+      else
+        current = current.subNode(word.charAt(i));
+      if(current.isEnd==true)return true;
+    }
+    return false;
+  }
+
+  public void deleteWord(String word){
+    if(search(word) == false) return;
+
+    Node current = root;
+    for(char c : word.toCharArray()) {
+      Node child = current.subNode(c);
+      if(child.count == 1) {
+        current.childList.remove(child);
+        return;
+      } else {
+        child.count--;
+        current = child;
+      }
+    }
+    current.isEnd = false;
+  }
+  public static class Node{
+    char content; // the character in the node
+    boolean isEnd; // whether the end of the words
+    int count;  // the number of words sharing this character
+    LinkedList<Node> childList; // the child list
+
+    public Node(char c){
+      childList = new LinkedList<Node>();
+      isEnd = false;
+      content = c;
+      count = 0;
+    }
+
+    public Node subNode(char c){
+      if(childList != null){
+        for(Node eachChild : childList){
+          if(eachChild.content == c){
+            return eachChild;
+          }
+        }
+      }
+      return null;
+    }
+  }
+
+}
