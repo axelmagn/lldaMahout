@@ -1,6 +1,8 @@
 package com.elex.bigdata.llda.mahout.util;
 
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -13,7 +15,7 @@ public class PrefixTrie {
   private Node root;
 
   public PrefixTrie(){
-    root = new Node(' ');
+    root = new Node();
   }
 
   public void insert(String word){
@@ -25,7 +27,7 @@ public class PrefixTrie {
       if(child != null){
         current = child;
       } else {
-        current.childList.add(new Node(word.charAt(i)));
+        current.childMap.put(word.charAt(i), new Node());
         current = current.subNode(word.charAt(i));
       }
       current.count++;
@@ -70,7 +72,7 @@ public class PrefixTrie {
     for(char c : word.toCharArray()) {
       Node child = current.subNode(c);
       if(child.count == 1) {
-        current.childList.remove(child);
+        current.childMap.remove(c);
         return;
       } else {
         child.count--;
@@ -80,27 +82,18 @@ public class PrefixTrie {
     current.isEnd = false;
   }
   public static class Node{
-    char content; // the character in the node
     boolean isEnd; // whether the end of the words
     int count;  // the number of words sharing this character
-    LinkedList<Node> childList; // the child list
+    Map<Character,Node> childMap;
 
-    public Node(char c){
-      childList = new LinkedList<Node>();
+    public Node(){
+      childMap = new HashMap<Character,Node>();
       isEnd = false;
-      content = c;
       count = 0;
     }
 
     public Node subNode(char c){
-      if(childList != null){
-        for(Node eachChild : childList){
-          if(eachChild.content == c){
-            return eachChild;
-          }
-        }
-      }
-      return null;
+      return childMap.get(c);
     }
   }
 
