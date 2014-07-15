@@ -1,9 +1,6 @@
 package com.elex.bigdata.llda.mahout.util;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -15,35 +12,56 @@ import java.util.Map;
 public class PrefixTrie {
   private Node root;
 
-  public PrefixTrie(){
+  public PrefixTrie() {
     root = new Node();
   }
 
-  public void insert(String word,int category){
-    if(search(word) !=-1 ) return;
+  public void insert(String word, int category) {
+    if (search(word) != -1) return;
 
     Node current = root;
-    for(int i = 0; i < word.length(); i++){
-      Node child = current.subNode(word.charAt(i));
-      if(child != null){
-        current = child;
-      } else {
-        Node nextNode=new Node();
-        current.nextNodes[(int)word.charAt(i)]=nextNode;
-        current = nextNode;
+    for (int i = 0; i < word.length(); i++) {
+      char letter = word.charAt(i);
+      if (letter >= 48 && letter <= 57) {
+        Node child = current.subNode((int) letter - 48);
+        if (child != null) {
+          current = child;
+        } else {
+          Node nextNode = new Node();
+          current.nextNodes[(int) letter - 48] = nextNode;
+          current = nextNode;
+        }
+        current.count++;
+      } else if (letter >= 97 && letter <= 122) {
+        Node child = current.subNode((int) letter - 97);
+        if (child != null) {
+          current = child;
+        } else {
+          Node nextNode = new Node();
+          current.nextNodes[(int) letter - 97] = nextNode;
+          current = nextNode;
+        }
+        current.count++;
       }
-      current.count++;
     }
     // Set isEnd to indicate end of the word
     current.category = category;
   }
-  public int search(String word){
+
+  public int search(String word) {
     Node current = root;
 
-    for(int i = 0; i < word.length(); i++){
-      current = current.subNode(word.charAt(i));
-      if(current == null)
-        return -1;
+    for (int i = 0; i < word.length(); i++) {
+      char letter = word.charAt(i);
+      if (letter >= 48 && letter <= 57) {
+        current = current.subNode((int) letter - 48);
+        if (current == null)
+          return -1;
+      } else if (letter >= 97 && letter <= 122) {
+        current = current.subNode((int) letter - 97);
+        if (current == null)
+          return -1;
+      }
     }
         /*
         * This means that a string exists, but make sure its
@@ -52,48 +70,70 @@ public class PrefixTrie {
     return current.category;
   }
 
-  public int prefixSearch(String word){
+  public int prefixSearch(String word) {
     Node current = root;
 
-    for(int i = 0; i < word.length(); i++){
-      current=current.subNode(word.charAt(i));
-      if(current == null)
-        return -1;
-      else if(current.category!=-1)
-        return current.category;
+    for (int i = 0; i < word.length(); i++) {
+      char letter = word.charAt(i);
+      if (letter >= 48 && letter <= 57) {
+        current = current.subNode((int) letter - 48);
+        if (current == null)
+          return -1;
+        else if (current.category != -1)
+          return current.category;
+      } else if (letter >= 97 && letter <= 122) {
+        current = current.subNode((int) letter - 97);
+        if (current == null)
+          return -1;
+        else if (current.category != -1)
+          return current.category;
+      }
     }
     return current.category;
   }
 
-  public void deleteWord(String word){
-    if(search(word) == -1) return;
+  public void deleteWord(String word) {
+    if (search(word) == -1) return;
 
     Node current = root;
-    for(char c : word.toCharArray()) {
-      Node child = current.subNode(c);
-      if(child.count == 1) {
-        current.nextNodes[(int)c]=null;
-        return;
-      } else {
-        child.count--;
-        current = child;
+    for (char c : word.toCharArray()) {
+      if (c >= 48 && c <= 57) {
+        Node child = current.subNode((int) c - 48);
+        if (child.count == 1) {
+          current.nextNodes[(int) c - 48] = null;
+          return;
+        } else {
+          child.count--;
+          current = child;
+        }
+      } else if (c >= 97 && c <= 122) {
+        Node child = current.subNode((int) c - 97);
+        if (child.count == 1) {
+          current.nextNodes[(int) c - 97] = null;
+          return;
+        } else {
+          child.count--;
+          current = child;
+        }
       }
+
     }
-    current.category=-1;
+    current.category = -1;
   }
-  public static class Node{
+
+  public static class Node {
     int category;
     int count;  // the number of words sharing this character
-    Node[] nextNodes=new Node[256];
+    Node[] nextNodes = new Node[10 + 26];
 
-    public Node(){
-      Arrays.fill(nextNodes,null);
+    public Node() {
+      Arrays.fill(nextNodes, null);
       count = 0;
-      category=-1;
+      category = -1;
     }
 
-    public Node subNode(char c){
-      return nextNodes[(int)c];
+    public Node subNode(int c) {
+      return nextNodes[c];
     }
   }
 
