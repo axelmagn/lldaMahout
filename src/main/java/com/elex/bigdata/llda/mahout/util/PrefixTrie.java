@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.util;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -27,8 +28,9 @@ public class PrefixTrie {
       if(child != null){
         current = child;
       } else {
-        current.childMap.put(word.charAt(i), new Node());
-        current = current.subNode(word.charAt(i));
+        Node nextNode=new Node();
+        current.nextNodes[(int)word.charAt(i)]=nextNode;
+        current = nextNode;
       }
       current.count++;
     }
@@ -70,7 +72,7 @@ public class PrefixTrie {
     for(char c : word.toCharArray()) {
       Node child = current.subNode(c);
       if(child.count == 1) {
-        current.childMap.remove(c);
+        current.nextNodes[(int)c]=null;
         return;
       } else {
         child.count--;
@@ -82,16 +84,16 @@ public class PrefixTrie {
   public static class Node{
     int category;
     int count;  // the number of words sharing this character
-    Map<Character,Node> childMap;
+    Node[] nextNodes=new Node[256];
 
     public Node(){
-      childMap = new HashMap<Character,Node>();
+      Arrays.fill(nextNodes,null);
       count = 0;
       category=-1;
     }
 
     public Node subNode(char c){
-      return childMap.get(c);
+      return nextNodes[(int)c];
     }
   }
 
