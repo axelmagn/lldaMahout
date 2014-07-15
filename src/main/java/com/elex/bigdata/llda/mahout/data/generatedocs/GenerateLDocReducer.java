@@ -37,8 +37,10 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   private BDMD5 bdmd5;
   private Map<String, String> url_category_map = new HashMap<String, String>();
   private Map<String, Integer> category_label_map = new HashMap<String, Integer>();
-  private Map<String, PrefixTrie> categoryUrlTries = new HashMap<String, PrefixTrie>();
+  PrefixTrie prefixTrie = new PrefixTrie();
   private String[] destCategories = new String[]{"jogos", "compras", "Friends", "Tourism"};
+  Map<String, Integer> categoryIdMap = new HashMap<String, Integer>();
+  Map<Integer, String> idCategoryMap = new HashMap<Integer, String>();
   private SequenceFile.Writer uidWriter;
   private boolean saveUids = false;
   private int uidNum = 0;
@@ -57,8 +59,9 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     Path urlCategoryPath = new Path(resourcesPath, URL_CATEGORY);
     Path categoryLabelPath = new Path(resourcesPath, CATEGORY_LABEL);
 
-    for (String category : destCategories) {
-      categoryUrlTries.put(category, new PrefixTrie());
+    for (int i = 0; i < destCategories.length; i++) {
+      categoryIdMap.put(destCategories[i], i);
+      idCategoryMap.put(i, destCategories[i]);
     }
 
     String uidFile = conf.get(GenerateLDocDriver.UID_PATH);
@@ -81,10 +84,10 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     String line = "";
     while ((line = urlCategoryReader.readLine()) != null) {
       String[] categoryUrls = line.split(" ");
-      if (categoryUrlTries.containsKey(categoryUrls[0])) {
-        PrefixTrie prefixTrie = categoryUrlTries.get(categoryUrls[0]);
+      if (categoryIdMap.containsKey(categoryUrls[0])) {
+        int id = categoryIdMap.get(categoryUrls[0]);
         for (int i = 1; i < categoryUrls.length; i++)
-          prefixTrie.insert(categoryUrls[i]);
+          prefixTrie.insert(categoryUrls[i], id);
       } else {
         for (int i = 1; i < categoryUrls.length; i++) {
           url_category_map.put(categoryUrls[i], categoryUrls[0]);
@@ -135,13 +138,10 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       else
         urlCounts.put(id, (double) count);
       String category = url_category_map.get(url.toString());
-      if(category==null){
-        for(Map.Entry<String,PrefixTrie> entry: categoryUrlTries.entrySet()){
-          if(entry.getValue().prefixSearch(url.toString())){
-            category=entry.getKey();
-            break;
-          }
-        }
+      if (category == null) {
+        int categoryId = prefixTrie.prefixSearch(url.toString());
+        if (categoryId != -1)
+          category = idCategoryMap.get(id);
       }
       if (category != null) {
         Integer label = category_label_map.get(category);

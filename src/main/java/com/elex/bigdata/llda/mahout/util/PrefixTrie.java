@@ -18,8 +18,8 @@ public class PrefixTrie {
     root = new Node();
   }
 
-  public void insert(String word){
-    if(search(word) == true) return;
+  public void insert(String word,int category){
+    if(search(word) !=-1 ) return;
 
     Node current = root;
     for(int i = 0; i < word.length(); i++){
@@ -33,40 +33,38 @@ public class PrefixTrie {
       current.count++;
     }
     // Set isEnd to indicate end of the word
-    current.isEnd = true;
+    current.category = category;
   }
-  public boolean search(String word){
+  public int search(String word){
     Node current = root;
 
     for(int i = 0; i < word.length(); i++){
-      if(current.subNode(word.charAt(i)) == null)
-        return false;
-      else
-        current = current.subNode(word.charAt(i));
+      current = current.subNode(word.charAt(i));
+      if(current == null)
+        return -1;
     }
         /*
         * This means that a string exists, but make sure its
         * a word by checking its 'isEnd' flag
         */
-    if (current.isEnd == true) return true;
-    else return false;
+    return current.category;
   }
 
-  public boolean prefixSearch(String word){
+  public int prefixSearch(String word){
     Node current = root;
 
     for(int i = 0; i < word.length(); i++){
-      if(current.subNode(word.charAt(i)) == null)
-        return false;
-      else
-        current = current.subNode(word.charAt(i));
-      if(current.isEnd==true)return true;
+      current=current.subNode(word.charAt(i));
+      if(current == null)
+        return -1;
+      else if(current.category!=-1)
+        return current.category;
     }
-    return false;
+    return current.category;
   }
 
   public void deleteWord(String word){
-    if(search(word) == false) return;
+    if(search(word) == -1) return;
 
     Node current = root;
     for(char c : word.toCharArray()) {
@@ -79,17 +77,17 @@ public class PrefixTrie {
         current = child;
       }
     }
-    current.isEnd = false;
+    current.category=-1;
   }
   public static class Node{
-    boolean isEnd; // whether the end of the words
+    int category;
     int count;  // the number of words sharing this character
     Map<Character,Node> childMap;
 
     public Node(){
       childMap = new HashMap<Character,Node>();
-      isEnd = false;
       count = 0;
+      category=-1;
     }
 
     public Node subNode(char c){
