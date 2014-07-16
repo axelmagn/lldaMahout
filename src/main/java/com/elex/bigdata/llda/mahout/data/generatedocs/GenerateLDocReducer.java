@@ -122,23 +122,27 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     long startTime;
     for (Text value : values) {
       startTime=System.nanoTime();
-      String wordMd5 = null;
       String[] tokens = value.toString().split("\t");
       String url = tokens[0];
+      String wordMd5=tokens[1];
       long md5StartTime=System.nanoTime();
+      /*
       try {
         wordMd5 = bdmd5.toMD5(url.toString());
       } catch (HashingException e) {
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
       }
       md5Time+=(System.nanoTime()-md5StartTime);
-      queryDictTime+=(System.nanoTime()-startTime);
-      if (!dict.contains(wordMd5))
+      */
+      if (!dict.contains(wordMd5)){
+        queryDictTime+=(System.nanoTime()-startTime);
         continue;
+      }
+      queryDictTime+=(System.nanoTime()-startTime);
       startTime=System.nanoTime();
       hitCount++;
       int id = dict.getId(wordMd5);
-      int count = Integer.parseInt(tokens[1]);
+      int count = Integer.parseInt(tokens[2]);
       if (urlCounts.containsKey(id))
         urlCounts.put(id, urlCounts.get(id) + count);
       else
