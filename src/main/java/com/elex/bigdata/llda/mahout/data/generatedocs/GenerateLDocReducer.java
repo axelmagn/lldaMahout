@@ -73,12 +73,14 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
         fs.delete(uidPath);
       uidWriter = SequenceFile.createWriter(fs, conf, uidPath, Text.class, NullWritable.class);
     }
+    /*
     try {
       bdmd5 = BDMD5.getInstance();
       dict = new Dictionary(conf.get(UpdateDictDriver.DICT_ROOT), fs, conf);
     } catch (HashingException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
+    */
     //termSize=dictionary.size();
 
     BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(fs.open(urlCategoryPath)));
@@ -124,7 +126,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       startTime=System.nanoTime();
       String[] tokens = value.toString().split("\t");
       String url = tokens[0];
-      String wordMd5=tokens[1];
+      //String wordMd5=tokens[1];
       long md5StartTime=System.nanoTime();
       /*
       try {
@@ -134,14 +136,17 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       }
       md5Time+=(System.nanoTime()-md5StartTime);
       */
+      /*
       if (!dict.contains(wordMd5)){
         queryDictTime+=(System.nanoTime()-startTime);
         continue;
       }
+      */
       queryDictTime+=(System.nanoTime()-startTime);
       startTime=System.nanoTime();
       hitCount++;
-      int id = dict.getId(wordMd5);
+      //int id = dict.getId(wordMd5);
+      int id=Integer.parseInt(tokens[1]);
       int count = Integer.parseInt(tokens[2]);
       if (urlCounts.containsKey(id))
         urlCounts.put(id, urlCounts.get(id) + count);

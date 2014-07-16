@@ -2,6 +2,10 @@ package com.elex.bigdata.llda.mahout.data.generatedocs;
 
 import com.elex.bigdata.hashing.BDMD5;
 import com.elex.bigdata.hashing.HashingException;
+import com.elex.bigdata.llda.mahout.dictionary.Dictionary;
+import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -26,7 +30,8 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
   private Set<String> eliminated_urls=new HashSet<String>();
   private int index=0,sampleRatio=100000;
   private BDMD5 bdmd5;
-  public void setup(Context context){
+  private Dictionary dict;
+  public void setup(Context context) throws IOException {
     InputStream inputStream = this.getClass().getResourceAsStream("/eliminated_urls");
     BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
     String line = null;
@@ -40,7 +45,14 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    bdmd5=BDMD5.getInstance();
+    Configuration conf=context.getConfiguration();
+    FileSystem fs=FileSystem.get(conf);
+    try {
+      bdmd5=BDMD5.getInstance();
+      dict = new Dictionary(conf.get(UpdateDictDriver.DICT_ROOT), fs, conf);
+    } catch (HashingException e) {
+      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+    }
   }
   public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
     /*
@@ -62,7 +74,9 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
       */
     try {
       String urlMd5=bdmd5.toMD5(uidUrlCount[1]);
-      context.write(new Text(uidUrlCount[0]),new Text(uidUrlCount[1]+"\t"+urlMd5+"\t"+uidUrlCount[2]));
+      if(!dict.contains(urlMd5))
+        return;
+      context.write(new Text(uidUrlCount[0]),new Text(uidUrlCount[1]+"\t"+dict.getId(urlMd5)+"\t"+uidUrlCount[2]));
     } catch (HashingException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }
