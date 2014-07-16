@@ -170,7 +170,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     uidNum++;
 
     if ((++index) >= sampleRatio) {
-      System.out.println("prefixTrie cost "+timeCost/1000*1000l);
+      System.out.println("prefixTrie cost "+timeCost/(1000*1000l));
       log.info("hitCount is " + hitCount);
       log.info(" uidNum " + uidNum);
       index = 0;
@@ -194,7 +194,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
 
   public void cleanup(Context context) throws IOException {
     log.info("uidNum is " + uidNum);
-    System.out.println("total prefixTrie cost "+timeCost/1000*1000l);
+    System.out.println("total prefixTrie cost "+timeCost/(1000*1000l));
     if (saveUids) {
       uidWriter.hflush();
       uidWriter.close();
