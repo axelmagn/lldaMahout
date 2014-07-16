@@ -46,6 +46,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   private int uidNum = 0;
   private int sampleRatio = 10000, index = 0;
   private long timeCost = 0l;
+  private long labelVectorTimeCost=0l;
 
   //int termSize;
   public void setup(Context context) throws IOException {
@@ -147,16 +148,19 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       }
       long cost=System.nanoTime()-t1;
       timeCost+=cost;
+      t1=System.nanoTime();
       if (category != null) {
         Integer label = category_label_map.get(category);
         if (label != null) {
           labelSet.add(label);
         }
       }
+      labelVectorTimeCost+=System.nanoTime()-t1;
     }
     //
     if (urlCounts.size() == 0)
       return;
+    long t1=System.nanoTime();
     Vector urlCountsVector = new RandomAccessSparseVector(urlCounts.size() * 2);
     for (Map.Entry<Integer, Double> urlCount : urlCounts.entrySet()) {
       urlCountsVector.setQuick(urlCount.getKey(), urlCount.getValue());
@@ -168,9 +172,11 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     }
     MultiLabelVectorWritable labelVectorWritable = new MultiLabelVectorWritable(urlCountsVector, labels);
     uidNum++;
+    labelVectorTimeCost+=System.nanoTime()-t1;
 
     if ((++index) >= sampleRatio) {
-      System.out.println("prefixTrie cost "+timeCost/(1000*1000l));
+      log.info("prefixTrie cost "+timeCost/(1000*1000l));
+      log.info("produce label vector cost "+labelVectorTimeCost/(1000*1000l));
       log.info("hitCount is " + hitCount);
       log.info(" uidNum " + uidNum);
       index = 0;
