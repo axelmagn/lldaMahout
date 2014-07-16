@@ -44,7 +44,8 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   private SequenceFile.Writer uidWriter;
   private boolean saveUids = false;
   private int uidNum = 0;
-  private int sampleRatio = 100 * 10000, index = 0;
+  private int sampleRatio = 10000, index = 0;
+  private long timeCost = 0l;
 
   //int termSize;
   public void setup(Context context) throws IOException {
@@ -137,12 +138,15 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
         urlCounts.put(id, urlCounts.get(id) + count);
       else
         urlCounts.put(id, (double) count);
+      long t1=System.nanoTime();
       String category = url_category_map.get(url.toString());
       if (category == null) {
         int categoryId = prefixTrie.prefixSearch(url.toString());
         if (categoryId != -1)
           category = idCategoryMap.get(id);
       }
+      long cost=System.nanoTime()-t1;
+      timeCost+=cost;
       if (category != null) {
         Integer label = category_label_map.get(category);
         if (label != null) {
@@ -166,6 +170,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     uidNum++;
 
     if ((++index) >= sampleRatio) {
+      System.out.println("prefixTrie cost "+timeCost);
       log.info("hitCount is " + hitCount);
       log.info(" uidNum " + uidNum);
       index = 0;
@@ -189,6 +194,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
 
   public void cleanup(Context context) throws IOException {
     log.info("uidNum is " + uidNum);
+    System.out.println("total prefixTrie cost "+timeCost);
     if (saveUids) {
       uidWriter.hflush();
       uidWriter.close();

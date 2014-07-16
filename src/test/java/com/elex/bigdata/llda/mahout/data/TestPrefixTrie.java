@@ -59,7 +59,7 @@ public class TestPrefixTrie {
     */
     String[] destUrls = new String[]{"www.jogos.com", "www.jogos.com/myword", "www.neoseeker.com", "www.jogos.cn/myword", "backyardscoreboards.com/hello?myapp=12&myid=15"};
     long t1 = System.currentTimeMillis();
-    for (int i = 0; i < 1000 * 1000; i++) {
+    for (int i = 0; i < 1000 * 1000*10; i++) {
       for (String url : destUrls) {
         String category = url_category_map.get(url.toString());
         if (category == null) {
