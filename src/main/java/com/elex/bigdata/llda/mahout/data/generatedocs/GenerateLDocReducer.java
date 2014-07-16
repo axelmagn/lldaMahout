@@ -45,7 +45,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   private boolean saveUids = false;
   private int uidNum = 0;
   private int sampleRatio = 10000, index = 0;
-  private long timeCost = 0l,labelVectorTimeCost=0l,queryDictTime=0l,ioTime=0l;
+  private long timeCost = 0l,labelVectorTimeCost=0l,queryDictTime=0l,ioTime=0l,reduceTime=0l;
 
   //int termSize;
   public void setup(Context context) throws IOException {
@@ -115,6 +115,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
        uidWriter.write(key,NullWritable)
 
      */
+    long reduceStart=System.nanoTime();
     int hitCount = 0;
     Map<Integer, Double> urlCounts = new HashMap<Integer, Double>();
     Set<Integer> labelSet = new HashSet<Integer>();
@@ -179,6 +180,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       log.info("produce label vector cost "+labelVectorTimeCost/(1000*1000l));
       log.info("query Dict and calculate url count use "+queryDictTime/(1000*1000l));
       log.info("io use "+ioTime/(1000*1000l));
+      log.info("reduce use "+reduceTime/(1000*1000));
       log.info("hitCount is " + hitCount);
       log.info(" uidNum " + uidNum);
       index = 0;
@@ -202,6 +204,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       uidWriter.append(key, NullWritable.get());
     context.write(key, labelVectorWritable);
     ioTime+=(System.nanoTime()-startTime);
+    reduceTime+=(System.nanoTime()-reduceStart);
   }
 
   public void cleanup(Context context) throws IOException {

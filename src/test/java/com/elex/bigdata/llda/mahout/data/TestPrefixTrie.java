@@ -71,7 +71,7 @@ public class TestPrefixTrie {
     }
     long t2 = System.currentTimeMillis();
     System.out.println((t2 - t1) + " ms");
-    System.out.println((System.nanoTime()-startTime)+" ms");
+    System.out.println((System.nanoTime()-startTime)/(1000*1000)+" ms");
 
   }
 
