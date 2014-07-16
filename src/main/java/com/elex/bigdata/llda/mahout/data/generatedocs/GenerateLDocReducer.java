@@ -210,8 +210,13 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   }
 
   public void cleanup(Context context) throws IOException {
-    log.info("uidNum is " + uidNum);
-    System.out.println("total prefixTrie cost "+timeCost/(1000*1000l));
+    log.info("prefixTrie cost "+timeCost/(1000*1000l));
+    log.info("produce label vector cost "+labelVectorTimeCost/(1000*1000l));
+    log.info("query Dict  use "+queryDictTime/(1000*1000l));
+    log.info("cal count use "+calTime/(1000*1000l));
+    log.info("io use "+ioTime/(1000*1000l));
+    log.info("reduce use "+reduceTime/(1000*1000));
+    log.info(" uidNum " + uidNum);
     if (saveUids) {
       uidWriter.hflush();
       uidWriter.close();
