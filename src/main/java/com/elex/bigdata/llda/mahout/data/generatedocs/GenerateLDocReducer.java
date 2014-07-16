@@ -45,7 +45,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   private boolean saveUids = false;
   private int uidNum = 0;
   private int sampleRatio = 10000, index = 0;
-  private long timeCost = 0l,labelVectorTimeCost=0l,queryDictTime=0l,calTime=0l,ioTime=0l,reduceTime=0l;
+  private long timeCost = 0l,labelVectorTimeCost=0l,queryDictTime=0l,md5Time=0l,calTime=0l,ioTime=0l,reduceTime=0l;
 
   //int termSize;
   public void setup(Context context) throws IOException {
@@ -125,12 +125,13 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       String wordMd5 = null;
       String[] tokens = value.toString().split("\t");
       String url = tokens[0];
-
+      long md5StartTime=System.nanoTime();
       try {
         wordMd5 = bdmd5.toMD5(url.toString());
       } catch (HashingException e) {
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
       }
+      md5Time+=(System.nanoTime()-md5StartTime);
       queryDictTime+=(System.nanoTime()-startTime);
       if (!dict.contains(wordMd5))
         continue;
@@ -186,6 +187,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       log.info("prefixTrie cost "+timeCost/(1000*1000l));
       log.info("produce label vector cost "+labelVectorTimeCost/(1000*1000l));
       log.info("query Dict  use "+queryDictTime/(1000*1000l));
+      log.info("md5 use "+md5Time/(1000*1000l));
       log.info("cal count use "+calTime/(1000*1000l));
       log.info("io use "+ioTime/(1000*1000l));
       log.info("reduce use "+reduceTime/(1000*1000));
