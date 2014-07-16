@@ -182,6 +182,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       log.info("hitCount is " + hitCount);
       log.info(" uidNum " + uidNum);
       index = 0;
+      /*
       StringBuilder vectorStr = new StringBuilder();
       Iterator<Vector.Element> iterator = urlCountsVector.iterateNonZero();
       while (iterator.hasNext()) {
@@ -189,6 +190,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
         vectorStr.append(e.index() + ":" + e.get() + "  ");
       }
       log.info("vector is : " + vectorStr.toString());
+      */
       StringBuilder labelStr = new StringBuilder();
       for (int label : labels) {
         labelStr.append(label + " ");
