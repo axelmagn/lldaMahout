@@ -58,7 +58,7 @@ public class TestPrefixTrie {
     }
     */
     String[] destUrls = new String[]{"www.jogos.com", "www.jogos.com/myword", "www.neoseeker.com", "www.jogos.cn/myword", "backyardscoreboards.com/hello?myapp=12&myid=15"};
-    long t1 = System.currentTimeMillis();
+    long t1 = System.currentTimeMillis(),startTime=System.nanoTime();
     for (int i = 0; i < 1000 * 1000*10; i++) {
       for (String url : destUrls) {
         String category = url_category_map.get(url.toString());
@@ -71,7 +71,7 @@ public class TestPrefixTrie {
     }
     long t2 = System.currentTimeMillis();
     System.out.println((t2 - t1) + " ms");
-
+    System.out.println((System.nanoTime()-startTime)+" ms");
 
   }
 
@@ -91,7 +91,9 @@ public class TestPrefixTrie {
       System.out.println((System.nanoTime() - t1)+" C");
     }
     t1 = System.nanoTime();
+    long t2=System.currentTimeMillis();
     new String("www.jogos.com").hashCode();
     System.out.println(System.nanoTime() - t1);
+    System.out.println(System.currentTimeMillis()-t2);
   }
 }
