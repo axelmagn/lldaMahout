@@ -4,6 +4,7 @@ day=$1
 resultDir=${resultRoot}/${day}
 resultFile=${resultDir}/result
 if test -e ${resultFile}
+  then
   rm ${resultFile}
 fi
 categorys=(a b c d z)
