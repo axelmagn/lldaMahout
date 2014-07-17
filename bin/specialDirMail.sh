@@ -5,6 +5,7 @@ resultDir=${resultRoot}/${day}
 resultFile=${resultDir}/result
 if test -e ${resultFile}
   rm ${resultFile}
+fi
 categorys=(a b c d z)
 cat ${resultDir}/* | wc -l >> ${resultDir}/result
 for category in ${categorys[@]};do
