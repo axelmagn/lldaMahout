@@ -3,8 +3,8 @@ resultRoot=/data/log/user_category_result/pr
 day=$1
 resultDir=${resultRoot}/${day}
 resultFile=${resultDir}/result
-if [ -e ${resultFile} ]
- rm ${resultFile}
+if test -e ${resultFile}
+  rm ${resultFile}
 categorys=(a b c d z)
 cat ${resultDir}/* | wc -l >> ${resultDir}/result
 for category in ${categorys[@]};do
