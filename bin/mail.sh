@@ -5,7 +5,7 @@ categorys=(a b c d z)
 for category in categorys;do
    echo ${category}
    echo ${category} >> ${resultDir}/result
-   cat * | grep ${category}$ | wc -l >> ${resultDir}/result
+   cat ${resultDir}/* | grep ${category}$ | wc -l >> ${resultDir}/result
 done
 cat ${resultDir}/result | mail -s "category result ${day}" "yangbo@elex-tech.com"
 
