@@ -44,7 +44,7 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
      int wordCount=0;
      for(IntWritable countWritable:values){
         wordCount+=countWritable.get();
-        if(wordCount>= word_count_threshold)
+        if(wordCount>= word_count_threshold&&wordCount<=10000)
         {
           try {
             dict.update(bdmd5.toMD5(key.toString()).substring(UpdateDictDriver.MD5_START_INDEX,UpdateDictDriver.MD5_END_INDEX));
