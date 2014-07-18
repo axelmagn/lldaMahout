@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.dictionary;
 
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,8 +48,7 @@ public class UpdateDictDriver extends AbstractJob{
   }
 
   public static Job prepareJob(Configuration conf,Path inputPath,Path dictRootPath) throws IOException {
-    conf.setLong("mapred.max.split.size", 10*1000*1000*1000); // 10G
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 10*1000*1000*1000);
+    FileSystemUtil.setCombineInputSplitSize(conf,inputPath);
     conf.set(DICT_ROOT,dictRootPath.toString());
     Path dictOutputPath=new Path(dictRootPath,"updateDictOut");
     FileSystem fs=FileSystem.get(conf);
