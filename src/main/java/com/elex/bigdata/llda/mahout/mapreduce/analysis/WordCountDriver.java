@@ -71,6 +71,9 @@ public class WordCountDriver extends AbstractJob {
       String[] tokens = line.split("\t");
       if (tokens.length < 3)
         return;
+      int index=tokens[1].indexOf('?');
+      if(index!=-1)
+        tokens[1]=tokens[1].substring(0,index);
       try {
         context.write(new Text(bdmd5.toMD5(tokens[1])), new IntWritable(Integer.parseInt(tokens[2])));
       } catch (HashingException e) {
