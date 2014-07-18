@@ -71,11 +71,23 @@ public class WordCountDriver extends AbstractJob {
       String[] tokens = line.split("\t");
       if (tokens.length < 3)
         return;
-      int index=tokens[1].indexOf('?');
+      String word=tokens[1];
+      String count=tokens[2];
+      int index=word.indexOf('?');
       if(index!=-1)
-        tokens[1]=tokens[1].substring(0,index);
+        word=word.substring(0,index);
+      int frequent=0;
+      for(int i=0;i<word.length();i++){
+        if(word.charAt(i)=='/'){
+          frequent++;
+          if(frequent==3){
+            word=word.substring(0,i);
+            break;
+          }
+        }
+      }
       try {
-        context.write(new Text(bdmd5.toMD5(tokens[1])), new IntWritable(Integer.parseInt(tokens[2])));
+        context.write(new Text(bdmd5.toMD5(word)), new IntWritable(Integer.parseInt(count)));
       } catch (HashingException e) {
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
       }

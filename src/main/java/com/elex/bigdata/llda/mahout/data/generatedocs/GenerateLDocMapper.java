@@ -72,11 +72,15 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
     if((++index)>sampleRatio)
       log.info(value.toString() + " count is " + count);
       */
+    String url=uidUrlCount[1];
+    int index=url.indexOf('?');
+    if(index!=-1)
+      url=url.substring(0,index);
     try {
-      String urlMd5=bdmd5.toMD5(uidUrlCount[1]).substring(UpdateDictDriver.MD5_START_INDEX,UpdateDictDriver.MD5_END_INDEX);
+      String urlMd5=bdmd5.toMD5(url).substring(UpdateDictDriver.MD5_START_INDEX,UpdateDictDriver.MD5_END_INDEX);
       if(!dict.contains(urlMd5))
         return;
-      context.write(new Text(uidUrlCount[0]),new Text(uidUrlCount[1]+"\t"+dict.getId(urlMd5)+"\t"+uidUrlCount[2]));
+      context.write(new Text(uidUrlCount[0]),new Text(url+"\t"+dict.getId(urlMd5)+"\t"+uidUrlCount[2]));
     } catch (HashingException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     }

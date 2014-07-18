@@ -82,6 +82,7 @@ public class TestPrefixTrie {
     System.out.println(System.nanoTime() - t1);
     String str=new String("www.jogos.com/hello.htmldddddddddddddddddddddddddddccccccccccccccddsssssssssssdfgfdssssssss");
     Character c=new Character('b');
+    /*
     for (int i = 0; i < 10; i++) {
       t1 = System.nanoTime();
       str.hashCode();
@@ -90,10 +91,23 @@ public class TestPrefixTrie {
       c.hashCode();
       System.out.println((System.nanoTime() - t1)+" C");
     }
+    */
     t1 = System.nanoTime();
     long t2=System.currentTimeMillis();
     new String("www.jogos.com").hashCode();
     System.out.println(System.nanoTime() - t1);
     System.out.println(System.currentTimeMillis()-t2);
+    String url=new String("www.123.com/1/2/3");
+    String[] tokens=url.split("/");
+    if(tokens.length>=4){
+      StringBuilder builder=new StringBuilder();
+      for (int i=0;i<2;i++){
+        builder.append(tokens[i]+"/");
+      }
+      builder.append(tokens[2]);
+      url=builder.toString();
+    }
+    System.out.println(url);
+
   }
 }

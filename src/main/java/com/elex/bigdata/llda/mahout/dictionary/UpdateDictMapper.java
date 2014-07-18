@@ -28,6 +28,9 @@ public class UpdateDictMapper extends Mapper<Object,Text,Text,IntWritable> {
      }
      String url=uidUrlCount[1];
      Integer count=Integer.parseInt(uidUrlCount[2]);
+     int index=url.indexOf('?');
+     if(index!=-1)
+       url=url.substring(0,index);
      context.write(new Text(url), new IntWritable(count));
   }
 }
