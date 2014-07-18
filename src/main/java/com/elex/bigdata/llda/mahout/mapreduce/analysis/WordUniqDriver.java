@@ -95,7 +95,21 @@ public class WordUniqDriver {
       String[] tokens = line.split("\t");
       if (tokens.length < 2)
         return;
-      context.write(new Text(tokens[0]), new IntWritable(Integer.parseInt(tokens[1])));
+      String url=tokens[0];
+      int index=url.indexOf('?');
+      if(index!=-1)
+        url=url.substring(0,index);
+      int frequent=0;
+      for(int i=0;i<url.length();i++){
+        if(url.charAt(i)=='/'){
+          frequent++;
+          if(frequent==3){
+            url=url.substring(0,i);
+            break;
+          }
+        }
+      }
+      context.write(new Text(url), new IntWritable(Integer.parseInt(tokens[1])));
     }
   }
 }

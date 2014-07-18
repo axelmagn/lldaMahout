@@ -76,6 +76,16 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
     int index=url.indexOf('?');
     if(index!=-1)
       url=url.substring(0,index);
+    int frequent=0;
+    for(int i=0;i<url.length();i++){
+      if(url.charAt(i)=='/'){
+        frequent++;
+        if(frequent==3){
+          url=url.substring(0,i);
+          break;
+        }
+      }
+    }
     try {
       String urlMd5=bdmd5.toMD5(url).substring(UpdateDictDriver.MD5_START_INDEX,UpdateDictDriver.MD5_END_INDEX);
       if(!dict.contains(urlMd5))

@@ -98,6 +98,7 @@ public class TestPrefixTrie {
     System.out.println(System.nanoTime() - t1);
     System.out.println(System.currentTimeMillis()-t2);
     String url=new String("www.123.com/1/2/3");
+    t1=System.nanoTime();
     String[] tokens=url.split("/");
     if(tokens.length>=4){
       StringBuilder builder=new StringBuilder();
@@ -107,7 +108,21 @@ public class TestPrefixTrie {
       builder.append(tokens[2]);
       url=builder.toString();
     }
+    System.out.println(System.nanoTime()-t1);
     System.out.println(url);
-
+    int frequent=0;
+    t1=System.nanoTime();
+    String word=new String("www.123.com/1/2/3");
+    for(int i=0;i<word.length();i++){
+      if(word.charAt(i)=='/'){
+        frequent++;
+        if(frequent==3){
+          word=word.substring(0,i);
+          break;
+        }
+      }
+    }
+    System.out.println(System.nanoTime()-t1);
+    System.out.println(word);
   }
 }
