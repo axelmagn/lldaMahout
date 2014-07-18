@@ -47,7 +47,7 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
         if(wordCount>= word_count_threshold)
         {
           try {
-            dict.update(bdmd5.toMD5(key.toString()));
+            dict.update(bdmd5.toMD5(key.toString()).substring(UpdateDictDriver.MD5_START_INDEX,UpdateDictDriver.MD5_END_INDEX));
           } catch (HashingException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
           }
