@@ -24,7 +24,7 @@ import java.io.IOException;
 public class UpdateDictDriver extends AbstractJob{
   public static final String DICT_ROOT ="dict_root";
   public static final String COUNT_THRESHOLD="count_threshold";
-  public static final int DEFAULT_COUNT_THRESHOLD=3;
+  public static final int DEFAULT_COUNT_THRESHOLD=8;
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
