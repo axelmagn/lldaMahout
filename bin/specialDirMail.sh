@@ -12,6 +12,6 @@ cat ${resultDir}/* | wc -l >> ${resultDir}/result
 for category in ${categorys[@]};do
    echo ${category}
    echo ${category} >> ${resultDir}/result
-   cat ${resultDir}/* | grep ${category}$ | wc -l >> ${resultDir}/result
+   cat ${resultDir}/* | grep ${category}$ | awk '{print $1}' | sort | uniq | wc -l >> ${resultDir}/result
 done
 cat ${resultDir}/result | mail -s "category result ${day}" "yangbo@elex-tech.com"
