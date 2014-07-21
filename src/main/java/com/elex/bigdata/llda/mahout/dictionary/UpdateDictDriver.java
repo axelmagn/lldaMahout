@@ -25,7 +25,7 @@ import java.io.IOException;
 public class UpdateDictDriver extends AbstractJob{
   public static final String DICT_ROOT ="dict_root";
   public static final String COUNT_THRESHOLD="count_threshold";
-  public static final int DEFAULT_COUNT_THRESHOLD=8;
+  public static final int DEFAULT_COUNT_THRESHOLD=5;
   public static final int MD5_START_INDEX=6,MD5_END_INDEX=18;
   @Override
   public int run(String[] args) throws Exception {
