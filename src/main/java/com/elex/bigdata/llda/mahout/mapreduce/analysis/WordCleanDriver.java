@@ -106,11 +106,11 @@ public class WordCleanDriver extends AbstractJob {
         context.write(key,new Text(entry.getKey()+"\t"+entry.getValue()));
       }
       if(uidNum%10000==1){
-        System.out.println("uidNum: "+uidNum+" trieCost: "+trieCost/1000);
+        System.out.println("uidNum: "+uidNum+" trieCost: "+trieCost/(1000*1000));
       }
     }
     public void cleanup(Context context){
-      System.out.println("uidNum: "+uidNum+" trieCost: "+trieCost/1000);
+      System.out.println("uidNum: "+uidNum+" trieCost: "+trieCost/(1000*1000));
     }
   }
 
