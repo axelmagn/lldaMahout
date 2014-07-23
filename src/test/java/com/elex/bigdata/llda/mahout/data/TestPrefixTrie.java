@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.data;
 
 import com.elex.bigdata.llda.mahout.util.PrefixTrie;
+import com.elex.bigdata.llda.mahout.util.Trie;
 import org.junit.Test;
 
 import java.io.BufferedReader;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -125,5 +127,18 @@ public class TestPrefixTrie {
     }
     System.out.println(System.nanoTime()-t1);
     System.out.println(word);
+  }
+  @Test
+  public void testTrie(){
+    Trie trie=new Trie();
+    String[] words=new String[]{"www.gravatar.com/avatar/68b891d4f32d3463769f7361e908d4eb","www.gravatar.com/avatar/03b8834dd9c333d836ad708917852004","www.gravatar.com/avatar.php",
+    "www.fonwire.com/panel/index.php/adv_publish/show_adv/2766/217/123/www.dvxfilm.com","bilgi.ttnet.com.tr/guvenli_internet_uyari/index.html"};
+    for(String word: words)
+      trie.insert(word);
+    Map<String,Integer> commonStrCounts=trie.searchCommonStr('/');
+    for(Map.Entry<String,Integer> commonStr: commonStrCounts.entrySet()){
+      System.out.println(commonStr.getKey()+":"+commonStr.getValue());
+    }
+
   }
 }

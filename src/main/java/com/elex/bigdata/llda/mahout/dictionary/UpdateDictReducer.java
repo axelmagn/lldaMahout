@@ -2,6 +2,7 @@ package com.elex.bigdata.llda.mahout.dictionary;
 
 import com.elex.bigdata.hashing.BDMD5;
 import com.elex.bigdata.hashing.HashingException;
+import com.elex.bigdata.llda.mahout.util.Trie;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.io.IntWritable;
