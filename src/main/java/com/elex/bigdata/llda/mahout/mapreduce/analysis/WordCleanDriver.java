@@ -90,15 +90,27 @@ public class WordCleanDriver extends AbstractJob {
   }
 
   public static class WordCleanReducer extends Reducer<Text,Text,Text,Text> {
+    private int uidNum=0;
+    private long trieCost=0;
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
+      uidNum++;
+      long t1=System.nanoTime();
       Trie trie=new Trie();
       for(Text wordCount: values){
         String[] tokens=wordCount.toString().split("\t");
         trie.insert(tokens[0],Integer.parseInt(tokens[1]));
       }
-      for(Map.Entry<String,Integer> entry: trie.searchCommonStr('/').entrySet()){
+      Map<String,Integer> wordCountMap=trie.searchCommonStr('/');
+      trieCost+=System.nanoTime()-t1;
+      for(Map.Entry<String,Integer> entry: wordCountMap.entrySet()){
         context.write(key,new Text(entry.getKey()+"\t"+entry.getValue()));
       }
+      if(uidNum%10000==1){
+        System.out.println("trieCost: "+trieCost/1000);
+      }
+    }
+    public void cleanup(Context context){
+      System.out.println("trieCost: "+trieCost/1000);
     }
   }
 

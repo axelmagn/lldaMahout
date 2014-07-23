@@ -76,7 +76,7 @@ public class GetDictWordDriver extends AbstractJob {
       for(IntWritable countWritable:values){
         wordCount+=countWritable.get();
       }
-      if(wordCount>=word_count_threshold&&wordCount<10000)
+      if(wordCount>=word_count_threshold)
         context.write(key,new IntWritable(wordCount));
     }
 

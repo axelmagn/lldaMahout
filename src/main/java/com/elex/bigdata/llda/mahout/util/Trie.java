@@ -110,18 +110,18 @@ public class Trie {
       commonStrs.put(prefix,node.count);
       return commonStrs;
     } else if (prefix.length() >= 1 && (index=prefix.lastIndexOf('/'))!=-1 && node.nextNodes.size() > 1) {
+      /*
       int maxCount=0;
       for(Map.Entry<Character,Node> entry: node.nextNodes.entrySet()){
          if(entry.getValue().count>maxCount)
            maxCount=entry.getValue().count;
       }
-      commonStrs.put(prefix.substring(0, index),maxCount);
+      */
+      commonStrs.put(prefix.substring(0, index),node.count);
       return commonStrs;
     } else {
       for (Map.Entry<Character, Node> entry : node.nextNodes.entrySet()) {
-        for (Map.Entry<String,Integer> wordCount: searchCommonStr(entry.getValue(), prefix + entry.getKey(), seperator).entrySet()) {
-          commonStrs.put(wordCount.getKey(),wordCount.getValue());
-        }
+        commonStrs.putAll(searchCommonStr(entry.getValue(), prefix + entry.getKey(), seperator));
       }
     }
     return commonStrs;
