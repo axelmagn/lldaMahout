@@ -11,5 +11,5 @@ for file in ${files[@]};do
   startTime=${time%%_*}
   endTime=${time##*_}
   echo $startTime $endTime
-  sh $baseDir/bin/analysis.sh  url_count/all_projects/${startTime}_${endTime}  url_count/all_projects/clean/${startTime}_${endTime}
+  sh $baseDir/bin/analysis.sh  wordClean url_count/all_projects/${startTime}_${endTime}  url_count/all_projects/clean/${startTime}_${endTime}
 done
