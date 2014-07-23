@@ -84,7 +84,7 @@ public class WordLenDriver {
 
   public static class WordAnalysisCombiner extends Reducer<Text, IntWritable, Text, IntWritable> {
     Pattern pattern = Pattern.compile("\\.(gif|GIF|jpg|JPG|png|PNG|ico|ICO|css|CSS|sit|SIT|eps|EPS|wmf|WMF|zip|ZIP|ppt|PPT|mpg|MPG|xls|XLS|gz|GZ|\" +\n" +
-      "      \"pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS)(\\?.+)?$");
+      "      \"pm|RPM|tgz|TGZ|mov|MOV|exe|EXE|jpeg|JPEG|bmp|BMP|js|JS|MP4|mp4                                             )(\\?.+)?$");
     private int[] wordLens = new int[]{10, 30, 50, 100, 150, 200, 250, 300, 350, 400, 500, 600, 700, 800, 900, 1000};
     private String[] replaceStr = new String[wordLens.length + 1];
     private int[] wordCounts = new int[wordLens.length + 1];
