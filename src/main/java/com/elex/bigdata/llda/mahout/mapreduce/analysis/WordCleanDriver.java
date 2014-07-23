@@ -38,6 +38,7 @@ public class WordCleanDriver extends AbstractJob {
     inputPath = getInputPath();
     outputPath = getOutputPath();
     Configuration conf = getConf();
+    conf.set("mapred.reduce.child.java.opts","-Xmx4096m -Xss1682k");
     Job job = prepareJob(conf, inputPath, outputPath);
     job.submit();
     job.waitForCompletion(true);
