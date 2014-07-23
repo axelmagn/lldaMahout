@@ -35,6 +35,11 @@ if [[ $type = userTrained ]]
      MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordExtractDriver
      echo "hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1"
      hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1
+  elif [[ $type = word ]]
+     then
+     MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.GetDictWordDriver
+     echo "hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1"
+     hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1
   else
      MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordLenDriver
      echo "hadoop jar $JAR $MAIN $2 $3 >> $logFile 2>&1"
