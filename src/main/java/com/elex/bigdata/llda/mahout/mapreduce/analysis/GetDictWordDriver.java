@@ -51,7 +51,7 @@ public class GetDictWordDriver extends AbstractJob {
     Job job=new Job(conf);
     FileSystem fs= FileSystem.get(conf);
     if(fs.exists(outputPath))
-      fs.delete(outputPath);
+      fs.delete(outputPath,true);
     job.setMapperClass(UpdateDictMapper.class);
     job.setReducerClass(GetDictWordReducer.class);
     job.setMapOutputKeyClass(Text.class);
@@ -83,6 +83,6 @@ public class GetDictWordDriver extends AbstractJob {
   }
 
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new GenerateLDocDriver(),args);
+    ToolRunner.run(new Configuration(),new GetDictWordDriver(),args);
   }
 }
