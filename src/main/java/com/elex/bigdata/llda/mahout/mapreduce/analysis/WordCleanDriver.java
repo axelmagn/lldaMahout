@@ -15,6 +15,7 @@ import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class WordCleanDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
-    job.setJarByClass(GetDictWordDriver.class);
+    job.setJarByClass(WordCleanDriver.class);
     job.setJobName("word clean "+inputPath.toString());
     return job;
   }
@@ -98,6 +99,10 @@ public class WordCleanDriver extends AbstractJob {
         context.write(key,new Text(entry.getKey()+"\t"+entry.getValue()));
       }
     }
+  }
+
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new Configuration(),new WordCleanDriver(),args);
   }
 
 
