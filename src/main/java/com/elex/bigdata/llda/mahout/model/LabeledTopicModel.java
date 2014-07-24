@@ -322,7 +322,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void updateTopic(int topic, Vector docTopicCounts) {
+    log.info("get iterateNonZero");
     Iterator<Vector.Element> docTopicElementIter=docTopicCounts.iterateNonZero();
+    log.info("got iterateNonZero");
     Vector distTopicTermCountRow=topicTermCounts.viewRow(topic);
     double topicCountSum=0.0;
     StringBuilder builder=new StringBuilder();
@@ -333,7 +335,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       int termIndex=topicTermCount.index();
       double count=topicTermCount.get();
       builder.append(termIndex+":"+count+",");
-      if(num%100==0){
+      if(num>50){
         log.info("num increase to 100,vector is {}",builder.toString());
       }
       topicCountSum+=count;
