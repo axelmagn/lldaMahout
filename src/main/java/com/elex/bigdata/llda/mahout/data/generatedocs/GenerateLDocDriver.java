@@ -2,6 +2,7 @@ package com.elex.bigdata.llda.mahout.data.generatedocs;
 
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -55,8 +56,7 @@ public class GenerateLDocDriver extends AbstractJob {
   }
 
   public static Job prepareJob(Configuration conf,Path inputPath,Path dictRootPath,Path resourcesPath,Path outputPath) throws IOException {
-    conf.setLong("mapred.max.split.size", 5000*1000*1000); // 5000m
-    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", 5000*1000*1000);
+    FileSystemUtil.setCombineInputSplitSize(conf,inputPath);
     conf.set(UpdateDictDriver.DICT_ROOT,dictRootPath.toString());
     conf.set(RESOURCE_ROOT,resourcesPath.toString());
     FileSystem fs=FileSystem.get(conf);
