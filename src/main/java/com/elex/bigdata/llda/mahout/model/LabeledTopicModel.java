@@ -336,7 +336,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       double count=topicTermCount.get();
       builder.append(termIndex+":"+count+",");
       if(num>50){
-        log.info("num increase to 100,vector is {}",builder.toString());
+        log.info("num increase to 50,vector is {}",builder.toString());
       }
       topicCountSum+=count;
       distTopicTermCountRow.setQuick(termIndex,count+distTopicTermCountRow.get(termIndex));
