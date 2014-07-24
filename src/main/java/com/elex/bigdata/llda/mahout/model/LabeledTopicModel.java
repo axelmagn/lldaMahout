@@ -562,7 +562,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       while (true) { // keep trying if interrupted
         try {
           // start async operation by submitting to the queue
-          queue.put(Pair.of(topic, v));
+          queue.offer(Pair.of(topic, v),3,TimeUnit.SECONDS);
           log.info("queue size increase to {}" ,queue.size());
           // return once you got access to the queue
           return true;
