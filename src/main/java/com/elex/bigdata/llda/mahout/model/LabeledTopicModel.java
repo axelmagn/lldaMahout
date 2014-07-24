@@ -176,7 +176,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     int numTerms = -1;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
     for (Path modelPath : modelPaths) {
-      log.info("load model from {}",modelPath.toString());
+      log.info("load model from {}", modelPath.toString());
       for (Pair<IntWritable, VectorWritable> row
         : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
@@ -190,7 +190,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       throw new IOException(java.util.Arrays.toString(modelPaths) + " have no vectors in it");
     }
     numTopics++;
-    log.info("numTopics is {},numTerms is {}",numTopics,numTerms);
+    log.info("numTopics is {},numTerms is {}", numTopics, numTerms);
     Matrix model = new DenseMatrix(numTopics, numTerms);
     Vector topicSums = new DenseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
@@ -264,13 +264,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     while (docElementIter.hasNext()) {
       Vector.Element element = docElementIter.next();
       terms.add(element.index());
-      docTermCount+=element.get();
+      docTermCount += element.get();
     }
     //long midTime=System.currentTimeMillis();
     List<Integer> topicLabels = new ArrayList<Integer>();
-    Iterator<Vector.Element> labelIter=labels.iterateNonZero();
-    while(labelIter.hasNext()){
-      Vector.Element e=labelIter.next();
+    Iterator<Vector.Element> labelIter = labels.iterateNonZero();
+    while (labelIter.hasNext()) {
+      Vector.Element e = labelIter.next();
       topicLabels.add(e.index());
     }
     //long t1 = System.currentTimeMillis();
@@ -279,7 +279,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     pTopicGivenTerm(terms, topicLabels, docTopicModel);
     //long t2 = System.currentTimeMillis();
     //log.info("pTopic use {} ms with terms' size {}", new Object[]{(t2 - t1),terms.size()});
-    normByTopicAndMultiByCount(original,terms,docTopicModel);
+    normByTopicAndMultiByCount(original, terms, docTopicModel);
     //long t3 = System.currentTimeMillis();
     //log.info("normalize use {} ms with terms' size {}", new Object[]{(t3 - t2),terms.size()});
     // now multiply, term-by-term, by the document, to get the weighted distribution of
@@ -323,25 +323,25 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public void updateTopic(int topic, Vector docTopicCounts) {
     log.info("get iterateNonZero");
-    Iterator<Vector.Element> docTopicElementIter=docTopicCounts.iterateNonZero();
+    Iterator<Vector.Element> docTopicElementIter = docTopicCounts.iterateNonZero();
     log.info("got iterateNonZero");
-    Vector distTopicTermCountRow=topicTermCounts.viewRow(topic);
-    double topicCountSum=0.0;
-    StringBuilder builder=new StringBuilder();
-    int num=0;
-    while(docTopicElementIter.hasNext()){
-      Vector.Element topicTermCount=docTopicElementIter.next();
+    Vector distTopicTermCountRow = topicTermCounts.viewRow(topic);
+    double topicCountSum = 0.0;
+    StringBuilder builder = new StringBuilder();
+    int num = 0;
+    while (docTopicElementIter.hasNext()) {
+      Vector.Element topicTermCount = docTopicElementIter.next();
       num++;
-      int termIndex=topicTermCount.index();
-      double count=topicTermCount.get();
-      builder.append(termIndex+":"+count+",");
-      if(num>50){
-        log.info("num increase to 50,vector is {}",builder.toString());
+      int termIndex = topicTermCount.index();
+      double count = topicTermCount.get();
+      builder.append(termIndex + ":" + count + ",");
+      if (num > 50) {
+        log.info("num increase to 50,vector is {}", builder.toString());
       }
-      topicCountSum+=count;
-      distTopicTermCountRow.setQuick(termIndex,count+distTopicTermCountRow.get(termIndex));
+      topicCountSum += count;
+      distTopicTermCountRow.setQuick(termIndex, count + distTopicTermCountRow.get(termIndex));
     }
-    log.info("topic: {}; docTopicCounts: {}",new Object[]{topic,builder.toString()});
+    log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.set(topic, topicSums.get(topic) + topicCountSum);
   }
 
@@ -434,7 +434,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private void pTopicGivenTerm(List<Integer> terms, List<Integer> topicLabels, Matrix termTopicDist) {
     int modelTermSize = topicTermCounts.columnSize();
-    double Vbeta=eta*numTerms;
+    double Vbeta = eta * numTerms;
     for (Integer topicIndex : topicLabels) {
       Vector termTopicRow = termTopicDist.viewRow(topicIndex);
       Vector topicTermRow = topicTermCounts.viewRow(topicIndex);
@@ -448,7 +448,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       for (Integer termIndex : terms) {
         if (termIndex >= modelTermSize)
           continue;
-        double topicTermCount=topicTermRow.getQuick(termIndex);
+        double topicTermCount = topicTermRow.getQuick(termIndex);
         double topicWeight = docTopicSum - topicTermCount;
         double termTopicLikelihood = (topicTermCount + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
         termTopicRow.setQuick(termIndex, termTopicLikelihood);
@@ -479,17 +479,17 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     return -perplexity;
   }
 
-  private void normByTopicAndMultiByCount(Vector doc,List<Integer> terms,Matrix perTopicSparseDistributions) {
+  private void normByTopicAndMultiByCount(Vector doc, List<Integer> terms, Matrix perTopicSparseDistributions) {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
-    for(Integer termIndex: terms){
+    for (Integer termIndex : terms) {
       double sum = 0;
       for (int x = 0; x < numTopics; x++) {
         sum += perTopicSparseDistributions.viewRow(x).getQuick(termIndex);
       }
-      double count=doc.getQuick(termIndex);
+      double count = doc.getQuick(termIndex);
       for (int x = 0; x < numTopics; x++) {
         perTopicSparseDistributions.viewRow(x).setQuick(termIndex,
-          perTopicSparseDistributions.viewRow(x).getQuick(termIndex)*count / sum);
+          perTopicSparseDistributions.viewRow(x).getQuick(termIndex) * count / sum);
       }
     }
   }
@@ -562,10 +562,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       while (true) { // keep trying if interrupted
         try {
           // start async operation by submitting to the queue
-          queue.offer(Pair.of(topic, v),3,TimeUnit.SECONDS);
-          log.info("queue size increase to {}" ,queue.size());
-          // return once you got access to the queue
-          return true;
+          if (queue.offer(Pair.of(topic, v), 3, TimeUnit.SECONDS)) {
+            log.info("queue size increase to {}", queue.size());
+            // return once you got access to the queue
+            return true;
+          }else {
+            Thread.sleep(100);
+          }
         } catch (InterruptedException e) {
           log.warn("Interrupted trying to queue update:", e);
         }
@@ -578,12 +581,12 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         try {
           //long t1=System.currentTimeMillis();
           Pair<Integer, Vector> pair = queue.take();
-          log.info("queue size decrease to {}",queue.size());
+          log.info("queue size decrease to {}", queue.size());
           if (pair != null) {
-            long t2=System.currentTimeMillis();
-            log.info("start updateTopic {}",pair.getSecond().size());
+            long t2 = System.currentTimeMillis();
+            log.info("start updateTopic {}", pair.getSecond().size());
             updateTopic(pair.getFirst(), pair.getSecond());
-            log.info("updateTopic use {} ms",(System.currentTimeMillis()-t2));
+            log.info("updateTopic use {} ms", (System.currentTimeMillis() - t2));
           }
           //log.info("update pair use {} ms",(System.currentTimeMillis()-t1));
         } catch (InterruptedException e) {
