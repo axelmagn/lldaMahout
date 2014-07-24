@@ -13,5 +13,5 @@ for file in ${files[@]};do
   startTime=${startTime%%_*}
   echo $startTime
   sh $baseDir/bin/crondInf.sh ${file}
-  sh $baseDir/bin/etl.sh ${resultRoot}/inf ${resultRoot}/inf_result ${localResultRoot} $startTime >> $logFile
+  sh $baseDir/bin/etl.sh ${resultRoot}/inf ${resultRoot}/inf_result ${localResultRoot} $startTime
 done
