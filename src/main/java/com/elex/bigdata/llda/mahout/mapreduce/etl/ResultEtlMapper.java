@@ -50,7 +50,7 @@ public class ResultEtlMapper extends Mapper<Object,Text,Text,Text> {
         maxProbIndex=i;
         maxProb=probabilities.get(i);
       }
-    if(maxProb>8)
+    if(maxProb>5)
       context.write(new Text(results[0]),new Text(probStrs[maxProbIndex]));
     else
       context.write(new Text(results[0]),new Text(probStrs[4]));
