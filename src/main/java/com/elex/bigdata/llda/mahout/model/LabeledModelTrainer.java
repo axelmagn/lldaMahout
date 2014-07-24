@@ -249,10 +249,10 @@ public class LabeledModelTrainer {
     public void run() {
       //for (int i = 0; i < numDocTopicIters; i++) {
         // synchronous read-only call:
-        //long t1=System.currentTimeMillis();
+        long t1=System.currentTimeMillis();
         readModel.trainDocTopicModel(document, docTopics, docTopicModel,isInf);
-        //long t2=System.currentTimeMillis();
-        //log.info("trainerRunnable run use "+(t2-t1)+" ms");
+        long t2=System.currentTimeMillis();
+        log.info("trainerRunnable run use "+(t2-t1)+" ms");
       //}
       if (writeModel != null) {
         // parallel call which is read-only on the docTopicModel, and write-only on the writeModel
@@ -260,7 +260,7 @@ public class LabeledModelTrainer {
         // to write work queues
         writeModel.update(docTopicModel);
       }
-      //log.info("update use "+(System.currentTimeMillis()-t2)+" ms");
+      log.info("update use "+(System.currentTimeMillis()-t2)+" ms");
     }
 
     @Override
