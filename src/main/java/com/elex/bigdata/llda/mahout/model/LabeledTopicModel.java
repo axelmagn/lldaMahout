@@ -531,7 +531,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private final class Updater implements Runnable {
     private final ArrayBlockingQueue<Pair<Integer, Vector>> queue =
-      new ArrayBlockingQueue<Pair<Integer, Vector>>(updaters.length*500);
+      new ArrayBlockingQueue<Pair<Integer, Vector>>(500);
     private boolean shutdown = false;
     private boolean shutdownComplete = false;
 
