@@ -556,7 +556,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         try {
           // start async operation by submitting to the queue
           queue.put(Pair.of(topic, v));
-          log.info("queue size {}" ,queue.size());
+          log.info("queue size increase to {}" ,queue.size());
           // return once you got access to the queue
           return true;
         } catch (InterruptedException e) {
@@ -571,6 +571,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         try {
           //long t1=System.currentTimeMillis();
           Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
+          log.info("queue size decrease to {}",queue.size());
           if (pair != null) {
             long t2=System.currentTimeMillis();
             updateTopic(pair.getFirst(), pair.getSecond());
