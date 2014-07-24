@@ -7,7 +7,9 @@ day=`date +%Y%m%d `
 logFile=/data/log/user_category/processLog/llda/hadoopLLDA.log
 echo "fiveMinInf $startTime" >> $logFile
 textInputRoot=url_count/all_projects
+resultRoot=user_category/lldaMahout/docTopics
+localResultRoot=/data/log/user_category_result/pr
 #sh $baseDir/../Url_Count/bin/AccumulateUrlCount.sh $startTime $endTime >> $logFile
 sh $baseDir/bin/accumulateUrlCount.sh $startTime $endTime >> $logFile
-sh $baseDir/bin/crondInf.sh ${textInputRoot}/${startTime}_${endTime}
-sh $baseDir/bin/etl.sh inf result  >> $logFile
+sh $baseDir/bin/crondInf.sh ${textInputRoot}/clean/${startTime}_${endTime}
+sh $baseDir/bin/etl.sh ${resultRoot}/inf ${resultRoot}/inf_result ${localResultRoot} $startTime >> $logFile
