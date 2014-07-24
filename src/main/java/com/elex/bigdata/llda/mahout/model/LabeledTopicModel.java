@@ -574,6 +574,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
           log.info("queue size decrease to {}",queue.size());
           if (pair != null) {
             long t2=System.currentTimeMillis();
+            log.info("start updateTopic {}",pair.getSecond().size());
             updateTopic(pair.getFirst(), pair.getSecond());
             log.info("updateTopic use {} ms",(System.currentTimeMillis()-t2));
           }
