@@ -322,26 +322,27 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void updateTopic(int topic, Vector docTopicCounts) {
-    log.info("get iterateNonZero");
+    //log.info("get iterateNonZero");
     Iterator<Vector.Element> docTopicElementIter = docTopicCounts.iterateNonZero();
-    log.info("got iterateNonZero");
+    //log.info("got iterateNonZero");
     Vector distTopicTermCountRow = topicTermCounts.viewRow(topic);
     double topicCountSum = 0.0;
     StringBuilder builder = new StringBuilder();
-    int num = 0;
+    //int num = 0;
+    //log.info("enter while");
     while (docTopicElementIter.hasNext()) {
       Vector.Element topicTermCount = docTopicElementIter.next();
-      num++;
+      //num++;
       int termIndex = topicTermCount.index();
       double count = topicTermCount.get();
-      builder.append(termIndex + ":" + count + ",");
-      if (num > 50) {
-        log.info("num increase to 50,vector is {}", builder.toString());
-      }
+      //builder.append(termIndex + ":" + count + ",");
+      //if (num > 50) {
+      //  log.info("num increase to 50,vector is {}", builder.toString());
+      //}
       topicCountSum += count;
       distTopicTermCountRow.setQuick(termIndex, count + distTopicTermCountRow.get(termIndex));
     }
-    log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
+    //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.set(topic, topicSums.get(topic) + topicCountSum);
   }
 
@@ -563,7 +564,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         try {
           // start async operation by submitting to the queue
           if (queue.offer(Pair.of(topic, v), 3, TimeUnit.SECONDS)) {
-            log.info("queue size increase to {}", queue.size());
+            //log.info("queue size increase to {}", queue.size());
             // return once you got access to the queue
             return true;
           }else {
@@ -580,13 +581,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       while (!shutdown) {
         try {
           //long t1=System.currentTimeMillis();
-          Pair<Integer, Vector> pair = queue.take();
-          log.info("queue size decrease to {}", queue.size());
+          Pair<Integer, Vector> pair = queue.poll(1,TimeUnit.SECONDS);
+          //log.info("queue size decrease to {}", queue.size());
           if (pair != null) {
-            long t2 = System.currentTimeMillis();
-            log.info("start updateTopic {}", pair.getSecond().size());
+            //long t2 = System.currentTimeMillis();
+            //log.info("start updateTopic {}", pair.getSecond().size());
             updateTopic(pair.getFirst(), pair.getSecond());
-            log.info("updateTopic use {} ms", (System.currentTimeMillis() - t2));
+            //log.info("updateTopic use {} ms", (System.currentTimeMillis() - t2));
           }
           //log.info("update pair use {} ms",(System.currentTimeMillis()-t1));
         } catch (InterruptedException e) {
