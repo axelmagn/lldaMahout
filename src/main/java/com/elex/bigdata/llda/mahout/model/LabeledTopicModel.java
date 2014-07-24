@@ -568,9 +568,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
           //long t1=System.currentTimeMillis();
           Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
           if (pair != null) {
-            //long t2=System.currentTimeMillis();
+            long t2=System.currentTimeMillis();
             updateTopic(pair.getFirst(), pair.getSecond());
-            //log.info("updateTopic use {} ms",(System.currentTimeMillis()-t2));
+            log.info("updateTopic use {} ms",(System.currentTimeMillis()-t2));
           }
           //log.info("update pair use {} ms",(System.currentTimeMillis()-t1));
         } catch (InterruptedException e) {
