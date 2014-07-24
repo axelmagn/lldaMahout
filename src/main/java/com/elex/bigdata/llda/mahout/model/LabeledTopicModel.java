@@ -570,7 +570,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       while (!shutdown) {
         try {
           //long t1=System.currentTimeMillis();
-          Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
+          Pair<Integer, Vector> pair = queue.take();
           log.info("queue size decrease to {}",queue.size());
           if (pair != null) {
             long t2=System.currentTimeMillis();
