@@ -93,6 +93,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     //log.info("create labels using "+(t2-t1)+" ms");
     //train
     if((index++)>=sampleRatio){
+      index=0;
       StringBuilder vectorStr=new StringBuilder();
       Iterator<Vector.Element> docIter=doc.getVector().iterateNonZero();
       while(docIter.hasNext()){
