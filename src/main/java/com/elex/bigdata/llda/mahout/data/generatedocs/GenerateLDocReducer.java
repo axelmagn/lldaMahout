@@ -155,7 +155,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       calTime+=(System.nanoTime()-startTime);
       startTime=System.nanoTime();
       String category = url_category_map.get(url);
-      if(category==null && url.contains("game"))
+      if(category==null && url.contains("games"))
         category=destCategories[0];
       if (category == null) {
         int categoryId = prefixTrie.prefixSearch(url);
