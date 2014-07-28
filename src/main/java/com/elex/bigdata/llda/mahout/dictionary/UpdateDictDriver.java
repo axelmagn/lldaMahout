@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.dictionary;
 
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
@@ -32,11 +33,13 @@ public class UpdateDictDriver extends AbstractJob{
     addInputOption();
     addOption(DICT_ROOT,"dict","dictionary root Path");
     addOption(COUNT_THRESHOLD,"count_threshold","specify the word count threshold to add to dictionary",false);
+    addOption(GenerateLDocDriver.RESOURCE_ROOT,"rDir","specify the resources Dir",true);
     if(parseArguments(args)==null)
       return -1;
     Path textInputPath=getInputPath();
     String dictRoot=getOption(DICT_ROOT);
     Configuration conf=new Configuration();
+    conf.set(GenerateLDocDriver.RESOURCE_ROOT,getOption(GenerateLDocDriver.RESOURCE_ROOT));
     conf.set(COUNT_THRESHOLD,getOption(COUNT_THRESHOLD,String.valueOf(DEFAULT_COUNT_THRESHOLD)));
     Job updateDictJob=prepareJob(conf,textInputPath,new Path(dictRoot));
     updateDictJob.submit();

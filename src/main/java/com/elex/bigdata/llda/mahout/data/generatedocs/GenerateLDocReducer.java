@@ -148,29 +148,33 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       //int id = dict.getId(wordMd5);
       int id=Integer.parseInt(tokens[1]);
       int count = Integer.parseInt(tokens[2]);
-      if (urlCounts.containsKey(id))
-        urlCounts.put(id, urlCounts.get(id) + count);
-      else
-        urlCounts.put(id, (double) count);
+
       calTime+=(System.nanoTime()-startTime);
       startTime=System.nanoTime();
       String category = url_category_map.get(url);
-      if(category==null && url.contains("games"))
-        category=destCategories[0];
       if (category == null) {
         int categoryId = prefixTrie.prefixSearch(url);
         if (categoryId != -1)
           category = idCategoryMap.get(id);
       }
+      if(category==null && url.contains("games"))
+      {
+        category=destCategories[0];
+      }
       timeCost+=(System.nanoTime()-startTime);
       startTime=System.nanoTime();
       if (category != null) {
+        count=count+3;
         Integer label = category_label_map.get(category);
         if (label != null) {
           labelSet.add(label);
         }
       }
       labelVectorTimeCost+=(System.nanoTime()-startTime);
+      if (urlCounts.containsKey(id))
+        urlCounts.put(id, urlCounts.get(id) + count);
+      else
+        urlCounts.put(id, (double) count);
     }
     //
     if (urlCounts.size() == 0)
