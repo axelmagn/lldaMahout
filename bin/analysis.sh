@@ -3,7 +3,7 @@ baseDir=`dirname $0`/..
 JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 rootPath=/user/hadoop/user_category/lldaMahout
-logFile=/data/log/user_category/processLog/llda/analysis.log
+logFile=/data0/log/user_category/processLog/llda/analysis.log
 if [[ $# < 3 ]]
 then
   echo " args < 3"

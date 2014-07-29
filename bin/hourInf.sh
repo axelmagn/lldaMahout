@@ -4,10 +4,10 @@ startTime=`date +%Y%m%d%H%M%S -d "-2 hours"`
 endTime=`date +%Y%m%d%H%M%S -d "-1 hours"`
 preDay=`date +%Y%m%d -d "-1 days"`
 day=`date +%Y%m%d `
-logFile=/data/log/user_category/processLog/llda/hourInf.log
+logFile=/data0/log/user_category/processLog/llda/hourInf.log
 textInputRoot=url_count/all_projects
 resultRoot=user_category/lldaMahout/docTopics
-localResultRoot=/data/log/user_category_result/pr
+localResultRoot=/data0/log/user_category_result/pr
 now=`date`
 echo $now >> $logFile
 sh $baseDir/bin/accumulateUrlCount.sh $startTime $endTime >> $logFile
