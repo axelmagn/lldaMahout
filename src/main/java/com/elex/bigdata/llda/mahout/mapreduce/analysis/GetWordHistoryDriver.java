@@ -49,6 +49,9 @@ public class GetWordHistoryDriver extends AbstractJob{
   }
   public Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
     FileSystemUtil.setCombineInputSplitSize(conf,inputPath);
+    FileSystem fs= FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(outputPath,true);
     Job job=new Job(conf,"get word history");
     job.setMapperClass(GetWordHistoryMapper.class);
     job.setReducerClass(GetWordHistoryReducer.class);
