@@ -50,7 +50,7 @@ public class GetWordHistoryDriver extends AbstractJob{
   public Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
     FileSystemUtil.setCombineInputSplitSize(conf,inputPath);
     Job job=new Job(conf,"get word history");
-    job.setMapOutputKeyClass(GetWordHistoryMapper.class);
+    job.setMapperClass(GetWordHistoryMapper.class);
     job.setReducerClass(GetWordHistoryReducer.class);
     job.setInputFormatClass(CombineTextInputFormat.class);
     FileInputFormat.addInputPath(job,inputPath);
