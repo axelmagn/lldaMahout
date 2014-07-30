@@ -87,9 +87,11 @@ public class GetWordHistoryDriver extends AbstractJob{
   }
   public static class GetWordHistoryReducer extends Reducer<Text,Text,Text,Text> {
     public void reduce(Text key,Iterable<Text> value,Context context) throws IOException, InterruptedException {
+      StringBuilder builder=new StringBuilder();
       for(Text word:value){
-        context.write(key,word);
+         builder.append(word.toString()+"\t");
       }
+      context.write(key,new Text(builder.toString()));
     }
   }
   public static void main(String[] args) throws Exception {
