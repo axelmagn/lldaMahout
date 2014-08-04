@@ -1,7 +1,7 @@
 #!/bin/bash
 baseDir=`dirname $0`/..
-startTime=`date +%Y%m%d%H%M%S -d "-1 hours -30 mins"`
-endTime=`date +%Y%m%d%H%M%S -d "-30 mins"`
+startTime=`date +%Y%m%d%H%M%S -d "-1 hours -20 mins"`
+endTime=`date +%Y%m%d%H%M%S -d "-20 mins"`
 preDay=`date +%Y%m%d -d "-1 days"`
 day=`date +%Y%m%d `
 logFile=/data0/log/user_category/processLog/llda/hourInf.log
