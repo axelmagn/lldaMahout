@@ -26,7 +26,7 @@ import java.util.Map;
  * Time: 10:48 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
+public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
   /*
      fields:
          dict: Dictionary
@@ -39,9 +39,10 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
   Map<String, Integer> categoryIdMap = new HashMap<String, Integer>();
   PrefixTrie prefixTrie = new PrefixTrie();
   private Map<String, String> url_category_map = new HashMap<String, String>();
+
   public void setup(Context context) throws IOException, InterruptedException {
-    Configuration conf=context.getConfiguration();
-    FileSystem fs=FileSystem.get(conf);
+    Configuration conf = context.getConfiguration();
+    FileSystem fs = FileSystem.get(conf);
     for (int i = 0; i < destCategories.length; i++) {
       categoryIdMap.put(destCategories[i], i);
     }
@@ -62,41 +63,45 @@ public class UpdateDictReducer extends Reducer<Text,IntWritable,Text,IntWritable
       }
     }
     urlCategoryReader.close();
-    word_count_threshold=Integer.parseInt(conf.get(UpdateDictDriver.COUNT_THRESHOLD));
-    System.out.println("word count boundary is "+ word_count_threshold);
-    String dictRoot=conf.get(UpdateDictDriver.DICT_ROOT);
-    System.out.println("dict Root is "+dictRoot);
+    word_count_threshold = Integer.parseInt(conf.get(UpdateDictDriver.COUNT_THRESHOLD));
+    System.out.println("word count boundary is " + word_count_threshold);
+    String dictRoot = conf.get(UpdateDictDriver.DICT_ROOT);
+    System.out.println("dict Root is " + dictRoot);
     try {
-      dict=new Dictionary(dictRoot,fs,conf);
-      bdmd5=BDMD5.getInstance();
+      dict = new Dictionary(dictRoot, fs, conf);
+      bdmd5 = BDMD5.getInstance();
     } catch (HashingException e) {
       e.printStackTrace();
     }
   }
-  public void reduce(Text key,Iterable<IntWritable> values,Context context) throws IOException, InterruptedException {
-     int wordCount=0;
-     if(url_category_map.containsKey(key.toString())|| prefixTrie.prefixSearch(key.toString())!=-1){
-       try {
-         dict.update(bdmd5.toMD5(key.toString()).substring(UpdateDictDriver.MD5_START_INDEX,UpdateDictDriver.MD5_END_INDEX));
-       } catch (HashingException e) {
-         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-       }
-       return;
-     }
-     for(IntWritable countWritable:values){
-        wordCount+=countWritable.get();
-        if(wordCount>= word_count_threshold)
-        {
-          try {
-            dict.update(bdmd5.toMD5(key.toString()).substring(UpdateDictDriver.MD5_START_INDEX,UpdateDictDriver.MD5_END_INDEX));
-          } catch (HashingException e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-          }
-          return;
+
+  public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
+    int wordCount = 0;
+    String word = key.toString();
+    boolean shouldWrite = false;
+    if (url_category_map.containsKey(key.toString()) || prefixTrie.prefixSearch(key.toString()) != -1) {
+      shouldWrite = true;
+    } else if (word.contains("shop") || word.contains("games")) {
+      shouldWrite = true;
+    } else {
+      for (IntWritable countWritable : values) {
+        wordCount += countWritable.get();
+        if (wordCount >= word_count_threshold) {
+          shouldWrite = true;
+          break;
         }
-     }
+      }
+    }
+    if (shouldWrite) {
+      try {
+        dict.update(bdmd5.toMD5(word).substring(UpdateDictDriver.MD5_START_INDEX, UpdateDictDriver.MD5_END_INDEX));
+      } catch (HashingException e) {
+        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+      }
+    }
   }
+
   public void cleanup(Context context) throws IOException {
-     dict.flushDict();
+    dict.flushDict();
   }
 }

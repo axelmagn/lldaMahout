@@ -7,7 +7,7 @@ rootPath=/user/hadoop/user_category/lldaMahout
 resultRoot=user_category/lldaMahout/docTopics
 localResultRoot=/data0/log/user_category_result/pr
 logFile=/data0/log/user_category/processLog/llda/dayEst.log
-now=`date +date +%Y%m%d`
+now=`date +%Y%m%d`
 multiInput=${rootPath}/docs/to${twoDayAgo}:${rootPath}/docs/${oneDayAgo}/*
 mergeOutput=${rootPath}/docs/to${oneDayAgo}
 echo ${now} >> $logFile

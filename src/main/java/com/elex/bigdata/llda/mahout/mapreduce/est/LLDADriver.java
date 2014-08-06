@@ -66,7 +66,7 @@ public class LLDADriver extends AbstractJob {
   private static final String MODEL_PATHS = "mahout.lda.cvb.modelPath";
 
   private static final double DEFAULT_CONVERGENCE_DELTA = 0.0001;
-  private static final double DEFAULT_DOC_TOPIC_SMOOTHING = 0.2;
+  private static final double DEFAULT_DOC_TOPIC_SMOOTHING = 0.3;
   private static final double DEFAULT_TERM_TOPIC_SMOOTHING = 0.01;
   private static final int DEFAULT_ITERATION_BLOCK_SIZE = 10;
   private static final double DEFAULT_TEST_SET_FRACTION = 0;

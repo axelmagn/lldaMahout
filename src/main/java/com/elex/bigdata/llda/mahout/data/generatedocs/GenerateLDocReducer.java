@@ -38,7 +38,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   private Map<String, String> url_category_map = new HashMap<String, String>();
   private Map<String, Integer> category_label_map = new HashMap<String, Integer>();
   PrefixTrie prefixTrie = new PrefixTrie();
-  private String[] destCategories = new String[]{"jogos", "compras", "Friends", "Tourism"};
+  private String[] destCategories = new String[]{"jogos", "compras", "Friends"};
   Map<String, Integer> categoryIdMap = new HashMap<String, Integer>();
   Map<Integer, String> idCategoryMap = new HashMap<Integer, String>();
   private SequenceFile.Writer uidWriter;
@@ -161,12 +161,12 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       {
         category=destCategories[0];
       }
-      if(category==null && url.contains("shopping"))
+      if(category==null && url.contains("shop"))
         category=destCategories[1];
       timeCost+=(System.nanoTime()-startTime);
       startTime=System.nanoTime();
       if (category != null) {
-        count=count+3;
+        count=count+5;
         Integer label = category_label_map.get(category);
         if (label != null) {
           labelSet.add(label);
