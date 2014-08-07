@@ -65,9 +65,9 @@ public class LLDADriver extends AbstractJob {
   public static final String BACKFILL_PERPLEXITY = "backfill_perplexity";
   private static final String MODEL_PATHS = "mahout.lda.cvb.modelPath";
 
-  private static final double DEFAULT_CONVERGENCE_DELTA = 0.0001;
-  private static final double DEFAULT_DOC_TOPIC_SMOOTHING = 0.3;
-  private static final double DEFAULT_TERM_TOPIC_SMOOTHING = 0.01;
+  private static final double DEFAULT_CONVERGENCE_DELTA = 0.00005;
+  private static final double DEFAULT_DOC_TOPIC_SMOOTHING = 0.5;
+  private static final double DEFAULT_TERM_TOPIC_SMOOTHING = 0.05;
   private static final int DEFAULT_ITERATION_BLOCK_SIZE = 10;
   private static final double DEFAULT_TEST_SET_FRACTION = 0;
   private static final int DEFAULT_NUM_TRAIN_THREADS = 4;
