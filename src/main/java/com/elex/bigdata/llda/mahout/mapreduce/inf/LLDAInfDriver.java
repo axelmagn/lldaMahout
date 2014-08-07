@@ -36,8 +36,8 @@ import static com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver.*;
 public class LLDAInfDriver extends AbstractJob{
   private static final Logger log = LoggerFactory.getLogger(LLDAInfDriver.class);
   private static final double DEFAULT_CONVERGENCE_DELTA = 0;
-  private static final double DEFAULT_DOC_TOPIC_SMOOTHING = 0.3;
-  private static final double DEFAULT_TERM_TOPIC_SMOOTHING = 0.01;
+  private static final double DEFAULT_DOC_TOPIC_SMOOTHING = 0.5;
+  private static final double DEFAULT_TERM_TOPIC_SMOOTHING = 0.05;
   private static final int DEFAULT_ITERATION_BLOCK_SIZE = 10;
   private static final double DEFAULT_TEST_SET_FRACTION = 0;
   private static final int DEFAULT_NUM_TRAIN_THREADS = 4;
