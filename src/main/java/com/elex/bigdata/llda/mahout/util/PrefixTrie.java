@@ -11,9 +11,10 @@ import java.util.Arrays;
  */
 public class PrefixTrie {
   private Node root;
-
+  private int size=0;
   public PrefixTrie() {
     root = new Node();
+    size+=1;
   }
 
   public void insert(String word, int category) {
@@ -30,6 +31,7 @@ public class PrefixTrie {
           Node nextNode = new Node();
           current.nextNodes[(int) letter - 48] = nextNode;
           current = nextNode;
+          size+=1;
         }
         current.count++;
       } else if (letter >= 97 && letter <= 122) {
@@ -40,6 +42,7 @@ public class PrefixTrie {
           Node nextNode = new Node();
           current.nextNodes[(int) letter - 97] = nextNode;
           current = nextNode;
+          size+=1;
         }
         current.count++;
       }
@@ -119,6 +122,10 @@ public class PrefixTrie {
 
     }
     current.category = -1;
+  }
+
+  public int getSize(){
+    return size;
   }
 
   public static class Node {

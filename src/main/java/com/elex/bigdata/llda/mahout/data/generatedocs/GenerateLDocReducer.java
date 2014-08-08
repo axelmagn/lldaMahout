@@ -85,12 +85,14 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
 
     BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(fs.open(urlCategoryPath)));
     String line = "";
+    int prefixTrieWordCount=0;
     while ((line = urlCategoryReader.readLine()) != null) {
       String[] categoryUrls = line.split(" ");
       if (categoryIdMap.containsKey(categoryUrls[0])) {
         int id = categoryIdMap.get(categoryUrls[0]);
         for (int i = 1; i < categoryUrls.length; i++)
           prefixTrie.insert(categoryUrls[i], id);
+        prefixTrieWordCount+=categoryUrls.length-1;
       } else {
         for (int i = 1; i < categoryUrls.length; i++) {
           url_category_map.put(categoryUrls[i], categoryUrls[0]);
@@ -104,6 +106,8 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       String[] categoryLabels = line.split("=");
       category_label_map.put(categoryLabels[0], Integer.parseInt(categoryLabels[1]));
     }
+    log.info("prefixTrie word Count "+prefixTrieWordCount);
+    log.info("prefixTrie jvm size "+ prefixTrie.getSize()*37*8);
   }
 
   public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
