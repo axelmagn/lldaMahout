@@ -32,6 +32,8 @@ public class TopicTermModelDriver extends AbstractJob {
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
+    if(parseArguments(args)==null)
+       return -1;
     Job job=prepareJob(getConf(),getInputPath(),getOutputPath());
     job.submit();
     job.waitForCompletion(true);
