@@ -19,6 +19,7 @@ import org.apache.mahout.math.VectorWritable;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Iterator;
 
 
 /**
@@ -61,7 +62,7 @@ public class TopicTermModelDriver extends AbstractJob {
     ToolRunner.run(new Configuration(),new TopicTermModelDriver(),args);
   }
   public static class TopicTermModelMapper extends Mapper<IntWritable,VectorWritable,Text,Text>{
-    private double[] ratio = new double[]{0.0,0.001,0.01,0.1,1,10,100,Double.MAX_VALUE};
+    private double[] ratio = new double[]{0.0,0.00001,0.0001,0.001,0.01,0.1,1,10,100,1000,Double.MAX_VALUE};
     private int[] termCounts=new int[ratio.length-1];
     private Logger log=Logger.getLogger(TopicTermModelMapper.class);
     public void setup(Context context){
@@ -69,10 +70,14 @@ public class TopicTermModelDriver extends AbstractJob {
     }
     public void map(IntWritable key,VectorWritable value,Context context) throws IOException, InterruptedException {
       Vector probVector=value.get();
-      double averageProb=probVector.norm(1)/(double)probVector.size();
-      log.info("size "+probVector.size()+" average: "+averageProb);
+      double sum=probVector.norm(1);
+      double averageProb=sum/(double)probVector.size();
+      log.info("topic: "+key.get()+" size "+probVector.size()+" average: "+averageProb);
       log.info("isDense "+probVector.isDense());
-      for(Vector.Element e: probVector){
+      Iterator<Vector.Element> iterator=probVector.iterateNonZero();
+      int count=0;
+      while(iterator.hasNext()){
+         Vector.Element e=iterator.next();
          double prob=e.get();
          int i=1;
          for(;i<ratio.length-1;i++){
@@ -80,7 +85,9 @@ public class TopicTermModelDriver extends AbstractJob {
               break;
          }
          termCounts[i-1]+=1;
+         count+=1;
       }
+      log.info("nonZero size "+count+" nonZero average "+sum/count);
       StringBuilder builder=new StringBuilder();
       for(int j=1;j<ratio.length;j++){
          builder.append(ratio[j-1]+"~"+ratio[j]+" : "+termCounts[j-1]/(double)probVector.size()+"\t");
