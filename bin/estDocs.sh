@@ -4,7 +4,7 @@ JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
 MAIN=com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver
 rootPath=/user/hadoop/user_category/lldaMahout
 inputDocs=$1
-logFile=/data0/log/user_category/processLog/llda/est.log
+logFile=/data0/log/user_category/processLog/llda/test_est.log
 now=`date`
 echo $now >> $logFile
 echo "hadoop jar $JAR $MAIN  --input $inputDocs -k 8 --output ${rootPath}/test_models --maxIter 40 -mipd 1 --dictionary ${rootPath}/dictionary/dict \
