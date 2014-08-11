@@ -155,7 +155,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private static Pair<Matrix, Vector> randomMatrix(int numTopics, int numTerms, Random random) {
-    Matrix topicTermCounts = new DenseMatrix(numTopics, numTerms);
+    Matrix topicTermCounts = new SparseMatrix(numTopics, numTerms);
     Vector topicSums = new DenseVector(numTopics);
     if (random != null) {
       for (int x = 0; x < numTopics; x++) {
