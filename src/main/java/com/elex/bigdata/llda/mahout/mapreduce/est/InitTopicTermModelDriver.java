@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.mapreduce.est;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -37,15 +38,19 @@ public class InitTopicTermModelDriver extends AbstractJob{
      job.waitForCompletion(true);
   }
   public Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
+     FileSystem fs= FileSystem.get(conf);
+     if(fs.exists(outputPath))
+       fs.delete(outputPath,true);
      Job job=new Job(conf,"init topic term model");
      job.setMapperClass(InitTopicTermModelMapper.class);
      job.setReducerClass(VectorSumReducer.class);
      job.setMapOutputKeyClass(IntWritable.class);
      job.setMapOutputValueClass(VectorWritable.class);
      job.setInputFormatClass(SequenceFileInputFormat.class);
-    FileInputFormat.addInputPath(job,inputPath);
+     FileInputFormat.addInputPath(job,inputPath);
      job.setOutputFormatClass(SequenceFileOutputFormat.class);
      SequenceFileOutputFormat.setOutputPath(job,outputPath);
+     job.setJarByClass(InitTopicTermModelDriver.class);
      return job;
   }
   public static class InitTopicTermModelMapper extends Mapper<Text, MultiLabelVectorWritable,IntWritable,VectorWritable>{
