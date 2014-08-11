@@ -43,9 +43,12 @@ public class InitTopicTermModelDriver extends AbstractJob{
        fs.delete(outputPath,true);
      Job job=new Job(conf,"init topic term model");
      job.setMapperClass(InitTopicTermModelMapper.class);
+     job.setCombinerClass(VectorSumReducer.class);
      job.setReducerClass(VectorSumReducer.class);
      job.setMapOutputKeyClass(IntWritable.class);
      job.setMapOutputValueClass(VectorWritable.class);
+     job.setOutputKeyClass(IntWritable.class);
+     job.setOutputValueClass(VectorWritable.class);
      job.setInputFormatClass(SequenceFileInputFormat.class);
      FileInputFormat.addInputPath(job,inputPath);
      job.setOutputFormatClass(SequenceFileOutputFormat.class);
