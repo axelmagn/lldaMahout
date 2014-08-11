@@ -48,6 +48,7 @@ public class TestPrefixTrie {
       }
     }
     urlCategoryReader.close();
+    System.out.println(prefixTrie.getSize());
     String[] urls = new String[]{"www.jogos.com", "www.neoseeker.com/Games/Products/PSX/legend_dragoon/legend_dragoon_cheats.html", "songbird-productions.com/protector_se.shtml", "www.game-over.net/review/october/caesar3/index.html", "www.freewebs.com/mtanl",
       "www.renewalresearch.com", "www.entowinkler.at", "www.officemax.com", "backyardscoreboards.com", "www.williswinebar.us", "www.unifold.net", "www.drumsonsale.com", "www.sportingkicks.co.uk", "www.affordabledesigns.net"
     };

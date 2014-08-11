@@ -20,6 +20,11 @@ if [[ $type = userTrained ]]
      MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCountByUserDriver
      echo "hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1"
      hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1
+  elif [[ $type = topicTerm ]]
+  then
+     MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.TopicTermModelDriver
+     echo "hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1"
+     hadoop jar $JAR $MAIN --input $2 --output $3 >> $logFile 2>&1
   elif [[ $type = uniqWord ]]
     then
      MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordUniqDriver
