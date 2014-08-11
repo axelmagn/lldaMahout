@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -37,6 +38,9 @@ public class TopicTermModelDriver extends AbstractJob {
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
   public Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(outputPath,true);
     Job job=new Job(conf,"topic term model analysis "+inputPath.toString());
     job.setMapperClass(TopicTermModelMapper.class);
     job.setReducerClass(Reducer.class);
