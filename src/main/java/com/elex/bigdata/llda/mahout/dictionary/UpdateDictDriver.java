@@ -26,13 +26,16 @@ import java.io.IOException;
 public class UpdateDictDriver extends AbstractJob{
   public static final String DICT_ROOT ="dict_root";
   public static final String COUNT_THRESHOLD="count_threshold";
+  public static final String COUNT_UPPER_THRESHOLD="count_upper_threshold";
   public static final int DEFAULT_COUNT_THRESHOLD=3;
+  public static final int DEFUAL_COUNT_UPPER_THRESHOLD=10000;
   public static final int MD5_START_INDEX=6,MD5_END_INDEX=18;
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
     addOption(DICT_ROOT,"dict","dictionary root Path");
     addOption(COUNT_THRESHOLD,"count_threshold","specify the word count threshold to add to dictionary",false);
+    addOption(COUNT_UPPER_THRESHOLD,"count_upper_threshold","specify the word count uppper threshold to add to dictionary",false);
     addOption(GenerateLDocDriver.RESOURCE_ROOT,"rDir","specify the resources Dir",true);
     if(parseArguments(args)==null)
       return -1;
@@ -41,6 +44,7 @@ public class UpdateDictDriver extends AbstractJob{
     Configuration conf=new Configuration();
     conf.set(GenerateLDocDriver.RESOURCE_ROOT,getOption(GenerateLDocDriver.RESOURCE_ROOT));
     conf.set(COUNT_THRESHOLD,getOption(COUNT_THRESHOLD,String.valueOf(DEFAULT_COUNT_THRESHOLD)));
+    conf.set(COUNT_UPPER_THRESHOLD,getOption(COUNT_UPPER_THRESHOLD,String.valueOf(DEFUAL_COUNT_UPPER_THRESHOLD)));
     Job updateDictJob=prepareJob(conf,textInputPath,new Path(dictRoot));
     updateDictJob.submit();
     updateDictJob.waitForCompletion(true);

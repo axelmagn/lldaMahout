@@ -34,7 +34,7 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
    */
   private Dictionary dict;
   private BDMD5 bdmd5;
-  private int word_count_threshold;
+  private int word_count_threshold, word_count_upper_threshold;
   private String[] destCategories = new String[]{"jogos", "compras", "Friends", "Tourism"};
   Map<String, Integer> categoryIdMap = new HashMap<String, Integer>();
   PrefixTrie prefixTrie = new PrefixTrie();
@@ -64,7 +64,9 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
     }
     urlCategoryReader.close();
     word_count_threshold = Integer.parseInt(conf.get(UpdateDictDriver.COUNT_THRESHOLD));
-    System.out.println("word count boundary is " + word_count_threshold);
+    System.out.println("word count lower boundary is " + word_count_threshold);
+    word_count_upper_threshold = Integer.parseInt(conf.get(UpdateDictDriver.COUNT_UPPER_THRESHOLD));
+    System.out.println("word count upper boundary is " + word_count_upper_threshold);
     String dictRoot = conf.get(UpdateDictDriver.DICT_ROOT);
     System.out.println("dict Root is " + dictRoot);
     try {
@@ -86,11 +88,12 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
     } else {
       for (IntWritable countWritable : values) {
         wordCount += countWritable.get();
-        if (wordCount >= word_count_threshold) {
-          shouldWrite = true;
+        if (wordCount >= word_count_upper_threshold) {
           break;
         }
       }
+      if (wordCount >= word_count_threshold && wordCount < word_count_upper_threshold)
+        shouldWrite = true;
     }
     if (shouldWrite) {
       try {
