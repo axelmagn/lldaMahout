@@ -12,6 +12,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.log4j.Logger;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.math.Vector;
 import org.apache.mahout.math.VectorWritable;
@@ -28,6 +29,7 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class TopicTermModelDriver extends AbstractJob {
+
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
@@ -61,12 +63,15 @@ public class TopicTermModelDriver extends AbstractJob {
   public static class TopicTermModelMapper extends Mapper<IntWritable,VectorWritable,Text,Text>{
     private double[] ratio = new double[]{0.0,0.001,0.01,0.1,1,10,100,Double.MAX_VALUE};
     private int[] termCounts=new int[ratio.length-1];
+    private Logger log=Logger.getLogger(TopicTermModelMapper.class);
     public void setup(Context context){
       Arrays.fill(termCounts, 0);
     }
     public void map(IntWritable key,VectorWritable value,Context context) throws IOException, InterruptedException {
       Vector probVector=value.get();
-      double averageProb=1/(double)probVector.size();
+      double averageProb=probVector.norm(1)/(double)probVector.size();
+      log.info("size "+probVector.size()+" average: "+averageProb);
+      log.info("isDense "+probVector.isDense());
       for(Vector.Element e: probVector){
          double prob=e.get();
          int i=1;
@@ -78,7 +83,7 @@ public class TopicTermModelDriver extends AbstractJob {
       }
       StringBuilder builder=new StringBuilder();
       for(int j=1;j<ratio.length;j++){
-         builder.append(ratio[j-1]+"~"+ratio[j]+" : "+termCounts[j-1]+"\t");
+         builder.append(ratio[j-1]+"~"+ratio[j]+" : "+termCounts[j-1]/(double)probVector.size()+"\t");
       }
       context.write(new Text(String.valueOf(key.get())),new Text(builder.toString()));
     }
