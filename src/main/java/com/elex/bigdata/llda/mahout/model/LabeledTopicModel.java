@@ -155,7 +155,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private static Pair<Matrix, Vector> randomMatrix(int numTopics, int numTerms, Random random) {
-    Matrix topicTermCounts = new SparseMatrix(numTopics, numTerms);
+    Matrix topicTermCounts = new SparseRowMatrix(numTopics, numTerms);
     Vector topicSums = new DenseVector(numTopics);
     if (random != null) {
       for (int x = 0; x < numTopics; x++) {
@@ -191,7 +191,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
     numTopics++;
     log.info("numTopics is {},numTerms is {}", numTopics, numTerms);
-    Matrix model = new DenseMatrix(numTopics, numTerms);
+    Matrix model = new SparseRowMatrix(numTopics, numTerms);
     Vector topicSums = new DenseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
       model.viewRow(pair.getFirst()).assign(pair.getSecond());
