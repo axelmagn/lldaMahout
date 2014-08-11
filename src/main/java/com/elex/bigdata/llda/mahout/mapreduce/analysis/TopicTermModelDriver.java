@@ -74,7 +74,7 @@ public class TopicTermModelDriver extends AbstractJob {
             if(prob<ratio[i]*averageProb)
               break;
          }
-         termCounts[i]+=1;
+         termCounts[i-1]+=1;
       }
       StringBuilder builder=new StringBuilder();
       for(int j=1;j<ratio.length;j++){
