@@ -59,12 +59,12 @@ public class WordCleanDriver extends AbstractJob {
     if(fs.exists(outputPath))
       fs.delete(outputPath,true);
     job.setMapperClass(WordCleanMapper.class);
-    //job.setCombinerClass(WordCleanReducer.class);
+    job.setCombinerClass(WordCleanReducer.class);
     job.setReducerClass(WordCleanReducer.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
     job.setInputFormatClass(CombineTextInputFormat.class);
-    job.setNumReduceTasks(7);
+    job.setNumReduceTasks(5);
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
