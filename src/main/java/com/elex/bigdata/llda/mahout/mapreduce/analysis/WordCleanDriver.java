@@ -73,6 +73,8 @@ public class WordCleanDriver extends AbstractJob {
   }
 
   public static class WordCleanMapper extends Mapper<Object,Text,Text,Text> {
+    private String[] contents=new String[]{"xxx","gravatar.com","msn.com","microsoft.com","twitter.com",
+      "log.optimaizely.com","bing.net","goo."};
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
       String[] uidUrlCount = value.toString().split("\t");
       if (uidUrlCount.length < 3) {
@@ -93,6 +95,13 @@ public class WordCleanDriver extends AbstractJob {
           }
         }
       }
+      for(int i=0;i<contents.length;i++)
+      {
+        if(url.contains(contents[i]))
+          return;
+      }
+      if(url.startsWith("/")||url.endsWith("//")||!url.contains("."))
+        return;
       context.write(new Text(uidUrlCount[0]),new Text(url+"\t"+uidUrlCount[2]));
     }
   }
@@ -100,9 +109,8 @@ public class WordCleanDriver extends AbstractJob {
   public static class WordCleanReducer extends Reducer<Text,Text,Text,Text> {
     private int uidNum=0;
     private long trieCost=0;
-    private Pattern cleanPattern=Pattern.compile("([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|(:[0-9]+$)|(^/|/$)|(^[^.]+$)|" +
-      "(.*(gravatar|msn|microsoft|twitter|xingcloud|log\\.optimizely)\\.com.*)|(.*bing\\.net.*)|(.*goo\\..*)|" +
-      "(.*xxx.*)|(\\.pl$)|(\\.crl$)|(\\.srf$)|(\\.fcgi$)|(\\.cgi$)|(\\.xgi$)");
+    private Pattern cleanPattern=Pattern.compile("([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|(:[0-9]+$)|" +
+      "(\\.pl$)|(\\.crl$)|(\\.srf$)|(\\.fcgi$)|(\\.cgi$)|(\\.xgi$)");
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       uidNum++;
       long t1=System.nanoTime();
