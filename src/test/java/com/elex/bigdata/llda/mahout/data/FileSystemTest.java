@@ -84,5 +84,7 @@ public class FileSystemTest {
     }
     Pattern pattern2=Pattern.compile("^[^.]+$");
     System.out.println(pattern2.matcher("adbdcdd").find());
+    String cleanPatternStr="(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)";
+    System.out.println("102.12.2.2".matches(cleanPatternStr));
   }
 }

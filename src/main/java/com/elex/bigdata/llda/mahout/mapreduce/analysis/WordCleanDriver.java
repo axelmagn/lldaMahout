@@ -76,6 +76,7 @@ public class WordCleanDriver extends AbstractJob {
     private String[] contents=new String[]{"xxx","gravatar.com","msn.com","microsoft.com","twitter.com",
       "log.optimaizely.com","bing.net","goo."};
     private String[] endContents=new String[]{".pl",".crl",".srf",".fcgi",".cgi",".xgi"};
+    private String cleanPattern="(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)";
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
       String[] uidUrlCount = value.toString().split("\t");
       if (uidUrlCount.length < 3) {
@@ -106,6 +107,8 @@ public class WordCleanDriver extends AbstractJob {
       for(int i=0;i<endContents.length;i++)
         if(url.endsWith(endContents[i]))
           return;
+      if(url.matches(cleanPattern))
+        return;
       context.write(new Text(uidUrlCount[0]),new Text(url+"\t"+uidUrlCount[2]));
     }
   }
@@ -113,7 +116,7 @@ public class WordCleanDriver extends AbstractJob {
   public static class WordCleanReducer extends Reducer<Text,Text,Text,Text> {
     private int uidNum=0;
     private long trieCost=0;
-    private Pattern cleanPattern=Pattern.compile("(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)");
+
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       uidNum++;
       long t1=System.nanoTime();
@@ -126,8 +129,7 @@ public class WordCleanDriver extends AbstractJob {
       trieCost+=System.nanoTime()-t1;
       for(Map.Entry<String,Integer> entry: wordCountMap.entrySet()){
         String word=entry.getKey();
-        if(cleanPattern.matcher(word).find())
-          continue;
+
         context.write(key,new Text(word+"\t"+entry.getValue()));
       }
       if(uidNum%10000==1){
