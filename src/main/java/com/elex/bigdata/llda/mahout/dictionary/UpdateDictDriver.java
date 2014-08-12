@@ -28,7 +28,7 @@ public class UpdateDictDriver extends AbstractJob{
   public static final String COUNT_THRESHOLD="count_threshold";
   public static final String COUNT_UPPER_THRESHOLD="count_upper_threshold";
   public static final int DEFAULT_COUNT_THRESHOLD=3;
-  public static final int DEFUAL_COUNT_UPPER_THRESHOLD=50000;
+  public static final int DEFUAL_COUNT_UPPER_THRESHOLD=100000;
   public static final int MD5_START_INDEX=6,MD5_END_INDEX=18;
   @Override
   public int run(String[] args) throws Exception {
