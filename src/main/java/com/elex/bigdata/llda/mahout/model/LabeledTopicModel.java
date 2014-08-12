@@ -340,7 +340,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       //  log.info("num increase to 50,vector is {}", builder.toString());
       //}
       topicCountSum += count;
-      distTopicTermCountRow.setQuick(termIndex, count + distTopicTermCountRow.get(termIndex));
+      distTopicTermCountRow.setQuick(termIndex, count + distTopicTermCountRow.getQuick(termIndex));
     }
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.set(topic, topicSums.get(topic) + topicCountSum);
