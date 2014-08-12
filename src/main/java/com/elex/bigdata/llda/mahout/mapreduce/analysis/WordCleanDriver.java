@@ -113,7 +113,7 @@ public class WordCleanDriver extends AbstractJob {
   public static class WordCleanReducer extends Reducer<Text,Text,Text,Text> {
     private int uidNum=0;
     private long trieCost=0;
-    private Pattern cleanPattern=Pattern.compile("([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|(:[0-9]+$)");
+    private Pattern cleanPattern=Pattern.compile("(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)");
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       uidNum++;
       long t1=System.nanoTime();
