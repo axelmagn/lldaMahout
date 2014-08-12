@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Created with IntelliJ IDEA.
@@ -99,6 +100,9 @@ public class WordCleanDriver extends AbstractJob {
   public static class WordCleanReducer extends Reducer<Text,Text,Text,Text> {
     private int uidNum=0;
     private long trieCost=0;
+    private Pattern cleanPattern=Pattern.compile("([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|(:[0-9]+$)|(^/|/$)|(^[^.]+$)|" +
+      "(.*(gravatar|msn|microsoft|twitter|xingcloud|log\\.optimizely)\\.com.*)|(.*bing\\.net.*)|(.*goo\\..*)|" +
+      "(.*xxx.*)|(\\.pl$)|(\\.crl$)|(\\.srf$)|(\\.fcgi$)|(\\.cgi$)|(\\.xgi$)");
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       uidNum++;
       long t1=System.nanoTime();
@@ -110,7 +114,10 @@ public class WordCleanDriver extends AbstractJob {
       Map<String,Integer> wordCountMap=trie.searchCommonStr('/');
       trieCost+=System.nanoTime()-t1;
       for(Map.Entry<String,Integer> entry: wordCountMap.entrySet()){
-        context.write(key,new Text(entry.getKey()+"\t"+entry.getValue()));
+        String word=entry.getKey();
+        if(cleanPattern.matcher(word).find())
+          continue;
+        context.write(key,new Text(word+"\t"+entry.getValue()));
       }
       if(uidNum%10000==1){
         System.out.println("uidNum: "+uidNum+" trieCost: "+trieCost/(1000*1000));

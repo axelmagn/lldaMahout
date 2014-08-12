@@ -69,5 +69,20 @@ public class FileSystemTest {
     Text text=new Text(str);
     System.out.println(text.toString());
     System.out.println(text.getLength());
+    Pattern cleanPattern=Pattern.compile("([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|(:[0-9]+$)|(^/|/$)|(^[^.]+$)|" +
+      "(.*(gravatar|msn|microsoft|twitter|xingcloud|log\\.optimizely)\\.com.*)|(.*bing\\.net.*)|(.*goo\\..*)|" +
+      "(.*xxx.*)|(\\.pl$)|(\\.crl$)|(\\.srf$)|(\\.fcgi$)|(\\.cgi$)|(\\.xgi$)");
+    String[] testStrs=new String[]{"101.2.23.1","/page","hello.com:443","hello.com//","adbdcdd","gravatar.com.cn/gravatar",
+                                   "ar.msn.com","www.bing.net","ar.goo.mx/pl","sunxxx.com","inet.com/inet.pl","www.amazon.com"};
+    for(int i=0;i<testStrs.length;i++){
+      System.out.println(testStrs[i]+"\t"+cleanPattern.matcher(testStrs[i]).find());
+    }
+
+    Pattern pattern1=Pattern.compile(".*(gravatar|msn|microsoft|twitter|xingcloud|log\\.optimizely)\\.com.*");
+    for(int i=0;i<testStrs.length;i++){
+      System.out.println(testStrs[i]+"\t"+pattern1.matcher(testStrs[i]).find());
+    }
+    Pattern pattern2=Pattern.compile("^[^.]+$");
+    System.out.println(pattern2.matcher("adbdcdd").find());
   }
 }
