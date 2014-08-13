@@ -82,6 +82,12 @@ public class WordCleanDriver extends AbstractJob {
     "(liverail)|(criteo)|(skimlinks)|(accuenmedia)|(xp1\\.ru4\\.)|(admaym\\.)|(admeta)|(zenoviaexchange)|"+
     "(geotrust)|(radiumone)|(slimspots)|(triggit\\.)|(thawte)|(outlook)|(wordrefrence)"+
     ").*";
+    private String[] containContents=new String[]{"xxx","gravatar.com","msn","microsoft","twitter","log.optimizely.com",
+    "bing","goo","youtube","redirect","facebook","mail",".turn.com",".cloudfront.","dpm.demdex.",".openx.","ping.","contextweb",
+    "22find","ask.com","sekspornolari","crwdcntrl","anadoluyakasiescortbayan","nav-links","nexac","cedexis","tractionize",
+    "tidaltv","superfish","liverail","criteo","skimlinks","accuenmedia","xp1.ru4.","admaym.","admeta","zenoviaexchange",
+    "geotrust","radiumone","slimspots","triggit.","thawte","outlook","wordrefrence"};
+
     private String[] endContents=new String[]{".pl",".crl",".srf",".fcgi",".cgi",".xgi"};
     private String cleanPattern="(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)";
     private String[] startContents= new String[]{"b3.","b4."};
@@ -105,8 +111,14 @@ public class WordCleanDriver extends AbstractJob {
           }
         }
       }
+      /*
       if(url.matches(containPatterns))
         return;
+        */
+      for(int i=0;i<containContents.length;i++){
+        if(url.contains(containContents[i]))
+          return;
+      }
       if(url.startsWith("/")||url.endsWith("//")||!url.contains("."))
         return;
       for(int i=0;i<endContents.length;i++)
