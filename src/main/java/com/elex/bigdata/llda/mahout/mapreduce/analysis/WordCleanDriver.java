@@ -89,8 +89,19 @@ public class WordCleanDriver extends AbstractJob {
     "geotrust","radiumone","slimspots","triggit","thawte"};
 
     private String[] endContents=new String[]{".pl",".crl",".srf",".fcgi",".cgi",".xgi"};
+    private Pattern  endContentPattern=Pattern.compile(".*(\\.pl)|(\\.crl)|(\\.srf)|(\\.fcgi)|(\\.cgi)|(\\.xgi)$");
     private Pattern cleanPattern=Pattern.compile("(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)");
     private String[] startContents= new String[]{"b3.","b4."};
+    private Pattern totalPattern=Pattern.compile(".*(" +
+      "(("+
+      "(xxx)|(gravatar\\.com)|(msn\\.)|(microsoft\\.)|(twitter\\.)|(log\\.optimizely\\.com)|(bing\\.)|"  +
+      "(goo\\.)|(youtube\\.)|(redirect)|(facebook\\.)|(mail\\.)|(\\.turn\\.com)|(\\.cloudfront\\.)|" +
+      "(dpm\\.demdex\\.)|(\\.openx\\.)|(ping\\.)|(contextweb\\.)|(22find\\.)|(\\.ask\\.com)|(sekspornolari)|" +
+      "(crwdcntrl)|(anadoluyakasiescortbayan)|(nav-links)|(nexac)|(cedexis)|(tractionize)|(tidaltv)|(superfish)|" +
+      "(liverail)|(criteo)|(skimlinks)|(accuenmedia)|(xp1\\.ru4\\.)|(admaym\\.)|(admeta)|(zenoviaexchange)|" +
+      "(geotrust)|(radiumone)|(slimspots)|(triggit\\.)|(thawte) |([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|(:[0-9]+ )).*)|"+
+      "(\\.((pl)|(crl)|(srf)|(fcgi)|(cgi)|(xgi)))" +
+      ")$");
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
       String[] uidUrlCount = value.toString().split("\t");
       if (uidUrlCount.length < 3) {
@@ -112,20 +123,30 @@ public class WordCleanDriver extends AbstractJob {
         }
       }
 
-      if(containPatterns.matcher(url).matches())
-        return;
       /*
       for(int i=0;i<containContents.length;i++){
         if(url.contains(containContents[i]))
           return;
       }
       */
+      /*
+      if(containPatterns.matcher(url).matches())
+        return;
+      if(endContentPattern.matcher(url).matches())
+        return;
+      */
       if(url.startsWith("/")||url.endsWith("//")||!url.contains("."))
         return;
+      /*
       for(int i=0;i<endContents.length;i++)
         if(url.endsWith(endContents[i]))
-          return;
+          return;\
+          */
+      /*
       if(cleanPattern.matcher(url).matches())
+        return;
+        */
+      if(totalPattern.matcher(url).matches())
         return;
       for(int i=0;i<startContents.length;i++){
         if(url.startsWith(startContents[i])){
