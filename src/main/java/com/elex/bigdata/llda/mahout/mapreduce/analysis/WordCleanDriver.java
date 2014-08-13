@@ -74,22 +74,22 @@ public class WordCleanDriver extends AbstractJob {
   }
 
   public static class WordCleanMapper extends Mapper<Object,Text,Text,Text> {
-    private String containPatterns=".*("+
+    private Pattern containPatterns=Pattern.compile(".*("+
     "(xxx)|(gravatar\\.com)|(msn\\.)|(microsoft\\.)|(twitter\\.)|(log\\.optimizely\\.com)|(bing\\.)|" +
     "(goo\\.)|(youtube\\.)|(redirect)|(facebook\\.)|(mail\\.)|(\\.turn\\.com)|(\\.cloudfront\\.)|"   +
     "(dpm\\.demdex\\.)|(\\.openx\\.)|(ping\\.)|(contextweb\\.)|(22find\\.)|(\\.ask\\.com)|(sekspornolari)|"+
     "(crwdcntrl)|(anadoluyakasiescortbayan)|(nav-links)|(nexac)|(cedexis)|(tractionize)|(tidaltv)|(superfish)|"+
     "(liverail)|(criteo)|(skimlinks)|(accuenmedia)|(xp1\\.ru4\\.)|(admaym\\.)|(admeta)|(zenoviaexchange)|"+
-    "(geotrust)|(radiumone)|(slimspots)|(triggit\\.)|(thawte)|(outlook)|(wordrefrence)"+
-    ").*";
+    "(geotrust)|(radiumone)|(slimspots)|(triggit\\.)|(thawte)"+
+    ").*");
     private String[] containContents=new String[]{"xxx","gravatar.com","msn","microsoft","twitter","log.optimizely.com",
     "bing","goo","youtube","redirect","facebook","mail",".turn.com",".cloudfront.","dpm.demdex.",".openx.","ping.","contextweb",
-    "22find","ask.com","sekspornolari","crwdcntrl","anadoluyakasiescortbayan","nav-links","nexac","cedexis","tractionize",
+    "ask.com","sekspornolari","crwdcntrl","anadoluyakasiescortbayan","nav-links","nexac","cedexis","tractionize",
     "tidaltv","superfish","liverail","criteo","skimlinks","accuenmedia","xp1.ru4.","admaym.","admeta","zenoviaexchange",
-    "geotrust","radiumone","slimspots","triggit.","thawte","outlook","wordrefrence"};
+    "geotrust","radiumone","slimspots","triggit","thawte"};
 
     private String[] endContents=new String[]{".pl",".crl",".srf",".fcgi",".cgi",".xgi"};
-    private String cleanPattern="(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)";
+    private Pattern cleanPattern=Pattern.compile("(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)");
     private String[] startContents= new String[]{"b3.","b4."};
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
       String[] uidUrlCount = value.toString().split("\t");
@@ -111,24 +111,26 @@ public class WordCleanDriver extends AbstractJob {
           }
         }
       }
-      /*
-      if(url.matches(containPatterns))
+
+      if(containPatterns.matcher(url).matches())
         return;
-        */
+      /*
       for(int i=0;i<containContents.length;i++){
         if(url.contains(containContents[i]))
           return;
       }
+      */
       if(url.startsWith("/")||url.endsWith("//")||!url.contains("."))
         return;
       for(int i=0;i<endContents.length;i++)
         if(url.endsWith(endContents[i]))
           return;
-      if(url.matches(cleanPattern))
+      if(cleanPattern.matcher(url).matches())
         return;
       for(int i=0;i<startContents.length;i++){
         if(url.startsWith(startContents[i])){
           url.replace(startContents[i],"www.");
+          break;
         }
       }
       context.write(new Text(uidUrlCount[0]),new Text(url+"\t"+uidUrlCount[2]));
