@@ -69,10 +69,10 @@ public class FileSystemTest {
     Text text=new Text(str);
     System.out.println(text.toString());
     System.out.println(text.getLength());
-    Pattern cleanPattern=Pattern.compile("([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)|(:[0-9]+$)|(^/|/$)|(^[^.]+$)|" +
+    Pattern cleanPattern=Pattern.compile("(^[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(:[0-9]+$)|(^/|/$)|(^[^.]+$)|" +
       "(.*(gravatar|msn|microsoft|twitter|xingcloud|log\\.optimizely)\\.com.*)|(.*bing\\.net.*)|(.*goo\\..*)|" +
       "(.*xxx.*)|(\\.pl$)|(\\.crl$)|(\\.srf$)|(\\.fcgi$)|(\\.cgi$)|(\\.xgi$)");
-    String[] testStrs=new String[]{"101.2.23.1","/page","hello.com:443","hello.com//","adbdcdd","gravatar.com.cn/gravatar",
+    String[] testStrs=new String[]{"127.0.0.1:895/config","/page","hello.com:443","hello.com//","adbdcdd","gravatar.com.cn/gravatar",
                                    "ar.msn.com","www.bing.net","ar.goo.mx/pl","sunxxx.com","inet.com/inet.pl","www.amazon.com"};
     for(int i=0;i<testStrs.length;i++){
       System.out.println(testStrs[i]+"\t"+cleanPattern.matcher(testStrs[i]).find());
@@ -85,6 +85,17 @@ public class FileSystemTest {
     Pattern pattern2=Pattern.compile("^[^.]+$");
     System.out.println(pattern2.matcher("adbdcdd").find());
     String cleanPatternStr="(.*[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+.*)|(.*:[0-9]+$)";
-    System.out.println("102.12.2.2".matches(cleanPatternStr));
+    System.out.println("89.184.65:18080/echo".matches(cleanPatternStr));
+    String containPatterns=".*("+
+      "(xxx)|(gravatar\\.com)|(msn\\.)|(microsoft\\.)|(twitter\\.)|(log\\.optimizely\\.com)|(bing\\.)|" +
+      "(goo\\.)|(youtube\\.)|(redirect)|(facebook\\.)|(mail\\.)|(\\.turn\\.com)|(\\.cloudfront\\.)|"   +
+      "(dpm\\.demdex\\.)|(\\.openx\\.)|(ping\\.)|(contextweb\\.)|(22find\\.)|(\\.ask\\.com)|(sekspornolari)|"+
+      "(crwdcntrl)|(anadoluyakasiescortbayan)|(nav-links)|(nexac)|(cedexis)|(tractionize)|(tidaltv)|(superfish)|"+
+      "(liverail)|(criteo)|(skimlinks)|(accuenmedia)|(xp1\\.ru4\\.)|(admaym\\.)|(admeta)|(zenoviaexchange)|"+
+      "(geotrust)|(radiumone)|(slimspots)|(triggit\\.)|(thawte)|(outlook)|(wordrefrence)"+
+      ").*";
+    for(int i=0;i<testStrs.length;i++){
+      System.out.println(testStrs[i]+"\t"+testStrs[i].matches(containPatterns));
+    }
   }
 }
