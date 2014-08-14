@@ -87,7 +87,7 @@ public class HitWordCountDriver extends AbstractJob {
       while ((line = urlCategoryReader.readLine()) != null) {
         String[] categoryUrls = line.split(" ");
         //if (categoryIdMap.containsKey(categoryUrls[0])) {
-          int id = categoryIdMap.get(categoryUrls[0]);
+          int id = 1;
           for (int i = 1; i < categoryUrls.length; i++)
             prefixTrie.insert(categoryUrls[i], id);
         //} else {
