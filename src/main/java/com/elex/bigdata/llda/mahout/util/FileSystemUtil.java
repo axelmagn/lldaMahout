@@ -64,4 +64,11 @@ public class FileSystemUtil {
     conf.setLong("mapred.min.split.size.per.rack",minSplitSizePerRack);
     conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack",minSplitSizePerRack);
   }
+
+  public static void deleteOutputPath(Configuration conf,Path outputPath) throws IOException {
+    FileSystem fs=FileSystem.get(conf);
+    if(fs.exists(outputPath))
+      fs.delete(outputPath,true);
+  }
+
 }
