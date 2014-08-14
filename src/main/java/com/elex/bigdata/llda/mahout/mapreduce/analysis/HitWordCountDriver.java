@@ -72,7 +72,7 @@ public class HitWordCountDriver extends AbstractJob {
     Map<String, Integer> categoryIdMap = new HashMap<String, Integer>();
     Map<Integer, String> idCategoryMap = new HashMap<Integer, String>();
     private int hitWordCount=0,prefixHitCount=0, allWordCount=0;
-    public void setup(Context context) throws IOException {
+    public void setup(Context context) throws IOException, InterruptedException {
       Configuration conf = context.getConfiguration();
       FileSystem fs = FileSystem.get(conf);
       Path resourcesPath = new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
@@ -97,6 +97,7 @@ public class HitWordCountDriver extends AbstractJob {
         //}
       }
       urlCategoryReader.close();
+      context.write(new Text("prefixSize "),new IntWritable(prefixTrie.getSize()));
     }
 
     public void reduce(Text key, Iterable<IntWritable> values, Context context) {
