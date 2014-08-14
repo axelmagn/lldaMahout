@@ -8,6 +8,6 @@ logFile=/data0/log/user_category/processLog/llda/crondInf.log
 now=`date`
 echo ${now} >> $logFile
 echo "hadoop jar $JAR $MAIN --input $inputPath --doc_root ${rootPath}/docs --dict_root ${rootPath}/dictionary \
-      --resource_root ${rootPath}/resources --num_topics 8 --model_input ${rootPath}/models --output ${rootPath}/docTopics/inf >> $logFile 2>&1"
+      --resource_root ${rootPath}/resources --num_topics 5 --model_input ${rootPath}/models --output ${rootPath}/docTopics/inf >> $logFile 2>&1"
 hadoop jar $JAR $MAIN --input $inputPath --doc_root ${rootPath}/docs --dict_root ${rootPath}/dictionary \
---resource_root ${rootPath}/resources --num_topics 8 --model_input ${rootPath}/models --output ${rootPath}/docTopics/inf  >> $logFile 2>&1
+--resource_root ${rootPath}/resources --num_topics 5 --model_input ${rootPath}/models --output ${rootPath}/docTopics/inf  >> $logFile 2>&1

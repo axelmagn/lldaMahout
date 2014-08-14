@@ -69,12 +69,15 @@ public class WordExtractDriver extends AbstractJob{
         return;
       }
       String shortWord=tokens[1];
+      /*
       if(shortWord.startsWith("http://"))
         shortWord=shortWord.substring(7);
       else if(shortWord.startsWith("https://"))
         shortWord=shortWord.substring(8);
+
       if(shortWord.contains("/"))
         shortWord=shortWord.substring(0,shortWord.indexOf("/"));
+        */
       context.write(new Text(shortWord),new IntWritable(Integer.parseInt(tokens[2])));
     }
   }

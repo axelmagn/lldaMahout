@@ -117,7 +117,7 @@ public class Trie {
            maxCount=entry.getValue().count;
       }
       */
-      commonStrs.put(prefix.substring(0, index),node.count);
+      commonStrs.put(prefix.substring(0, index),node.count/node.nextNodes.size());
       return commonStrs;
     } else {
       for (Map.Entry<Character, Node> entry : node.nextNodes.entrySet()) {

@@ -92,7 +92,8 @@ public class TopicTermModelDriver extends AbstractJob {
       for(int j=1;j<ratio.length;j++){
          builder.append(ratio[j-1]+"~"+ratio[j]+" : "+termCounts[j-1]/(double)probVector.size()+"\t");
       }
-      builder.append("nonZero ratio "+count/probVector.size());
+
+      builder.append("nonZero ratio "+count/(double)probVector.size());
       context.write(new Text(String.valueOf(key.get())),new Text(builder.toString()));
     }
   }

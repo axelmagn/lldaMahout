@@ -152,7 +152,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       {
         category=destCategories[0];
       }
-      if(category==null && url.contains("shop"))
+      if(category==null && (url.contains("shop")|| url.contains("amazon.")))
         category=destCategories[1];
       timeCost+=(System.nanoTime()-startTime);
       startTime=System.nanoTime();

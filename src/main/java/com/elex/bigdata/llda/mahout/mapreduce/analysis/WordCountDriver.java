@@ -95,7 +95,7 @@ public class WordCountDriver extends AbstractJob {
   }
 
   public static class WordCountReducer extends Reducer<Text, IntWritable, Text, Text> {
-    private int[] thredhold = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 40, 60, 80, 100, 200, 400, 800, 1600, 3200, 6400};
+    private int[] thredhold = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 40, 60, 80, 100, 200, 400, 800, 1600, 3200, 6400,12800,25600,51200,102400};
     private int[] wordCount = new int[thredhold.length];
     private int totalCount=0;
     public void setup(Context context) {
