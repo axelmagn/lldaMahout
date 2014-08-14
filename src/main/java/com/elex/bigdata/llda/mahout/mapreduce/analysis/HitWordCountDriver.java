@@ -86,15 +86,15 @@ public class HitWordCountDriver extends AbstractJob {
       String line = "";
       while ((line = urlCategoryReader.readLine()) != null) {
         String[] categoryUrls = line.split(" ");
-        if (categoryIdMap.containsKey(categoryUrls[0])) {
+        //if (categoryIdMap.containsKey(categoryUrls[0])) {
           int id = categoryIdMap.get(categoryUrls[0]);
           for (int i = 1; i < categoryUrls.length; i++)
             prefixTrie.insert(categoryUrls[i], id);
-        } else {
-          for (int i = 1; i < categoryUrls.length; i++) {
-            url_category_map.put(categoryUrls[i], categoryUrls[0]);
-          }
-        }
+        //} else {
+        //  for (int i = 1; i < categoryUrls.length; i++) {
+        //    url_category_map.put(categoryUrls[i], categoryUrls[0]);
+        //  }
+        //}
       }
       urlCategoryReader.close();
     }
