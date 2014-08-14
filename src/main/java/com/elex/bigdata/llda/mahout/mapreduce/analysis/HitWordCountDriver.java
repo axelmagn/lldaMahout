@@ -52,7 +52,7 @@ public class HitWordCountDriver extends AbstractJob {
   public Job prepareJob(Configuration conf, Path inputPath, Path outputPath) throws IOException {
     FileSystemUtil.setCombineInputSplitSize(conf, inputPath);
     FileSystemUtil.deleteOutputPath(conf, outputPath);
-    Job job = new Job(conf);
+    Job job = new Job(conf,"hit Word Count "+inputPath.getName());
     job.setMapperClass(WordExtractDriver.WordExtractMapper.class);
     job.setReducerClass(HitWordCountReducer.class);
     job.setOutputKeyClass(Text.class);
@@ -61,6 +61,7 @@ public class HitWordCountDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
+    job.setJarByClass(HitWordCountDriver.class);
     return job;
   }
 
