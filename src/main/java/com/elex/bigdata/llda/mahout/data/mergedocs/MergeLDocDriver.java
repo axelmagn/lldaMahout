@@ -30,6 +30,7 @@ import java.util.*;
  */
 public class MergeLDocDriver extends AbstractJob {
   public static final String MULTI_INPUT="multi_input";
+  public static final String USE_COOKIEID="use_cookieId";
   /*
      InputPaths: labeledDocs files
      conf.setDictSizePath
@@ -43,6 +44,7 @@ public class MergeLDocDriver extends AbstractJob {
   public int run(String[] args) throws Exception {
     addOption(MULTI_INPUT, "mI", "specify the input Path", true);
     addOption(GenerateLDocDriver.UID_PATH,"uidPath","specify the uid file Path");
+    addOption(USE_COOKIEID,"use_cookieId","specify if use cookieId ");
     addOutputOption();
     if(parseArguments(args)==null){
       return -1;
