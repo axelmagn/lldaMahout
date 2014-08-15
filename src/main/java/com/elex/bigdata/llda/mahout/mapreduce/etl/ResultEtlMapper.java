@@ -25,7 +25,7 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
     for (int i = 0; i < 4; i++)
       probabilities.add((int) (Double.parseDouble(probs[i].split(":")[1]) * 100));
     StringBuilder probBuilder = new StringBuilder();
-    String[] probStrs = new String[]{"a", "b", "c", "d", "z"};
+    String[] probStrs = new String[]{"1", "2", "3", "4", "0"};
     /*
     int probLeft=100;
     for(int i=0;i<CATEGORY_COUNT;i++){
