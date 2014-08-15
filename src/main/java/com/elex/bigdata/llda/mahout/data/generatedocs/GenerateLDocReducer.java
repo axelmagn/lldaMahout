@@ -1,9 +1,10 @@
 package com.elex.bigdata.llda.mahout.data.generatedocs;
 
 import com.elex.bigdata.hashing.BDMD5;
-import com.elex.bigdata.hashing.HashingException;
 import com.elex.bigdata.llda.mahout.dictionary.Dictionary;
-import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
+import com.elex.bigdata.llda.mahout.mapreduce.etl.ResultEtlDriver;
+import com.elex.bigdata.llda.mahout.priocatogory.ParentToChildLabels;
+import com.elex.bigdata.llda.mahout.priocatogory.TopicUrls;
 import com.elex.bigdata.llda.mahout.util.PrefixTrie;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -13,9 +14,11 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.log4j.Logger;
+import org.apache.mahout.common.Pair;
 import org.apache.mahout.math.MultiLabelVectorWritable;
 import org.apache.mahout.math.RandomAccessSparseVector;
 import org.apache.mahout.math.Vector;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,18 +34,18 @@ import java.util.*;
  */
 public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVectorWritable> {
   private Logger log = Logger.getLogger(GenerateLDocReducer.class);
-  public static final String URL_CATEGORY = "url_category";
-  public static final String CATEGORY_LABEL = "category_label";
-  private Dictionary dict;
-  private BDMD5 bdmd5;
+  public static final String URL_TOPIC = "url_topic";
+
+  // save urlTopics
   private Map<String, String> url_category_map = new HashMap<String, String>();
   private Map<String, Integer> category_label_map = new HashMap<String, Integer>();
   PrefixTrie prefixTrie = new PrefixTrie();
-  private String[] destCategories = new String[]{"jogos", "compras", "Friends"};
-  Map<String, Integer> categoryIdMap = new HashMap<String, Integer>();
-  Map<Integer, String> idCategoryMap = new HashMap<Integer, String>();
+
+  // for uid saving
   private SequenceFile.Writer uidWriter;
   private boolean saveUids = false;
+
+  // for statistics
   private int uidNum = 0;
   private int sampleRatio = 10000, index = 0;
   private long timeCost = 0l,labelVectorTimeCost=0l,queryDictTime=0l,md5Time=0l,calTime=0l,ioTime=0l,reduceTime=0l;
@@ -55,59 +58,85 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
        get uid Path(write uid to hdfs) and create a sequenceFileWriter
     */
     Configuration conf = context.getConfiguration();
-    FileSystem fs = FileSystem.get(conf);
-    Path resourcesPath = new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
-    Path urlCategoryPath = new Path(resourcesPath, URL_CATEGORY);
-    Path categoryLabelPath = new Path(resourcesPath, CATEGORY_LABEL);
+    initUidSaver(conf);
+    Pair<Map<String,String>,Map<String,Integer>> pair = loadUrlTopics(conf,prefixTrie);
+    url_category_map=pair.getFirst();
+    category_label_map=pair.getSecond();
+    log.info("prefixTrie jvm size "+ prefixTrie.getSize()*37*8);
+  }
 
-    for (int i = 0; i < destCategories.length; i++) {
-      categoryIdMap.put(destCategories[i], i);
-      idCategoryMap.put(i, destCategories[i]);
-    }
-
+  private void initUidSaver(Configuration conf) throws IOException {
     String uidFile = conf.get(GenerateLDocDriver.UID_PATH);
     if (uidFile != null) {
       saveUids = true;
       Path uidPath = new Path(uidFile);
+      FileSystem fs = FileSystem.get(conf);
       if (fs.exists(uidPath))
         fs.delete(uidPath);
       uidWriter = SequenceFile.createWriter(fs, conf, uidPath, Text.class, NullWritable.class);
     }
-    /*
-    try {
-      bdmd5 = BDMD5.getInstance();
-      dict = new Dictionary(conf.get(UpdateDictDriver.DICT_ROOT), fs, conf);
-    } catch (HashingException e) {
-      e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-    }
-    */
-    //termSize=dictionary.size();
+  }
 
-    BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(fs.open(urlCategoryPath)));
-    String line = "";
+  private Pair<Map<String,String>,Map<String,Integer>> loadUrlTopics(Configuration conf,PrefixTrie prefixTrie) throws IOException {
     int prefixTrieWordCount=0;
+    Map<String,String> url2Category=new HashMap<String, String>();
+    Map<String,Integer> category2Label=new HashMap<String, Integer>();
+    Set<Integer> destParentLabels=getDestParentLabels();
+    Map<Integer,Integer> child2ParentLabels=getLabelRelations(conf);
+
+    ObjectMapper objectMapper=new ObjectMapper();
+    FileSystem fs = FileSystem.get(conf);
+    Path resourcesPath = new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
+    Path urlTopicPath = new Path(resourcesPath, URL_TOPIC);
+    BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(fs.open(urlTopicPath)));
+    String line ;
+
+
     while ((line = urlCategoryReader.readLine()) != null) {
-      String[] categoryUrls = line.split(" ");
-      if (categoryIdMap.containsKey(categoryUrls[0])) {
-        int id = categoryIdMap.get(categoryUrls[0]);
-        for (int i = 1; i < categoryUrls.length; i++)
-          prefixTrie.insert(categoryUrls[i], id);
-        prefixTrieWordCount+=categoryUrls.length-1;
-      } else {
-        for (int i = 1; i < categoryUrls.length; i++) {
-          url_category_map.put(categoryUrls[i], categoryUrls[0]);
+      TopicUrls topicUrls=objectMapper.readValue(line,TopicUrls.class);
+      if(destParentLabels.contains(child2ParentLabels.get(topicUrls.getLabel()))) {
+        for(String url: topicUrls.getUrls()){
+          prefixTrie.insert(url,topicUrls.getLabel());
+        }
+        prefixTrieWordCount+=topicUrls.getUrls().size();
+      }else {
+        for(String url: topicUrls.getUrls()){
+           url2Category.put(url,topicUrls.getTopic());
         }
       }
+      category2Label.put(topicUrls.getTopic(),topicUrls.getLabel());
     }
     urlCategoryReader.close();
+    log.info("prefix trie word count "+prefixTrieWordCount);
+    return new Pair<Map<String, String>, Map<String, Integer>>(url2Category,category2Label);
+  }
 
-    BufferedReader categoryLabelReader = new BufferedReader(new InputStreamReader(fs.open(categoryLabelPath)));
-    while ((line = categoryLabelReader.readLine()) != null) {
-      String[] categoryLabels = line.split("=");
-      category_label_map.put(categoryLabels[0], Integer.parseInt(categoryLabels[1]));
+  private Set<Integer> getDestParentLabels() throws IOException {
+     BufferedReader reader=new BufferedReader(new InputStreamReader(
+       this.getClass().getResourceAsStream("/"+GenerateLDocDriver.DEST_PARENT_LABELS)));
+     Set<Integer> labels=new HashSet<Integer>();
+     String line;
+     while((line=reader.readLine())!=null){
+       labels.add(Integer.parseInt(line.trim()));
+     }
+    return labels;
+  }
+
+  private Map<Integer,Integer> getLabelRelations(Configuration conf) throws IOException {
+    Map<Integer,Integer> child2ParentLabelMap=new HashMap<Integer, Integer>();
+    FileSystem fs = FileSystem.get(conf);
+    Path resourcesPath = new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
+    Path labelRelationPath=new Path(resourcesPath, ResultEtlDriver.LABEL_RELATION);
+    BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(fs.open(labelRelationPath)));
+    String line ;
+    ObjectMapper objectMapper=new ObjectMapper();
+    while ((line = urlCategoryReader.readLine()) != null) {
+      ParentToChildLabels parentToChildLabels=objectMapper.readValue(line.trim(),ParentToChildLabels.class);
+      for(Integer label: parentToChildLabels.getChildLabels()){
+         child2ParentLabelMap.put(label,parentToChildLabels.getParentLabel());
+      }
     }
-    log.info("prefixTrie word Count "+prefixTrieWordCount);
-    log.info("prefixTrie jvm size "+ prefixTrie.getSize()*37*8);
+    return child2ParentLabelMap;
   }
 
   public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
@@ -127,43 +156,34 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     Set<Integer> labelSet = new HashSet<Integer>();
     long startTime;
     for (Text value : values) {
-      startTime=System.nanoTime();
       String[] tokens = value.toString().split("\t");
       String url = tokens[0];
-      //String wordMd5=tokens[1];
-      long md5StartTime=System.nanoTime();
-
-      queryDictTime+=(System.nanoTime()-startTime);
-      startTime=System.nanoTime();
+      boolean hit=true;
       hitCount++;
-      //int id = dict.getId(wordMd5);
       int id=Integer.parseInt(tokens[1]);
       int count = Integer.parseInt(tokens[2]);
 
-      calTime+=(System.nanoTime()-startTime);
-      startTime=System.nanoTime();
       String category = url_category_map.get(url);
       if (category == null) {
         int categoryId = prefixTrie.prefixSearch(url);
         if (categoryId != -1)
-          category = idCategoryMap.get(id);
+          labelSet.add(categoryId);
+        /*
+         special rules according to human assert
+       */
+        else if(url.contains("games"))
+          labelSet.add(1);
+        else if((url.contains("shop")|| url.contains("amazon.")))
+          labelSet.add(2);
+        else
+          hit=false;
+      }else {
+        labelSet.add(category_label_map.get(category));
       }
-      if(category==null && url.contains("games"))
-      {
-        category=destCategories[0];
-      }
-      if(category==null && (url.contains("shop")|| url.contains("amazon.")))
-        category=destCategories[1];
-      timeCost+=(System.nanoTime()-startTime);
-      startTime=System.nanoTime();
-      if (category != null) {
+      // update word count
+      if (hit) {
         count=count+5;
-        Integer label = category_label_map.get(category);
-        if (label != null) {
-          labelSet.add(label);
-        }
       }
-      labelVectorTimeCost+=(System.nanoTime()-startTime);
       if (urlCounts.containsKey(id))
         urlCounts.put(id, urlCounts.get(id) + count);
       else

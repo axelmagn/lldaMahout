@@ -27,6 +27,7 @@ public class GenerateLDocDriver extends AbstractJob {
   public static final String UID_PATH="uid_path";
   public static final String RESOURCE_ROOT ="resource_root";
   public static final String UID_FILE="uid";
+  public static final String DEST_PARENT_LABELS="dest_parent_labels";
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();

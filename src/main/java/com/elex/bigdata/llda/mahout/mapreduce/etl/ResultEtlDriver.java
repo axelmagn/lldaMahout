@@ -26,7 +26,7 @@ import java.util.Date;
 public class ResultEtlDriver extends AbstractJob {
   public static String LOCAL_RESULT_ROOT = "local_result_root";
   public static final String RESULT_TIME = "result_time";
-
+  public static final String LABEL_RELATION = "label_relation";
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();

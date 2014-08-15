@@ -9,8 +9,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.hadoop.io.NullWritable;
-import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -76,7 +74,7 @@ public class HitWordCountDriver extends AbstractJob {
       Configuration conf = context.getConfiguration();
       FileSystem fs = FileSystem.get(conf);
       Path resourcesPath = new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
-      Path urlCategoryPath = new Path(resourcesPath, GenerateLDocReducer.URL_CATEGORY);
+      Path urlCategoryPath = new Path(resourcesPath, GenerateLDocReducer.URL_TOPIC);
 
       for (int i = 0; i < destCategories.length; i++) {
         categoryIdMap.put(destCategories[i], i);

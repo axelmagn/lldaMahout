@@ -5,7 +5,6 @@ import com.elex.bigdata.hashing.HashingException;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.util.PrefixTrie;
-import com.elex.bigdata.llda.mahout.util.Trie;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -47,7 +46,7 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
       categoryIdMap.put(destCategories[i], i);
     }
     Path resourcesPath = new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
-    Path urlCategoryPath = new Path(resourcesPath, GenerateLDocReducer.URL_CATEGORY);
+    Path urlCategoryPath = new Path(resourcesPath, GenerateLDocReducer.URL_TOPIC);
     BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(fs.open(urlCategoryPath)));
     String line = "";
     while ((line = urlCategoryReader.readLine()) != null) {

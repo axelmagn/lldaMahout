@@ -32,7 +32,7 @@ public class TestPrefixTrie {
     PrefixTrie prefixTrie = new PrefixTrie();
 
     Map<String, String> url_category_map = new HashMap<String, String>();
-    InputStream inputStream = this.getClass().getResourceAsStream("/url_category");
+    InputStream inputStream = this.getClass().getResourceAsStream("/urlTopic");
     BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(inputStream));
     String line = "";
     while ((line = urlCategoryReader.readLine()) != null) {

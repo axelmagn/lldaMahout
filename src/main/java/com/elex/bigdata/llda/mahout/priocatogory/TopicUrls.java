@@ -1,5 +1,7 @@
 package com.elex.bigdata.llda.mahout.priocatogory;
 
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import java.util.List;
 
 /**
@@ -11,10 +13,12 @@ import java.util.List;
  */
 public class TopicUrls {
   private String topic;
+  private int label;
   private List<String> urls;
 
-  public TopicUrls(String topic, List<String> urls) {
+  public TopicUrls(@JsonProperty("topic") String topic, @JsonProperty("label") int label,@JsonProperty("urls") List<String> urls) {
     this.topic = topic;
+    this.label=label;
     this.urls = urls;
   }
   public TopicUrls(){}
@@ -33,5 +37,13 @@ public class TopicUrls {
 
   public void setUrls(List<String> urls) {
     this.urls = urls;
+  }
+
+  public int getLabel() {
+    return label;
+  }
+
+  public void setLabel(int label) {
+    this.label = label;
   }
 }
