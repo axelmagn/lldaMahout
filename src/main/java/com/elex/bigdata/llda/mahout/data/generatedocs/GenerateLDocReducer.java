@@ -53,7 +53,6 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   //int termSize;
   public void setup(Context context) throws IOException {
     /*
-       load dict;
        load url--category map
        get uid Path(write uid to hdfs) and create a sequenceFileWriter
     */
