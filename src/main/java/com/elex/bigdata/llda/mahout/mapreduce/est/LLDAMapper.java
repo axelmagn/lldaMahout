@@ -31,7 +31,6 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
   private LabeledTopicModel readModel;
   private LabeledTopicModel writeModel;
   private int maxIters;
-  private int numTopics;
   private int sampleRatio=50000,index=0;
   private int[] topics;
 
@@ -43,8 +42,8 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     return maxIters;
   }
 
-  protected int getNumTopics() {
-    return numTopics;
+  protected int[] getTopics() {
+    return topics;
   }
 
   @Override
@@ -54,7 +53,6 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     float eta = conf.getFloat(LLDADriver.TERM_TOPIC_SMOOTHING, Float.NaN);
     float alpha = conf.getFloat(LLDADriver.DOC_TOPIC_SMOOTHING, Float.NaN);
     long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
-    numTopics = conf.getInt(LLDADriver.NUM_TOPICS, -1);
     int numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
     int numUpdateThreads = conf.getInt(LLDADriver.NUM_UPDATE_THREADS, 1);
     int numTrainThreads = conf.getInt(LLDADriver.NUM_TRAIN_THREADS, 4);
