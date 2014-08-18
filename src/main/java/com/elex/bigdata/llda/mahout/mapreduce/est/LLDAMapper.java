@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.mapreduce.est;
 
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.model.LabeledModelTrainer;
 import com.elex.bigdata.llda.mahout.model.LabeledTopicModel;
 import org.apache.hadoop.conf.Configuration;
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -31,6 +33,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
   private int maxIters;
   private int numTopics;
   private int sampleRatio=50000,index=0;
+  private int[] topics;
 
   protected LabeledModelTrainer getModelTrainer() {
     return modelTrainer;
@@ -57,41 +60,31 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     int numTrainThreads = conf.getInt(LLDADriver.NUM_TRAIN_THREADS, 4);
     maxIters = conf.getInt(LLDADriver.MAX_ITERATIONS_PER_DOC, 10);
     float modelWeight = conf.getFloat(LLDADriver.MODEL_WEIGHT, 1.0f);
-
+    topics=LLDADriver.getTopics(conf);
     log.info("Initializing read model");
     Path[] modelPaths = LLDADriver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new LabeledTopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
     } else {
       log.info("No model files found");
-      readModel = new LabeledTopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
+      readModel = new LabeledTopicModel(topics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
         numTrainThreads, modelWeight);
     }
 
     log.info("Initializing write model");
     writeModel = modelWeight == 1
-      ? new LabeledTopicModel(numTopics, numTerms, eta, alpha, null, numUpdateThreads)
+      ? new LabeledTopicModel(topics, numTerms, eta, alpha, null, numUpdateThreads)
       : readModel;
 
     log.info("Initializing model trainer");
-    modelTrainer = new LabeledModelTrainer(readModel, writeModel, numTrainThreads, numTopics, numTerms);
+    modelTrainer = new LabeledModelTrainer(readModel, writeModel, numTrainThreads, topics, numTerms);
     modelTrainer.start();
   }
 
   @Override
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
-    /* where to get docTopics? */
-    //long t1=System.currentTimeMillis();
-    Vector labels=new RandomAccessSparseVector(numTopics);
-    for(int label: doc.getLabels())
-      labels.setQuick(label,1.0);
-    if(doc.getLabels().length==0){
-      labels.assign(1.0);
-    }
-    //long t2=System.currentTimeMillis();
-    //log.info("create labels using "+(t2-t1)+" ms");
-    //train
+    int[] labels=doc.getLabels();
     if((index++)>=sampleRatio){
       index=0;
       StringBuilder vectorStr=new StringBuilder();
@@ -102,16 +95,11 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
       }
       log.info("vector is : "+vectorStr.toString());
       StringBuilder labelStr=new StringBuilder();
-      Iterator<Vector.Element> labelIter=labels.iterateNonZero();
-      while(labelIter.hasNext()){
-        Vector.Element e=labelIter.next();
-        labelStr.append(e.index()+":"+e.get()+"  ");
-      }
+      for(int label: labels)
+        labelStr.append(label+" ");
       log.info("labels is: "+labelStr.toString());
     }
-   // long t2=System.currentTimeMillis();
-    modelTrainer.train(doc.getVector(), labels, true, maxIters,false);
-    //log.info("train using "+(System.currentTimeMillis()-t2)+" ms");
+    modelTrainer.train(doc.getVector(), labels, topics,true, false);
   }
 
   @Override

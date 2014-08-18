@@ -1,5 +1,7 @@
 package com.elex.bigdata.llda.mahout.mapreduce.est;
 
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.mapreduce.inf.LLDAInferenceMapper;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -36,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -79,6 +82,7 @@ public class LLDADriver extends AbstractJob {
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
+    addOption(GenerateLDocDriver.RESOURCE_ROOT,"rDir","specify the resources Dir",true);
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION, "cd", "The convergence delta value",
       String.valueOf(DEFAULT_CONVERGENCE_DELTA));
@@ -141,10 +145,23 @@ public class LLDADriver extends AbstractJob {
     int numReduceTasks = Integer.parseInt(getOption(NUM_REDUCE_TASKS));
     boolean backfillPerplexity = hasOption(BACKFILL_PERPLEXITY);
 
-    return run(getConf(), inputPath, topicModelOutputPath, numTopics, numTerms, alpha, eta,
+    Configuration conf=getConf();
+    conf.set(GenerateLDocDriver.RESOURCE_ROOT,getOption(GenerateLDocDriver.RESOURCE_ROOT));
+
+    return run(conf, inputPath, topicModelOutputPath, numTopics, numTerms, alpha, eta,
       maxIterations, iterationBlockSize, convergenceDelta, dictionaryPath, docTopicOutputPath,
       modelTempPath, seed, testFraction, numTrainThreads, numUpdateThreads, maxItersPerDoc,
       numReduceTasks, backfillPerplexity);
+  }
+
+  public static int[] getTopics(Configuration conf) throws IOException {
+
+    Map<Integer,Integer> child2ParentLabels= GenerateLDocReducer.getLabelRelations(conf);
+    int[] topics=new int[child2ParentLabels.size()];
+    int i=0;
+    for(Integer topicLabel: child2ParentLabels.keySet())
+      topics[i++]=topicLabel;
+    return topics;
   }
 
   private static int getNumTerms(Configuration conf, Path dictionaryPath) throws IOException {

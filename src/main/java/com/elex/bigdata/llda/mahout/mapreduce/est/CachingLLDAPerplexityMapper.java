@@ -2,6 +2,7 @@ package com.elex.bigdata.llda.mahout.mapreduce.est;
 
 import com.elex.bigdata.llda.mahout.model.LabeledModelTrainer;
 import com.elex.bigdata.llda.mahout.model.LabeledTopicModel;
+import org.apache.avro.generic.GenericData;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -17,6 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 /**
@@ -38,11 +42,9 @@ public class CachingLLDAPerplexityMapper  extends
     private static final Logger log = LoggerFactory.getLogger(CachingLLDAPerplexityMapper.class);
 
     private LabeledModelTrainer modelTrainer;
-    private int maxIters;
-    private int numTopics;
+    private int[] topics;
     private float testFraction;
     private Random random;
-    private Vector topicVector;
     private final DoubleWritable outKey = new DoubleWritable();
     private final DoubleWritable outValue = new DoubleWritable();
 
@@ -56,11 +58,10 @@ public class CachingLLDAPerplexityMapper  extends
       float alpha = conf.getFloat(CVB0Driver.DOC_TOPIC_SMOOTHING, Float.NaN);
       long seed = conf.getLong(CVB0Driver.RANDOM_SEED, 1234L);
       random = RandomUtils.getRandom(seed);
-      numTopics = conf.getInt(CVB0Driver.NUM_TOPICS, -1);
+      topics= LLDADriver.getTopics(conf);
       int numTerms = conf.getInt(CVB0Driver.NUM_TERMS, -1);
       int numUpdateThreads = conf.getInt(CVB0Driver.NUM_UPDATE_THREADS, 1);
       int numTrainThreads = conf.getInt(CVB0Driver.NUM_TRAIN_THREADS, 4);
-      maxIters = conf.getInt(CVB0Driver.MAX_ITERATIONS_PER_DOC, 10);
       float modelWeight = conf.getFloat(CVB0Driver.MODEL_WEIGHT, 1.0f);
       testFraction = conf.getFloat(CVB0Driver.TEST_SET_FRACTION, 0.1f);
 
@@ -71,15 +72,14 @@ public class CachingLLDAPerplexityMapper  extends
         readModel = new LabeledTopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
       } else {
         log.info("No model files found");
-        readModel = new LabeledTopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
+        readModel = new LabeledTopicModel(topics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
           numTrainThreads, modelWeight);
       }
 
       log.info("Initializing model trainer");
-      modelTrainer = new LabeledModelTrainer(readModel, null, numTrainThreads, numTopics, numTerms);
+      modelTrainer = new LabeledModelTrainer(readModel, null, numTrainThreads, topics, numTerms);
 
       log.info("Initializing topic vector");
-      topicVector = new DenseVector(new double[numTopics]);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class CachingLLDAPerplexityMapper  extends
       }
       context.getCounter(Counters.SAMPLED_DOCUMENTS).increment(1);
       outKey.set(document.getVector().norm(1));
-      outValue.set(modelTrainer.calculatePerplexity(document.getVector(), topicVector.assign(1.0 / numTopics), maxIters));
+      outValue.set(modelTrainer.calculatePerplexity(document.getVector(), document.getLabels()));
       context.write(outKey, outValue);
     }
   }

@@ -35,9 +35,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   private static final Logger log = LoggerFactory.getLogger(LabeledTopicModel.class);
 
   private final String[] dictionary;
-  private final Matrix topicTermCounts;
+  private final AbstractMatrix topicTermCounts;
   private final Vector topicSums;
-  private final int numTopics;
+  private final int[] topics;
   private final int numTerms;
   private final double eta;
   private final double alpha;
@@ -53,13 +53,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     return numTerms;
   }
 
-  public int getNumTopics() {
-    return numTopics;
+  public int[] getTopics() {
+    return topics;
   }
 
-  public LabeledTopicModel(int numTopics, int numTerms, double eta, double alpha, String[] dictionary,
+  public LabeledTopicModel(int[] topics, int numTerms, double eta, double alpha, String[] dictionary,
                            double modelWeight) {
-    this(numTopics, numTerms, eta, alpha, null, dictionary, 1, modelWeight);
+    this(topics, numTerms, eta, alpha, null, dictionary, 1, modelWeight);
   }
 
   public LabeledTopicModel(Configuration conf, double eta, double alpha,
@@ -67,39 +67,25 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     this(loadModel(conf, modelpath), eta, alpha, dictionary, numThreads, modelWeight);
   }
 
-  public LabeledTopicModel(int numTopics, int numTerms, double eta, double alpha, String[] dictionary,
-                           int numThreads, double modelWeight) {
-    this(new DenseMatrix(numTopics, numTerms), new DenseVector(numTopics), eta, alpha, dictionary,
-      numThreads, modelWeight);
-  }
-
-  public LabeledTopicModel(int numTopics, int numTerms, double eta, double alpha, Random random,
+  public LabeledTopicModel(int[] topics, int numTerms, double eta, double alpha, Random random,
                            String[] dictionary, int numThreads, double modelWeight) {
-    this(randomMatrix(numTopics, numTerms, random), eta, alpha, dictionary, numThreads, modelWeight);
+    this(randomMatrix(topics, numTerms, random), eta, alpha, dictionary, numThreads, modelWeight);
   }
 
-  private LabeledTopicModel(Pair<Matrix, Vector> model, double eta, double alpha, String[] dict,
+  private LabeledTopicModel(Pair<AbstractMatrix, Vector> model, double eta, double alpha, String[] dict,
                             int numThreads, double modelWeight) {
     this(model.getFirst(), model.getSecond(), eta, alpha, dict, numThreads, modelWeight);
   }
 
-  public LabeledTopicModel(Matrix topicTermCounts, Vector topicSums, double eta, double alpha,
-                           String[] dictionary, double modelWeight) {
-    this(topicTermCounts, topicSums, eta, alpha, dictionary, 1, modelWeight);
-  }
-
-  public LabeledTopicModel(Matrix topicTermCounts, double eta, double alpha, String[] dictionary,
-                           int numThreads, double modelWeight) {
-    this(topicTermCounts, viewRowSums(topicTermCounts),
-      eta, alpha, dictionary, numThreads, modelWeight);
-  }
-
-  public LabeledTopicModel(Matrix topicTermCounts, Vector topicSums, double eta, double alpha,
+  public LabeledTopicModel(AbstractMatrix topicTermCounts, Vector topicSums,  double eta, double alpha,
                            String[] dictionary, int numThreads, double modelWeight) {
     this.dictionary = dictionary;
     this.topicTermCounts = topicTermCounts;
     this.topicSums = topicSums;
-    this.numTopics = topicSums.size();
+    this.topics=new int[topicSums.size()];
+    Iterator<Vector.Element> iter=topicSums.iterateNonZero();
+    for(int i=0;i<topics.length;i++)
+      topics[i]=iter.next().index();
     this.numTerms = topicTermCounts.numCols();
     this.eta = eta;
     this.alpha = alpha;
@@ -107,17 +93,17 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     this.numThreads = numThreads;
     if (modelWeight != 1) {
       topicSums.assign(Functions.mult(modelWeight));
-      for (int x = 0; x < numTopics; x++) {
-        topicTermCounts.viewRow(x).assign(Functions.mult(modelWeight));
+      for (int topic: topics) {
+        topicTermCounts.viewRow(topic).assign(Functions.mult(modelWeight));
       }
     }
     initializeThreadPool();
   }
 
   private static Vector viewRowSums(Matrix m) {
-    Vector v = new DenseVector(m.numRows());
+    Vector v = new RandomAccessSparseVector(m.numRows());
     for (MatrixSlice slice : m) {
-      v.set(slice.index(), slice.vector().norm(1));
+      v.setQuick(slice.index(), slice.vector().norm(1));
     }
     return v;
   }
@@ -147,32 +133,32 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   @Override
   public Iterator<MatrixSlice> iterator() {
-    return topicTermCounts.iterateAll();
+    return topicTermCounts.iterator();
   }
 
   public Vector topicSums() {
     return topicSums;
   }
 
-  private static Pair<Matrix, Vector> randomMatrix(int numTopics, int numTerms, Random random) {
-    Matrix topicTermCounts = new SparseRowMatrix(numTopics, numTerms);
-    Vector topicSums = new DenseVector(numTopics);
+  private static Pair<AbstractMatrix, Vector> randomMatrix(int[] topics, int numTerms, Random random) {
+    AbstractMatrix topicTermCounts = new SparseMatrix(topics.length, numTerms);
+    Vector topicSums = new RandomAccessSparseVector(topics.length);
     if (random != null) {
-      for (int x = 0; x < numTopics; x++) {
+      for (int x = 0; x < topics.length; x++) {
         for (int term = 0; term < numTerms; term++) {
           topicTermCounts.viewRow(x).set(term, random.nextDouble());
         }
       }
     }
-    for (int x = 0; x < numTopics; x++) {
-      topicSums.set(x, random == null ? 1.0 : topicTermCounts.viewRow(x).norm(1));
+    for (int topic: topics) {
+      topicSums.setQuick(topic, random == null ? 1.0 : topicTermCounts.viewRow(topic).norm(1));
     }
     return Pair.of(topicTermCounts, topicSums);
   }
 
-  public static Pair<Matrix, Vector> loadModel(Configuration conf, Path... modelPaths)
+  public static Pair<AbstractMatrix, Vector> loadModel(Configuration conf, Path... modelPaths)
     throws IOException {
-    int numTopics = -1;
+    int numTopics = 0;
     int numTerms = -1;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
     for (Path modelPath : modelPaths) {
@@ -180,7 +166,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       for (Pair<IntWritable, VectorWritable> row
         : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
-        numTopics = Math.max(numTopics, row.getFirst().get());
+        numTopics++;
         if (numTerms < 0) {
           numTerms = row.getSecond().get().size();
         }
@@ -189,10 +175,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     if (rows.isEmpty()) {
       throw new IOException(java.util.Arrays.toString(modelPaths) + " have no vectors in it");
     }
-    numTopics++;
     log.info("numTopics is {},numTerms is {}", numTopics, numTerms);
-    Matrix model = new SparseRowMatrix(numTopics, numTerms);
-    Vector topicSums = new DenseVector(numTopics);
+    AbstractMatrix model = new SparseMatrix(numTopics, numTerms);
+    Vector topicSums = new RandomAccessSparseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
       model.viewRow(pair.getFirst()).assign(pair.getSecond());
       topicSums.set(pair.getFirst(), pair.getSecond().norm(1));
@@ -204,10 +189,10 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    for (int x = 0; x < numTopics; x++) {
+    for (int topic: topics) {
       String v = dictionary != null
-        ? vectorToSortedString(topicTermCounts.viewRow(x).normalize(1), dictionary)
-        : topicTermCounts.viewRow(x).asFormatString();
+        ? vectorToSortedString(topicTermCounts.viewRow(topic).normalize(1), dictionary)
+        : topicTermCounts.viewRow(topic).asFormatString();
       buf.append(v).append('\n');
     }
     return buf.toString();
@@ -222,8 +207,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public synchronized void reset() {
-    for (int x = 0; x < numTopics; x++) {
-      topicTermCounts.assignRow(x, new SequentialAccessSparseVector(numTerms));
+    for (int topic: topics ) {
+      topicTermCounts.assignRow(topic, new SequentialAccessSparseVector(numTerms));
     }
     topicSums.assign(1.0);
     if (threadPool.isTerminated()) {
@@ -246,78 +231,38 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void renormalize() {
-    for (int x = 0; x < numTopics; x++) {
-      topicTermCounts.assignRow(x, topicTermCounts.viewRow(x).normalize(1));
+    for (int topic: topics) {
+      topicTermCounts.assignRow(topic, topicTermCounts.viewRow(topic).normalize(1));
       topicSums.assign(1.0);
     }
   }
 
-  public void trainDocTopicModel(Vector original, Vector labels, Matrix docTopicModel, boolean inf) {
+  public Vector trainDocTopicModel(Vector original, int[] labels, int[] topics,Matrix docTopicModel, boolean inf) {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
-    //log.info("before train. labels: " + labels.toString());
-    //long preTime=System.currentTimeMillis();
     List<Integer> terms = new ArrayList<Integer>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
-    //long getIterTime=System.currentTimeMillis();
     double docTermCount = 0.0;
     while (docElementIter.hasNext()) {
       Vector.Element element = docElementIter.next();
       terms.add(element.index());
       docTermCount += element.get();
     }
-    //long midTime=System.currentTimeMillis();
-    List<Integer> topicLabels = new ArrayList<Integer>();
-    Iterator<Vector.Element> labelIter = labels.iterateNonZero();
-    while (labelIter.hasNext()) {
-      Vector.Element e = labelIter.next();
-      topicLabels.add(e.index());
-    }
-    //long t1 = System.currentTimeMillis();
-    //log.info("get List use {} ms ,with terms' size of {} and doc size of {},get term list use {} ms,get termIter use time {} ",new Object[]{(t1-preTime),terms.size(),original.size(),(midTime-preTime),(getIterTime-preTime)});
-    //log.info("docTopicModel columns' length is {} ",docTopicModel.columnSize());
-    pTopicGivenTerm(terms, topicLabels, docTopicModel);
-    //long t2 = System.currentTimeMillis();
-    //log.info("pTopic use {} ms with terms' size {}", new Object[]{(t2 - t1),terms.size()});
+    pTopicGivenTerm(terms, labels, docTopicModel);
     normByTopicAndMultiByCount(original, terms, docTopicModel);
-    //long t3 = System.currentTimeMillis();
-    //log.info("normalize use {} ms with terms' size {}", new Object[]{(t3 - t2),terms.size()});
-    // now multiply, term-by-term, by the document, to get the weighted distribution of
-    // term-topic pairs from this document.
-
-    // now recalculate \(p(topic|doc)\) by summing contributions from all of pTopicGivenTerm
+    Vector result=new RandomAccessSparseVector(topics.length);
     if (inf) {
-      for (Vector.Element topic : labels) {
-        labels.set(topic.index(), (docTopicModel.viewRow(topic.index()).norm(1) + alpha) / (docTermCount + numTerms * alpha));
+      for (int topic : topics) {
+        result.set(topic, (docTopicModel.viewRow(topic).norm(1) + alpha) / (docTermCount + numTerms * alpha));
       }
-      // now renormalize so that \(sum_x(p(x|doc))\) = 1
-      labels.assign(Functions.mult(1 / labels.norm(1)));
-      //log.info("set topics use {} " + (System.currentTimeMillis() - t3));
+      result.assign(Functions.mult(1 / result.norm(1)));
     }
-    //log.info("after train: "+ topics.toString());
-  }
-
-  public Vector infer(Vector original, Vector docTopics) {
-    Vector pTerm = original.like();
-    Iterator<Vector.Element> origElementIter = original.iterateNonZero();
-    while (origElementIter.hasNext()) {
-      Vector.Element e = origElementIter.next();
-      int term = e.index();
-      // p(a) = sum_x (p(a|x) * p(x|i))
-      double pA = 0;
-      Iterator<Vector.Element> topicElementIter = docTopics.iterateNonZero();
-      while (topicElementIter.hasNext()) {
-        Vector.Element topic = topicElementIter.next();
-        pA += (topicTermCounts.viewRow(topic.index()).get(term) / topicSums.get(topic.index())) * docTopics.get(topic.index());
-      }
-      pTerm.set(term, pA);
-    }
-    return pTerm;
+    return result;
   }
 
   public void update(Matrix docTopicCounts) {
-    for (int x = 0; x < numTopics; x++) {
-      updaters[x % updaters.length].update(x, docTopicCounts.viewRow(x));
+    for (int topic: topics) {
+      updaters[topic % updaters.length].update(topic, docTopicCounts.viewRow(topic));
     }
   }
 
@@ -347,9 +292,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void update(int termId, Vector topicCounts) {
-    for (int x = 0; x < numTopics; x++) {
-      Vector v = topicTermCounts.viewRow(x);
-      v.set(termId, v.get(termId) + topicCounts.get(x));
+    for (int topic: topics) {
+      Vector v = topicTermCounts.viewRow(topic);
+      v.set(termId, v.get(termId) + topicCounts.get(topic));
     }
     topicSums.assign(topicCounts, Functions.PLUS);
   }
@@ -362,78 +307,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     DistributedRowMatrixWriter.write(outputDir, conf, topicTermCounts);
   }
 
-  /**
-   * Computes {@code \(p(topic x | term a, document i)\)} distributions given input document {@code i}.
-   * {@code \(pTGT[x][a]\)} is the (un-normalized) {@code \(p(x|a,i)\)}, or if docTopics is {@code null},
-   * {@code \(p(a|x)\)} (also un-normalized).
-   *
-   * @param document      doc-term vector encoding {@code \(w(term a|document i)\)}.
-   * @param docTopics     {@code docTopics[x]} is the overall weight of topic {@code x} in given
-   *                      document. If {@code null}, a topic weight of {@code 1.0} is used for all topics.
-   * @param termTopicDist storage for output {@code \(p(x|a,i)\)} distributions.
-   */
-  private void pTopicGivenTerm(Vector document, Vector docTopics, Matrix termTopicDist) {
-    // for each topic x
-    /*
-    for (int x = 0; x < numTopics; x++) {
-      // get p(topic x | document i), or 1.0 if docTopics is null
-      double topicWeight = docTopics == null ? 1.0 : docTopics.get(x);
-      // get w(term a | topic x)
-      Vector topicTermRow = topicTermCounts.viewRow(x);
-      // get \sum_a w(term a | topic x)
-      double topicSum = topicSums.get(x);
-      // get p(topic x | term a) distribution to update
-      Vector termTopicRow = termTopicDist.viewRow(x);
-
-      // for each term a in document i with non-zero weight
-      for (Vector.Element e : document.nonZeroes()) {
-        int termIndex = e.index();
-
-        // calc un-normalized p(topic x | term a, document i)
-        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha)
-          / (topicSum + eta * numTerms);
-        termTopicRow.set(termIndex, termTopicLikelihood);
-      }
-    }
-    */
-    int modelTermSize = topicTermCounts.columnSize();
-    List<Integer> terms = new ArrayList<Integer>();
-    Iterator<Vector.Element> docElementIter = document.iterateNonZero();
-    while (docElementIter.hasNext()) {
-      Vector.Element element = docElementIter.next();
-      terms.add(element.index());
-    }
-    for (Vector.Element e : docTopics) {
-      int topicIndex = e.index();
-      Vector termTopicRow = termTopicDist.viewRow(topicIndex);
-      if (e.get() == 0.0) {
-        termTopicRow.assign(0.0);
-        continue;
-      }
-      Vector topicTermRow = topicTermCounts.viewRow(topicIndex);
-      double topicSum = topicSums.get(topicIndex);
-      double docTopicSum = 0.0;
-      for (Integer termIndex : terms) {
-        docTopicSum += topicTermRow.get(termIndex);
-      }
-
-      for (Integer termIndex : terms) {
-        if (termIndex > modelTermSize)
-          continue;
-        double topicWeight = docTopicSum - topicTermRow.get(termIndex);
-        double termTopicLikelihood = (topicTermRow.get(termIndex) + eta) * (topicWeight + alpha) / (topicSum + eta * numTerms);
-        termTopicRow.set(termIndex, termTopicLikelihood);
-      }
-    }
-  }
-
   /*
      if infer according to labels ;
      topicWeitht should use labels.get(topicIndex) while now use topicTermCounts to get it
      then the inf can be executed more than once,but there is unsafety because notLabeled url's count may be bigger than labeled
  */
 
-  private void pTopicGivenTerm(List<Integer> terms, List<Integer> topicLabels, Matrix termTopicDist) {
+  private void pTopicGivenTerm(List<Integer> terms, int[] topicLabels, Matrix termTopicDist) {
     int modelTermSize = topicTermCounts.columnSize();
     double Vbeta = eta * numTerms;
     for (Integer topicIndex : topicLabels) {
@@ -469,10 +349,10 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       Vector.Element e = docElementIter.next();
       int term = e.index();
       double prob = 0;
-      for (int x = 0; x < numTopics; x++) {
-        double d = (docTopics.get(x) + alpha) / norm;
-        double p = d * (topicTermCounts.viewRow(x).get(term) + eta)
-          / (topicSums.get(x) + eta * numTerms);
+      for (int topic: topics) {
+        double d = (docTopics.getQuick(topic) + alpha) / norm;
+        double p = d * (topicTermCounts.viewRow(topic).get(term) + eta)
+          / (topicSums.get(topic) + eta * numTerms);
         prob += p;
       }
       perplexity += e.get() * Math.log(prob);
@@ -484,13 +364,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
     for (Integer termIndex : terms) {
       double sum = 0;
-      for (int x = 0; x < numTopics; x++) {
-        sum += perTopicSparseDistributions.viewRow(x).getQuick(termIndex);
+      for (int topic: topics) {
+        sum += perTopicSparseDistributions.viewRow(topic).getQuick(termIndex);
       }
       double count = doc.getQuick(termIndex);
-      for (int x = 0; x < numTopics; x++) {
-        perTopicSparseDistributions.viewRow(x).setQuick(termIndex,
-          perTopicSparseDistributions.viewRow(x).getQuick(termIndex) * count / sum);
+      for (int topic: topics) {
+        perTopicSparseDistributions.viewRow(topic).setQuick(termIndex,
+          perTopicSparseDistributions.viewRow(topic).getQuick(termIndex) * count / sum);
       }
     }
   }

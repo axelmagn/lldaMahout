@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.mapreduce.inf;
 
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver;
 import com.elex.bigdata.llda.mahout.model.LabeledModelTrainer;
 import com.elex.bigdata.llda.mahout.model.LabeledTopicModel;
@@ -13,6 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+
+import static org.apache.mahout.math.Vector.Element;
 
 /**
  * Created with IntelliJ IDEA.
@@ -26,20 +31,14 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
   private LabeledModelTrainer modelTrainer;
   private LabeledTopicModel readModel;
   private LabeledTopicModel writeModel;
-  private int maxIters;
-  private int numTopics;
-
+  private int[] topics;
 
   protected LabeledModelTrainer getModelTrainer() {
     return modelTrainer;
   }
 
-  protected int getMaxIters() {
-    return maxIters;
-  }
-
-  protected int getNumTopics() {
-    return numTopics;
+  protected int[] getTopics() {
+    return topics;
   }
 
   @Override
@@ -49,12 +48,11 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     float eta = conf.getFloat(LLDADriver.TERM_TOPIC_SMOOTHING, Float.NaN);
     float alpha = conf.getFloat(LLDADriver.DOC_TOPIC_SMOOTHING, Float.NaN);
     long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
-    numTopics = conf.getInt(LLDADriver.NUM_TOPICS, -1);
     int numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
     int numUpdateThreads = conf.getInt(LLDADriver.NUM_UPDATE_THREADS, 1);
     int numTrainThreads = conf.getInt(LLDADriver.NUM_TRAIN_THREADS, 4);
-    maxIters = conf.getInt(LLDADriver.MAX_ITERATIONS_PER_DOC, 10);
     float modelWeight = conf.getFloat(LLDADriver.MODEL_WEIGHT, 1.0f);
+    topics=LLDADriver.getTopics(conf);
 
     System.out.println("Initializing read model");
     Path[] modelPaths = LLDADriver.getModelPaths(conf);
@@ -63,17 +61,23 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
       numTerms=readModel.getNumTerms();
     } else {
       log.info("No model files found");
-      readModel = new LabeledTopicModel(numTopics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
+      readModel = new LabeledTopicModel(topics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
         numTrainThreads, modelWeight);
     }
 
     System.out.println("Initializing write model");
     writeModel = modelWeight == 1
-      ? new LabeledTopicModel(numTopics, numTerms, eta, alpha, null, numUpdateThreads)
+      ? new LabeledTopicModel(topics, numTerms, eta, alpha, null, numUpdateThreads)
       : readModel;
 
+    Map<Integer,Integer> child2ParentLabels= GenerateLDocReducer.getLabelRelations(conf);
+    topics=new int[child2ParentLabels.size()];
+    int i=0;
+    for(Integer topicLabel: child2ParentLabels.keySet())
+      topics[i++]=topicLabel;
+
     System.out.println("Initializing model trainer");
-    modelTrainer = new LabeledModelTrainer(readModel, writeModel, numTrainThreads, numTopics, numTerms);
+    modelTrainer = new LabeledModelTrainer(readModel, writeModel, numTrainThreads, topics, numTerms);
     modelTrainer.start();
   }
 
@@ -81,48 +85,15 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
   @Override
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
-    /*
-    int numTopics = getNumTopics();
-    int[] labels = doc.getLabels();
-    Vector topicVector = new DenseVector(numTopics);
-    if (labels.length > 0) {
-      topicVector.assign(0);
-      for (int i = 0; i < labels.length; i++) {
-        topicVector.set(labels[i], (double) 1l / labels.length);
-      }
-    } else {
-      topicVector.assign(1l/topicVector.size());
-    }
-    Matrix docModel = new SparseRowMatrix(numTopics, doc.getVector().size());
-    int maxIters = getMaxIters();
-    ModelTrainer modelTrainer = getModelTrainer();
-    for (int i = 0; i < maxIters; i++) {
-      modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(), topicVector, docModel);
-    }
-    topics.set(topicVector);
-    context.write(uid, topics);
-    */
-    Vector labels=new RandomAccessSparseVector(numTopics);
-    //labels.assign(0.0);
-    StringBuilder builder=new StringBuilder();
-    builder.append("[");
-    for(int label: doc.getLabels()){
-      labels.set(label,1.0);
-      builder.append(label+" ");
-    }
-    builder.append("]\t");
-    if(doc.getLabels().length==0){
-      labels.assign(1.0);
-    }
-    Matrix docModel = new SparseRowMatrix(numTopics,doc.getVector().size());
-    //int maxIters=getMaxIters();
+    int[] labels=doc.getLabels();
+    Matrix docModel = new SparseMatrix(topics.length,doc.getVector().size());
     LabeledModelTrainer modelTrainer=getModelTrainer();
-    //System.out.println("labels is "+labels.toString()+"\r\n vector is "+doc.getVector().toString());
-    //for(int i=0;i<maxIters;i++){
-    modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,docModel,true);
-    //}
-    for(Vector.Element e: labels){
-       builder.append(e.index()+":"+e.get()+",");
+    Vector result = modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,topics,docModel,true);
+    StringBuilder builder=new StringBuilder();
+    Iterator<Element> iter=result.iterateNonZero();
+    while(iter.hasNext()){
+      Element e=iter.next();
+      builder.append(e.index()+":"+e.get()+",");
     }
     builder.deleteCharAt(builder.length()-1);
     context.write(uid,new Text(builder.toString()));

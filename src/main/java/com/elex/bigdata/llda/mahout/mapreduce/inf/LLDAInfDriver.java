@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.mapreduce.inf;
 
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
@@ -48,6 +49,7 @@ public class LLDAInfDriver extends AbstractJob{
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
+    addOption(GenerateLDocDriver.RESOURCE_ROOT,"rDir","specify the resources Dir",true);
     addOption(DefaultOptionCreator.maxIterationsOption().create());
     addOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION, "cd", "The convergence delta value",
       String.valueOf(DEFAULT_CONVERGENCE_DELTA));

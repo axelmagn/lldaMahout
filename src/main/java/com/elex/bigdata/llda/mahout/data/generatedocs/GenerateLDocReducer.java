@@ -110,9 +110,9 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     return new Pair<Map<String, String>, Map<String, Integer>>(url2Category,category2Label);
   }
 
-  private Set<Integer> getDestParentLabels() throws IOException {
+  public static Set<Integer> getDestParentLabels() throws IOException {
      BufferedReader reader=new BufferedReader(new InputStreamReader(
-       this.getClass().getResourceAsStream("/"+GenerateLDocDriver.DEST_PARENT_LABELS)));
+       GenerateLDocDriver.class.getResourceAsStream("/"+GenerateLDocDriver.DEST_PARENT_LABELS)));
      Set<Integer> labels=new HashSet<Integer>();
      String line;
      while((line=reader.readLine())!=null){
@@ -121,7 +121,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     return labels;
   }
 
-  private Map<Integer,Integer> getLabelRelations(Configuration conf) throws IOException {
+  public static Map<Integer,Integer> getLabelRelations(Configuration conf) throws IOException {
     Map<Integer,Integer> child2ParentLabelMap=new HashMap<Integer, Integer>();
     FileSystem fs = FileSystem.get(conf);
     Path resourcesPath = new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
