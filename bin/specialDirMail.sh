@@ -7,7 +7,7 @@ if test -e ${resultFile}
   then
   rm ${resultFile}
 fi
-categorys=(a b c d z)
+categorys=(1 2 3 4 0)
 cat ${resultDir}/* | awk '{print $1}' | sort | uniq | wc -l >> ${resultDir}/result
 for category in ${categorys[@]};do
    echo ${category}
