@@ -81,7 +81,7 @@ public class InitTopicTermModelDriver extends AbstractJob{
         Iterator<Vector.Element> docIter=doc.iterateNonZero();
         while(docIter.hasNext()){
           Vector.Element termE=docIter.next();
-          topicTermCountRow.setQuick(termE.index(),random.nextDouble());
+          topicTermCountRow.setQuick(termE.index(),Math.abs(random.nextDouble()));
         }
       }
     }
