@@ -60,10 +60,12 @@ public class InitTopicTermModelDriver extends AbstractJob{
     private int[] topics;
     private Matrix topicTermCount;
     private Random random;
+    private int num=0;
     public void setup(Context context) throws IOException {
       Configuration conf = context.getConfiguration();
       topics=LLDADriver.getTopics(conf);
       int numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
+      System.out.println("numTerms "+numTerms);
       topicTermCount=new SparseMatrix(MathUtil.getMax(topics)+1,numTerms);
       long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
       random= RandomUtils.getRandom(seed);
@@ -73,15 +75,23 @@ public class InitTopicTermModelDriver extends AbstractJob{
       int[] labels=doc.getLabels();
       if(labels.length==0)
         labels=topics;
+      num++;
       train(doc.getVector(),labels,topicTermCount);
     }
     private void train(Vector doc,int[] labels,Matrix topicTermCountMatrix){
+      boolean shouldLog=false;
+      if(num%10000==1)
+        shouldLog=true;
       for(int label: labels){
         Vector topicTermCountRow=topicTermCountMatrix.viewRow(label);
         Iterator<Vector.Element> docIter=doc.iterateNonZero();
         while(docIter.hasNext()){
           Vector.Element termE=docIter.next();
-          topicTermCountRow.setQuick(termE.index(),Math.abs(random.nextDouble()));
+          double count=Math.abs(random.nextDouble());
+          topicTermCountRow.setQuick(termE.index(),count);
+          if(shouldLog){
+            System.out.println("num "+num+" term:"+termE.index()+" count:"+count);
+          }
         }
       }
     }
