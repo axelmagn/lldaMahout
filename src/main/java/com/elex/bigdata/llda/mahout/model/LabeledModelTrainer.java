@@ -80,7 +80,7 @@ public class LabeledModelTrainer {
     return calculatePerplexity(matrix,docTopicLabels, 0);
   }
   public double calculatePerplexity(Vector doc,int[] labels){
-    Vector topicDist=readModel.trainDocTopicModel(doc, labels, topics, new SparseMatrix(MathUtil.getMax(topics),numTerms), true);
+    Vector topicDist=readModel.trainDocTopicModel(doc, labels, topics, new SparseMatrix(MathUtil.getMax(topics)+1,numTerms), true);
     double perplexity = readModel.perplexity(doc, topicDist);
     return perplexity;
   }
@@ -97,7 +97,7 @@ public class LabeledModelTrainer {
       int docId = docSlice.index();
       Vector document = docSlice.vector();
       if (testFraction == 0 || docId % (1 / testFraction) == 0) {
-        Vector topicDist=readModel.trainDocTopicModel(document, topicLabels, topics, new SparseMatrix(topics.length,numTerms), true);
+        Vector topicDist=readModel.trainDocTopicModel(document, topicLabels, topics, new SparseMatrix(MathUtil.getMax(topics)+1,numTerms), true);
         perplexity += readModel.perplexity(document, topicDist);
         matrixNorm += document.norm(1);
       }
