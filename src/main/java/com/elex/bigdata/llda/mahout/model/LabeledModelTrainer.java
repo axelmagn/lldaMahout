@@ -80,10 +80,9 @@ public class LabeledModelTrainer {
     return calculatePerplexity(matrix,docTopicLabels, 0);
   }
   public double calculatePerplexity(Vector doc,int[] labels){
-    Vector topicDist=readModel.trainDocTopicModel(doc, labels, topics, new SparseMatrix(MathUtil.getMax(topics)+1,numTerms), true);
+    Vector topicDist=readModel.trainDocTopicModel(doc, labels, topics, new SparseMatrix(MathUtil.getMax(topics),numTerms), true);
     double perplexity = readModel.perplexity(doc, topicDist);
-    double docNorm = doc.norm(1);
-    return perplexity/docNorm;
+    return perplexity;
   }
 
   public double calculatePerplexity(VectorIterable matrix, Iterable<int[]> docTopicCounts,
