@@ -187,8 +187,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     Vector topicSums = new RandomAccessSparseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
       model.viewRow(pair.getFirst()).assign(pair.getSecond());
-      topicSums.setQuick(pair.getFirst(), pair.getSecond().norm(1));
-      log.info("topic "+pair.getFirst());
+      double sum=pair.getSecond().norm(1);
+      topicSums.setQuick(pair.getFirst(),sum );
+      log.info("topic "+pair.getFirst()+" sum: "+sum);
     }
     //assert model.rowSize()>100;
     return Pair.of(model, topicSums);
@@ -281,23 +282,15 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     //log.info("got iterateNonZero");
     Vector distTopicTermCountRow = topicTermCounts.viewRow(topic);
     double topicCountSum = 0.0;
-    StringBuilder builder = new StringBuilder();
-    //int num = 0;
-    //log.info("enter while");
     while (docTopicElementIter.hasNext()) {
       Vector.Element topicTermCount = docTopicElementIter.next();
-      //num++;
       int termIndex = topicTermCount.index();
       double count = topicTermCount.get();
-      //builder.append(termIndex + ":" + count + ",");
-      //if (num > 50) {
-      //  log.info("num increase to 50,vector is {}", builder.toString());
-      //}
       topicCountSum += count;
       distTopicTermCountRow.setQuick(termIndex, count + distTopicTermCountRow.getQuick(termIndex));
     }
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
-    topicSums.set(topic, topicSums.get(topic) + topicCountSum);
+    topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
   }
 
   public void update(int termId, Vector topicCounts) {
