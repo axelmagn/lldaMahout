@@ -76,7 +76,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     }
   }
 
-  private Pair<Map<String,String>,Map<String,Integer>> loadUrlTopics(Configuration conf,PrefixTrie prefixTrie) throws IOException {
+  public static Pair<Map<String,String>,Map<String,Integer>> loadUrlTopics(Configuration conf,PrefixTrie prefixTrie) throws IOException {
     int prefixTrieWordCount=0;
     Map<String,String> url2Category=new HashMap<String, String>();
     Map<String,Integer> category2Label=new HashMap<String, Integer>();
@@ -106,7 +106,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       category2Label.put(topicUrls.getTopic(),topicUrls.getLabel());
     }
     urlCategoryReader.close();
-    log.info("prefix trie word count "+prefixTrieWordCount);
+    System.out.println("prefix trie word count "+prefixTrieWordCount);
     return new Pair<Map<String, String>, Map<String, Integer>>(url2Category,category2Label);
   }
 

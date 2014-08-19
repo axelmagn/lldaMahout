@@ -11,6 +11,7 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.mahout.common.Pair;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,40 +35,21 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
   private Dictionary dict;
   private BDMD5 bdmd5;
   private int word_count_threshold, word_count_upper_threshold;
-  private String[] destCategories = new String[]{"jogos", "compras", "Friends", "Tourism"};
-  Map<String, Integer> categoryIdMap = new HashMap<String, Integer>();
-  PrefixTrie prefixTrie = new PrefixTrie();
   private Map<String, String> url_category_map = new HashMap<String, String>();
+  PrefixTrie prefixTrie = new PrefixTrie();
+
 
   public void setup(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
-    FileSystem fs = FileSystem.get(conf);
-    for (int i = 0; i < destCategories.length; i++) {
-      categoryIdMap.put(destCategories[i], i);
-    }
-    Path resourcesPath = new Path(conf.get(GenerateLDocDriver.RESOURCE_ROOT));
-    Path urlCategoryPath = new Path(resourcesPath, GenerateLDocReducer.URL_TOPIC);
-    BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(fs.open(urlCategoryPath)));
-    String line = "";
-    while ((line = urlCategoryReader.readLine()) != null) {
-      String[] categoryUrls = line.split(" ");
-      if (categoryIdMap.containsKey(categoryUrls[0])) {
-        int id = categoryIdMap.get(categoryUrls[0]);
-        for (int i = 1; i < categoryUrls.length; i++)
-          prefixTrie.insert(categoryUrls[i], id);
-      } else {
-        for (int i = 1; i < categoryUrls.length; i++) {
-          url_category_map.put(categoryUrls[i], categoryUrls[0]);
-        }
-      }
-    }
-    urlCategoryReader.close();
+    Pair<Map<String,String>,Map<String,Integer>> pair=GenerateLDocReducer.loadUrlTopics(conf,prefixTrie);
+    url_category_map=pair.getFirst();
     word_count_threshold = Integer.parseInt(conf.get(UpdateDictDriver.COUNT_THRESHOLD));
     System.out.println("word count lower boundary is " + word_count_threshold);
     word_count_upper_threshold = Integer.parseInt(conf.get(UpdateDictDriver.COUNT_UPPER_THRESHOLD));
     System.out.println("word count upper boundary is " + word_count_upper_threshold);
     String dictRoot = conf.get(UpdateDictDriver.DICT_ROOT);
     System.out.println("dict Root is " + dictRoot);
+    FileSystem fs=FileSystem.get(conf);
     try {
       dict = new Dictionary(dictRoot, fs, conf);
       bdmd5 = BDMD5.getInstance();
@@ -82,7 +64,7 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
     boolean shouldWrite = false;
     if (url_category_map.containsKey(key.toString()) || prefixTrie.prefixSearch(key.toString()) != -1) {
       shouldWrite = true;
-    } else if (word.contains("shop") || word.contains("games")) {
+    } else if (word.contains("shop") || word.contains("games") || word.contains("amazon")) {
       shouldWrite = true;
     } else {
       for (IntWritable countWritable : values) {
