@@ -259,7 +259,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
     pTopicGivenTerm(terms, labels, docTopicModel);
     normByTopicAndMultiByCount(original, terms, docTopicModel);
-    Vector result=new RandomAccessSparseVector(topics.length);
+    Vector result=new RandomAccessSparseVector(MathUtil.getMax(topics)+1);
     if (inf) {
       for (int topic : topics) {
         result.set(topic, (docTopicModel.viewRow(topic).norm(1) + alpha) / (docTermCount + numTerms * alpha));
