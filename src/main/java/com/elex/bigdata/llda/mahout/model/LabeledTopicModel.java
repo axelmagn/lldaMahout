@@ -89,6 +89,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     while(iter.hasNext()){
       topics[i++]=iter.next().index();
     }
+    assert topicSums.size()>100;
     this.numTerms = topicTermCounts.numCols();
     this.eta = eta;
     this.alpha = alpha;
@@ -147,15 +148,16 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     AbstractMatrix topicTermCounts = new SparseMatrix(MathUtil.getMax(topics)+1, numTerms);
     Vector topicSums = new RandomAccessSparseVector(MathUtil.getMax(topics)+1);
     if (random != null) {
-      for (int x = 0; x < topics.length; x++) {
+      for (int topic: topics) {
         for (int term = 0; term < numTerms; term++) {
-          topicTermCounts.viewRow(x).set(term, random.nextDouble());
+          topicTermCounts.viewRow(topic).set(term, random.nextDouble());
         }
       }
     }
     for (int topic: topics) {
       topicSums.setQuick(topic, random == null ? 1.0 : topicTermCounts.viewRow(topic).norm(1));
     }
+    assert topicTermCounts.rowSize()>100;
     return Pair.of(topicTermCounts, topicSums);
   }
 
@@ -188,6 +190,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topicSums.setQuick(pair.getFirst(), pair.getSecond().norm(1));
       log.info("topic "+pair.getFirst());
     }
+    assert model.rowSize()>100;
     return Pair.of(model, topicSums);
   }
 
