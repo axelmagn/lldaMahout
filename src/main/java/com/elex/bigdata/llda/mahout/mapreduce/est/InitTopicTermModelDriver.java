@@ -80,13 +80,16 @@ public class InitTopicTermModelDriver extends AbstractJob{
     }
     private void train(Vector doc,int[] labels,Matrix topicTermCountMatrix){
       boolean shouldLog=false;
-      if(num%10000==1)
+      if(num%50000==1)
+      {
         shouldLog=true;
+        System.out.println("num "+num);
+      }
       for(int label: labels){
         Vector topicTermCountRow=topicTermCountMatrix.viewRow(label);
         Iterator<Vector.Element> docIter=doc.iterateNonZero();
         if(shouldLog)
-          System.out.println("num "+num);
+          System.out.println("topic "+label);
         while(docIter.hasNext()){
           Vector.Element termE=docIter.next();
           double count=Math.abs(random.nextDouble());
@@ -98,6 +101,7 @@ public class InitTopicTermModelDriver extends AbstractJob{
         if(shouldLog)
           System.out.println();
       }
+
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
@@ -110,8 +114,9 @@ public class InitTopicTermModelDriver extends AbstractJob{
           sum+=iter.next().get();
           termSize+=1;
         }
-        context.write(new IntWritable(topic),new VectorWritable());
         System.out.println("topic: "+topic+" termSize: "+termSize+" sum:"+sum);
+        context.write(new IntWritable(topic),new VectorWritable(topicTermVector));
+
       }
     }
   }
