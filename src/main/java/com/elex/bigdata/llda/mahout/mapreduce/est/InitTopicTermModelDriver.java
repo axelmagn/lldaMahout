@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.mapreduce.est;
 
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
+import com.elex.bigdata.llda.mahout.util.MathUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -63,10 +64,11 @@ public class InitTopicTermModelDriver extends AbstractJob{
       Configuration conf = context.getConfiguration();
       topics=LLDADriver.getTopics(conf);
       int numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
-      topicTermCount=new SparseMatrix(topics.length,numTerms);
+      topicTermCount=new SparseMatrix(MathUtil.getMax(topics)+1,numTerms);
       long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
       random= RandomUtils.getRandom(seed);
     }
+
     public void map(Text key,MultiLabelVectorWritable doc,Context context){
       int[] labels=doc.getLabels();
       if(labels.length==0)

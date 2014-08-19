@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.model;
 
+import com.elex.bigdata.llda.mahout.util.MathUtil;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configurable;
 import org.apache.hadoop.conf.Configuration;
@@ -141,8 +142,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private static Pair<AbstractMatrix, Vector> randomMatrix(int[] topics, int numTerms, Random random) {
-    AbstractMatrix topicTermCounts = new SparseMatrix(topics.length, numTerms);
-    Vector topicSums = new RandomAccessSparseVector(topics.length);
+    AbstractMatrix topicTermCounts = new SparseMatrix(MathUtil.getMax(topics)+1, numTerms);
+    Vector topicSums = new RandomAccessSparseVector(MathUtil.getMax(topics)+1);
     if (random != null) {
       for (int x = 0; x < topics.length; x++) {
         for (int term = 0; term < numTerms; term++) {
@@ -158,20 +159,22 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public static Pair<AbstractMatrix, Vector> loadModel(Configuration conf, Path... modelPaths)
     throws IOException {
-    int numTopics = 0;
     int numTerms = -1;
+    int numTopics=0;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
     for (Path modelPath : modelPaths) {
       log.info("load model from {}", modelPath.toString());
       for (Pair<IntWritable, VectorWritable> row
         : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
-        numTopics++;
+        if(row.getFirst().get()>numTopics)
+          numTopics=row.getFirst().get();
         if (numTerms < 0) {
           numTerms = row.getSecond().get().size();
         }
       }
     }
+    numTopics++;
     if (rows.isEmpty()) {
       throw new IOException(java.util.Arrays.toString(modelPaths) + " have no vectors in it");
     }
