@@ -89,6 +89,7 @@ public class InitTopicTermModelDriver extends AbstractJob{
     public void cleanup(Context context) throws IOException, InterruptedException {
       for(int topic: topics){
         context.write(new IntWritable(topic),new VectorWritable(topicTermCount.viewRow(topic)));
+        System.out.println(topicTermCount.viewRow(topic).norm(1.0));
       }
     }
   }

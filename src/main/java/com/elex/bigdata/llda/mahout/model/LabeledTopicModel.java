@@ -187,7 +187,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     Vector topicSums = new RandomAccessSparseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
       model.viewRow(pair.getFirst()).assign(pair.getSecond());
-      double sum=pair.getSecond().norm(1);
+      double sum=pair.getSecond().norm(1.0);
       topicSums.setQuick(pair.getFirst(),sum );
       log.info("topic "+pair.getFirst()+" sum: "+sum);
     }
