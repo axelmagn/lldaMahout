@@ -58,27 +58,24 @@ public class InitTopicTermModelDriver extends AbstractJob{
   }
   public static class InitTopicTermModelMapper extends Mapper<Text, MultiLabelVectorWritable,IntWritable,VectorWritable>{
     private int[] topics;
-    private Matrix topicTermCount;
+    private int numTerms;
     private Random random;
     private int num=0;
     public void setup(Context context) throws IOException {
       Configuration conf = context.getConfiguration();
       topics=LLDADriver.getTopics(conf);
-      int numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
+      numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
       System.out.println("numTerms "+numTerms);
-      topicTermCount=new SparseMatrix(MathUtil.getMax(topics)+1,numTerms);
       long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
       random= RandomUtils.getRandom(seed);
     }
 
-    public void map(Text key,MultiLabelVectorWritable doc,Context context){
-      int[] labels=doc.getLabels();
+    public void map(Text key,MultiLabelVectorWritable lDoc,Context context) throws IOException, InterruptedException {
+      int[] labels=lDoc.getLabels();
       if(labels.length==0)
         labels=topics;
       num++;
-      train(doc.getVector(),labels,topicTermCount);
-    }
-    private void train(Vector doc,int[] labels,Matrix topicTermCountMatrix){
+      Vector doc=lDoc.getVector();
       boolean shouldLog=false;
       if(num%50000==1)
       {
@@ -86,7 +83,7 @@ public class InitTopicTermModelDriver extends AbstractJob{
         System.out.println("num "+num);
       }
       for(int label: labels){
-        Vector topicTermCountRow=topicTermCountMatrix.viewRow(label);
+        Vector topicTermCountRow=new RandomAccessSparseVector(numTerms);
         Iterator<Vector.Element> docIter=doc.iterateNonZero();
         if(shouldLog)
           System.out.println("topic "+label);
@@ -94,6 +91,7 @@ public class InitTopicTermModelDriver extends AbstractJob{
           Vector.Element termE=docIter.next();
           double count=Math.abs(random.nextDouble());
           topicTermCountRow.setQuick(termE.index(),count);
+          context.write(new IntWritable(label),new VectorWritable(topicTermCountRow));
           if(shouldLog){
             System.out.print(" term:"+termE.index()+" count:"+count+" , ");
           }
@@ -104,21 +102,6 @@ public class InitTopicTermModelDriver extends AbstractJob{
 
     }
 
-    public void cleanup(Context context) throws IOException, InterruptedException {
-      for(int topic: topics){
-        double sum=0.0;
-        Vector topicTermVector=topicTermCount.viewRow(topic);
-        Iterator<Vector.Element> iter=topicTermVector.iterateNonZero();
-        int termSize=0;
-        while(iter.hasNext()){
-          sum+=iter.next().get();
-          termSize+=1;
-        }
-        System.out.println("topic: "+topic+" termSize: "+termSize+" sum:"+sum);
-        context.write(new IntWritable(topic),new VectorWritable(topicTermVector));
-
-      }
-    }
   }
 
 }
