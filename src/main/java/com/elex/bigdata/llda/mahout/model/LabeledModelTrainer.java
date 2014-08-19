@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.model;
 
+import com.elex.bigdata.llda.mahout.util.MathUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.hadoop.fs.Path;
@@ -24,7 +25,6 @@ import java.util.concurrent.*;
 public class LabeledModelTrainer {
   private static final Logger log = LoggerFactory.getLogger(LabeledModelTrainer.class);
 
-  private final int numTopics;
   private final int numTerms;
   private LabeledTopicModel readModel;
   private LabeledTopicModel writeModel;
@@ -39,7 +39,6 @@ public class LabeledModelTrainer {
     this.readModel = initialReadModel;
     this.writeModel = initialWriteModel;
     this.numTrainThreads = numTrainThreads;
-    this.numTopics = topics.length;
     this.topics=topics;
     this.numTerms = numTerms;
     isReadWrite = initialReadModel == initialWriteModel;
@@ -173,7 +172,7 @@ public class LabeledModelTrainer {
         List<TrainerRunnable> runnables = Lists.newArrayList();
         for (Map.Entry<Vector, int[]> entry : batch.entrySet()) {
           runnables.add(new TrainerRunnable(readModel, null, entry.getKey(),
-            entry.getValue(), topics,new SparseRowMatrix(numTopics, numTerms, true),
+            entry.getValue(), topics,new SparseRowMatrix(MathUtil.getMax(topics)+1, numTerms, true),
             isInf));
         }
         threadPool.invokeAll(runnables);
@@ -194,7 +193,7 @@ public class LabeledModelTrainer {
       try {
         workQueue.put(new TrainerRunnable(readModel, update
           ? writeModel
-          : null, document, labels,topics, new SparseMatrix(numTopics, document.size()),  isInf));
+          : null, document, labels,topics, new SparseMatrix(MathUtil.getMax(topics)+1, document.size()),  isInf));
         //log.info("workQueue size {}", workQueue.size());
         return;
       } catch (InterruptedException e) {
@@ -207,7 +206,7 @@ public class LabeledModelTrainer {
                          boolean isInf) {
     new TrainerRunnable(readModel, update
       ? writeModel
-      : null, document, labels,topics, new SparseRowMatrix(numTopics, numTerms, true), isInf).run();
+      : null, document, labels,topics, new SparseRowMatrix(MathUtil.getMax(topics)+1, numTerms, true), isInf).run();
   }
 
 
@@ -260,7 +259,7 @@ public class LabeledModelTrainer {
       this.topics=topics;
       this.docTopicModel = docTopicModel;
       this.isInf = isInf;
-      this.docTopics=new RandomAccessSparseVector(topics.length);
+      this.docTopics=new RandomAccessSparseVector(MathUtil.getMax(topics)+1);
     }
 
 
