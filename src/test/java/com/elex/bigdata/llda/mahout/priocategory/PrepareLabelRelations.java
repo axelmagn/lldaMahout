@@ -32,7 +32,7 @@ public class PrepareLabelRelations {
       parentToChildLabelsList.add(new ParentToChildLabels(parentLabel[i], new int[]{parentLabel[i]}));
     }
     ObjectMapper objectMapper = new ObjectMapper();
-    BufferedWriter writer = new BufferedWriter(new FileWriter("/data/log/user_category/llda/categories/result/labelRelations"));
+    BufferedWriter writer = new BufferedWriter(new FileWriter("/data/log/user_category/llda/categories/result/label_relation"));
     for (ParentToChildLabels parentToChildLabels : parentToChildLabelsList) {
       writer.write(objectMapper.writeValueAsString(parentToChildLabels));
       writer.newLine();

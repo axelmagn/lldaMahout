@@ -24,7 +24,7 @@ public class PrepareTopicUrls {
      List<TopicUrls> topicUrlsList=new ArrayList<TopicUrls>();
      loadJson("/data/log/user_category/llda/categories/result",containedUrls,topicUrlsList);
      loadPlain("/data/log/user_category/llda/categories/result",containedUrls,topicUrlsList);
-     String resultFile="/data/log/user_category/llda/categories/result/urlTopic";
+     String resultFile="/data/log/user_category/llda/categories/result/url_topic";
      BufferedWriter writer=new BufferedWriter(new FileWriter(resultFile));
      ObjectMapper objectMapper=new ObjectMapper();
      for(TopicUrls topicUrls: topicUrlsList){

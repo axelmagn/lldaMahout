@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +31,7 @@ public class TestPrefixTrie {
     PrefixTrie prefixTrie = new PrefixTrie();
 
     Map<String, String> url_category_map = new HashMap<String, String>();
-    InputStream inputStream = this.getClass().getResourceAsStream("/urlTopic");
+    InputStream inputStream = this.getClass().getResourceAsStream("/url_topic");
     BufferedReader urlCategoryReader = new BufferedReader(new InputStreamReader(inputStream));
     String line = "";
     while ((line = urlCategoryReader.readLine()) != null) {
