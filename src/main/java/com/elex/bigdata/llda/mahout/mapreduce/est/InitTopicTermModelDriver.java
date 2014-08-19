@@ -77,7 +77,7 @@ public class InitTopicTermModelDriver extends AbstractJob{
       num++;
       Vector doc=lDoc.getVector();
       boolean shouldLog=false;
-      if(num%50000==1)
+      if(num%400000==1)
       {
         shouldLog=true;
         System.out.println("num "+num);
@@ -85,19 +85,20 @@ public class InitTopicTermModelDriver extends AbstractJob{
       for(int label: labels){
         Vector topicTermCountRow=new RandomAccessSparseVector(numTerms);
         Iterator<Vector.Element> docIter=doc.iterateNonZero();
-        if(shouldLog)
-          System.out.println("topic "+label);
         while(docIter.hasNext()){
           Vector.Element termE=docIter.next();
           double count=Math.abs(random.nextDouble());
           topicTermCountRow.setQuick(termE.index(),count);
           context.write(new IntWritable(label),new VectorWritable(topicTermCountRow));
           if(shouldLog){
-            System.out.print(" term:"+termE.index()+" count:"+count+" , ");
+            StringBuilder builder=new StringBuilder();
+            Iterator<Vector.Element> iter=topicTermCountRow.iterateNonZero();
+            while(iter.hasNext()){
+              Vector.Element e=iter.next();
+              builder.append(e.index()+":"+e.get()+",");
+            }
           }
         }
-        if(shouldLog)
-          System.out.println();
       }
 
     }
