@@ -85,8 +85,10 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     this.topicSums = topicSums;
     this.topics=new int[topicSums.size()];
     Iterator<Vector.Element> iter=topicSums.iterateNonZero();
-    for(int i=0;i<topics.length;i++)
-      topics[i]=iter.next().index();
+    int i=0;
+    while(iter.hasNext()){
+      topics[i++]=iter.next().index();
+    }
     this.numTerms = topicTermCounts.numCols();
     this.eta = eta;
     this.alpha = alpha;
@@ -184,6 +186,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     for (Pair<Integer, Vector> pair : rows) {
       model.viewRow(pair.getFirst()).assign(pair.getSecond());
       topicSums.setQuick(pair.getFirst(), pair.getSecond().norm(1));
+      log.info("topic "+pair.getFirst());
     }
     return Pair.of(model, topicSums);
   }
