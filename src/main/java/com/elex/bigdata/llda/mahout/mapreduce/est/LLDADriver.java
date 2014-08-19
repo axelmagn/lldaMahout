@@ -279,6 +279,7 @@ public class LLDADriver extends AbstractJob {
       Path modelOutputPath = modelPath(topicModelStateTempPath, iterationNumber);
       if(iterationNumber==1){
         InitTopicTermModelDriver.runJob(conf,inputPath,modelInputPath);
+        perplexities.add(calculatePerplexity(conf, inputPath, modelOutputPath, iterationNumber-1));
       }
       runIteration(conf, inputPath, modelInputPath, modelOutputPath, iterationNumber,
         maxIterations, numReduceTasks);

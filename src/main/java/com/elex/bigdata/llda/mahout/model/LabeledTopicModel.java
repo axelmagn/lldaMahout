@@ -190,7 +190,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topicSums.setQuick(pair.getFirst(), pair.getSecond().norm(1));
       log.info("topic "+pair.getFirst());
     }
-    assert model.rowSize()>100;
+    //assert model.rowSize()>100;
     return Pair.of(model, topicSums);
   }
 
