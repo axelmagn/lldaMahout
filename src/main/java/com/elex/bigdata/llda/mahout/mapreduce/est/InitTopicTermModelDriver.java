@@ -77,7 +77,7 @@ public class InitTopicTermModelDriver extends AbstractJob{
       num++;
       Vector doc=lDoc.getVector();
       boolean shouldLog=false;
-      if(num%400000==1)
+      if(num%80000==1)
       {
         shouldLog=true;
         System.out.println("num "+num);
