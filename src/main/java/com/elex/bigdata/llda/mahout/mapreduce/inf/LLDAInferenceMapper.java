@@ -4,6 +4,7 @@ import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver;
 import com.elex.bigdata.llda.mahout.model.LabeledModelTrainer;
 import com.elex.bigdata.llda.mahout.model.LabeledTopicModel;
+import com.elex.bigdata.llda.mahout.util.MathUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -86,7 +87,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
     int[] labels=doc.getLabels();
-    Matrix docModel = new SparseMatrix(topics.length,doc.getVector().size());
+    Matrix docModel = new SparseMatrix(MathUtil.getMax(topics)+1,doc.getVector().size());
     LabeledModelTrainer modelTrainer=getModelTrainer();
     Vector result = modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,topics,docModel,true);
     StringBuilder builder=new StringBuilder();
