@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.mapreduce.est;
 
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -38,9 +39,7 @@ public class InitTopicTermModelDriver extends AbstractJob{
      job.waitForCompletion(true);
   }
   public Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
-     FileSystem fs= FileSystem.get(conf);
-     if(fs.exists(outputPath))
-       fs.delete(outputPath,true);
+     FileSystemUtil.deleteOutputPath(conf,outputPath);
      Job job=new Job(conf,"init topic term model");
      job.setMapperClass(InitTopicTermModelMapper.class);
      job.setCombinerClass(VectorSumReducer.class);
@@ -57,32 +56,27 @@ public class InitTopicTermModelDriver extends AbstractJob{
      return job;
   }
   public static class InitTopicTermModelMapper extends Mapper<Text, MultiLabelVectorWritable,IntWritable,VectorWritable>{
-    private int numTopics;
+    private int[] topics;
     private Matrix topicTermCount;
     private Random random;
-    public void setup(Context context){
+    public void setup(Context context) throws IOException {
       Configuration conf = context.getConfiguration();
-      numTopics = conf.getInt(LLDADriver.NUM_TOPICS, -1);
+      topics=LLDADriver.getTopics(conf);
       int numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
-      topicTermCount=new SparseMatrix(numTopics,numTerms);
+      topicTermCount=new SparseMatrix(topics.length,numTerms);
       long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
       random= RandomUtils.getRandom(seed);
     }
     public void map(Text key,MultiLabelVectorWritable doc,Context context){
-      Vector labels=new RandomAccessSparseVector(numTopics);
-      for(int label: doc.getLabels())
-        labels.setQuick(label,1.0);
-      if(doc.getLabels().length==0){
-        labels.assign(1.0);
-      }
-      train(labels,doc.getVector(),topicTermCount);
+      int[] labels=doc.getLabels();
+      if(labels.length==0)
+        labels=topics;
+      train(doc.getVector(),labels,topicTermCount);
     }
-    private void train(Vector labels,Vector doc,Matrix topicTermCountMatrix){
-      Iterator<Vector.Element> labelIter=labels.iterateNonZero();
-      while(labelIter.hasNext()){
-        Vector.Element labelE=labelIter.next();
-        Vector topicTermCountRow=topicTermCountMatrix.viewRow(labelE.index());
-        Iterator<Vector.Element> docIter=labels.iterateNonZero();
+    private void train(Vector doc,int[] labels,Matrix topicTermCountMatrix){
+      for(int label: labels){
+        Vector topicTermCountRow=topicTermCountMatrix.viewRow(label);
+        Iterator<Vector.Element> docIter=doc.iterateNonZero();
         while(docIter.hasNext()){
           Vector.Element termE=docIter.next();
           if(topicTermCountRow.getQuick(termE.index())==0)
@@ -92,8 +86,8 @@ public class InitTopicTermModelDriver extends AbstractJob{
     }
 
     public void cleanup(Context context) throws IOException, InterruptedException {
-      for(int i=0;i<topicTermCount.rowSize();i++){
-        context.write(new IntWritable(i),new VectorWritable(topicTermCount.viewRow(i)));
+      for(int topic: topics){
+        context.write(new IntWritable(topic),new VectorWritable(topicTermCount.viewRow(topic)));
       }
     }
   }

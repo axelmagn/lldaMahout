@@ -180,7 +180,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     Vector topicSums = new RandomAccessSparseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
       model.viewRow(pair.getFirst()).assign(pair.getSecond());
-      topicSums.set(pair.getFirst(), pair.getSecond().norm(1));
+      topicSums.setQuick(pair.getFirst(), pair.getSecond().norm(1));
     }
     return Pair.of(model, topicSums);
   }
