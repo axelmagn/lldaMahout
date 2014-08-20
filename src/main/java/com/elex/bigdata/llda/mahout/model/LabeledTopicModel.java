@@ -322,7 +322,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     long t2=System.nanoTime();
     if(updateNum%5000==1){
       log.info("updateNum "+updateNum);
-      log.info("updateTopic: "+topicTermCounts.viewRow(topic).norm(1.0)+" docSize "+termCounts.size());
+      log.info("updateTopic: "+topicTermCounts.viewRow(topic).norm(1.0)+" "+globalTermCounts.norm(1.0)+" docSize "+termCounts.size());
       log.info("updateTopic use : "+(t2-t1)/1000 +" us");
     }
   }
