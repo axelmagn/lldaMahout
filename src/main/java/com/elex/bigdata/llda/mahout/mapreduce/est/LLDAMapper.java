@@ -84,7 +84,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     throws IOException, InterruptedException {
     int[] labels=doc.getLabels();
     if(labels.length==0)
-      labels=topics;
+    labels=topics;
     if((index++)>=sampleRatio){
       index=0;
       StringBuilder vectorStr=new StringBuilder();

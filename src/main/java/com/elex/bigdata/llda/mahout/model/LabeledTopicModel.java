@@ -270,7 +270,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         terms.add(element.index());
     }
     pTopicGivenTerm(terms, labels, docTopicModel);
-    normByTopicAndMultiByCount(original, terms, docTopicModel);
+    normByTopicAndMultiByCount(original, terms, labels,docTopicModel);
     long t2 = System.nanoTime();
     if (trainNum % 5000 == 1) {
       log.info("trainNum: ", trainNum );
@@ -396,15 +396,15 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     return -perplexity;
   }
 
-  private void normByTopicAndMultiByCount(Vector doc, List<Integer> terms, Matrix perTopicSparseDistributions) {
+  private void normByTopicAndMultiByCount(Vector doc, List<Integer> terms, int[] labels,Matrix perTopicSparseDistributions) {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
     for (Integer termIndex : terms) {
       double sum = 0;
-      for (int topic : topics) {
+      for (int topic : labels) {
         sum += perTopicSparseDistributions.viewRow(topic).getQuick(termIndex);
       }
       double count = doc.getQuick(termIndex);
-      for (int topic : topics) {
+      for (int topic : labels) {
         double orig = perTopicSparseDistributions.getQuick(topic, termIndex);
         perTopicSparseDistributions.setQuick(topic, termIndex, orig * count / sum);
       }

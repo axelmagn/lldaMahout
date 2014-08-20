@@ -246,9 +246,6 @@ public class LabeledModelTrainer {
       this.document = document;
       this.labels = labels;
       this.docTopicModel = new SparseMatrix(readModel.getNumTopics(),document.size());
-      for(int topic: labels){
-        docTopicModel.assignRow(topic,new RandomAccessSparseVector(document.size()));
-      }
     }
 
 
