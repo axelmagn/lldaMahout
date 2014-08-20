@@ -3,7 +3,6 @@ package com.elex.bigdata.llda.mahout.mapreduce.est;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import com.elex.bigdata.llda.mahout.util.MathUtil;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
@@ -14,7 +13,6 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.mahout.common.AbstractJob;
 import org.apache.mahout.common.RandomUtils;
-import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.*;
 
 import java.io.IOException;
