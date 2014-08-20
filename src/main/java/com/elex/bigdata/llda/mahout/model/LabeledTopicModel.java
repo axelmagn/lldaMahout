@@ -186,10 +186,12 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     AbstractMatrix model = new SparseMatrix(numTopics, numTerms);
     Vector topicSums = new RandomAccessSparseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
-      model.assignRow(pair.getFirst(),pair.getSecond());
-      double sum=model.viewRow(pair.getFirst()).norm(1.0);
-      topicSums.setQuick(pair.getFirst(),sum );
-      log.info("topic "+pair.getFirst()+" sum: "+sum);
+      int topic=pair.getFirst();
+      model.assignRow(topic,pair.getSecond());
+      System.out.println("topic:"+topic+",sum:"+pair.getSecond().norm(1.0));
+      double sum=model.viewRow(topic).norm(1.0);
+      topicSums.setQuick(topic,sum );
+      log.info("topic "+topic+" sum: "+sum);
     }
     //assert model.rowSize()>100;
     return Pair.of(model, topicSums);
