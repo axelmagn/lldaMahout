@@ -39,6 +39,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   private final AbstractMatrix topicTermCounts;
   private final Vector topicSums;
   private final int[] topics;
+  private final int numTopics;
   private final int numTerms;
   private final double eta;
   private final double alpha;
@@ -56,6 +57,10 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public int[] getTopics() {
     return topics;
+  }
+
+  public int getNumTopics(){
+    return numTopics;
   }
 
   public LabeledTopicModel(int[] topics, int numTerms, double eta, double alpha, String[] dictionary,
@@ -78,18 +83,19 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     this(model.getFirst(), model.getSecond(), eta, alpha, dict, numThreads, modelWeight);
   }
 
-  public LabeledTopicModel(AbstractMatrix topicTermCounts, Vector topicSums,  double eta, double alpha,
+  public LabeledTopicModel(AbstractMatrix topicTermCounts, Vector topicSums, double eta, double alpha,
                            String[] dictionary, int numThreads, double modelWeight) {
     this.dictionary = dictionary;
     this.topicTermCounts = topicTermCounts;
     this.topicSums = topicSums;
-    this.topics=new int[topicSums.size()];
-    Iterator<Vector.Element> iter=topicSums.iterateNonZero();
-    int i=0;
-    while(iter.hasNext()){
-      topics[i++]=iter.next().index();
+    this.topics = new int[topicSums.size()];
+    Iterator<Vector.Element> iter = topicSums.iterateNonZero();
+    int i = 0;
+    while (iter.hasNext()) {
+      topics[i++] = iter.next().index();
     }
-    assert topicSums.size()>100;
+    numTopics = MathUtil.getMax(topics) + 1;
+    assert topicSums.size() > 100;
     this.numTerms = topicTermCounts.numCols();
     this.eta = eta;
     this.alpha = alpha;
@@ -97,7 +103,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     this.numThreads = numThreads;
     if (modelWeight != 1) {
       topicSums.assign(Functions.mult(modelWeight));
-      for (int topic: topics) {
+      for (int topic : topics) {
         topicTermCounts.viewRow(topic).assign(Functions.mult(modelWeight));
       }
     }
@@ -145,34 +151,34 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private static Pair<AbstractMatrix, Vector> randomMatrix(int[] topics, int numTerms, Random random) {
-    AbstractMatrix topicTermCounts = new SparseMatrix(MathUtil.getMax(topics)+1, numTerms);
-    Vector topicSums = new RandomAccessSparseVector(MathUtil.getMax(topics)+1);
+    AbstractMatrix topicTermCounts = new SparseMatrix(MathUtil.getMax(topics) + 1, numTerms);
+    Vector topicSums = new RandomAccessSparseVector(MathUtil.getMax(topics) + 1);
     if (random != null) {
-      for (int topic: topics) {
+      for (int topic : topics) {
         for (int term = 0; term < numTerms; term++) {
-          topicTermCounts.set(topic,term, random.nextDouble());
+          topicTermCounts.set(topic, term, random.nextDouble());
         }
       }
     }
-    for (int topic: topics) {
+    for (int topic : topics) {
       topicSums.setQuick(topic, random == null ? 1.0 : topicTermCounts.viewRow(topic).norm(1));
     }
-    assert topicTermCounts.rowSize()>100;
+    assert topicTermCounts.rowSize() > 100;
     return Pair.of(topicTermCounts, topicSums);
   }
 
   public static Pair<AbstractMatrix, Vector> loadModel(Configuration conf, Path... modelPaths)
     throws IOException {
     int numTerms = -1;
-    int numTopics=0;
+    int numTopics = 0;
     List<Pair<Integer, Vector>> rows = Lists.newArrayList();
     for (Path modelPath : modelPaths) {
       log.info("load model from {}", modelPath.toString());
       for (Pair<IntWritable, VectorWritable> row
         : new SequenceFileIterable<IntWritable, VectorWritable>(modelPath, true, conf)) {
         rows.add(Pair.of(row.getFirst().get(), row.getSecond().get()));
-        if(row.getFirst().get()>numTopics)
-          numTopics=row.getFirst().get();
+        if (row.getFirst().get() > numTopics)
+          numTopics = row.getFirst().get();
         if (numTerms < 0) {
           numTerms = row.getSecond().get().size();
         }
@@ -186,12 +192,12 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     AbstractMatrix model = new SparseMatrix(numTopics, numTerms);
     Vector topicSums = new RandomAccessSparseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
-      int topic=pair.getFirst();
-      model.assignRow(topic,pair.getSecond());
-      System.out.println("topic:"+topic+",sum:"+pair.getSecond().norm(1.0));
-      double sum=model.viewRow(topic).norm(1.0);
-      topicSums.setQuick(topic,sum );
-      log.info("topic "+topic+" sum: "+sum);
+      int topic = pair.getFirst();
+      model.assignRow(topic, pair.getSecond());
+      System.out.println("topic:" + topic + ",sum:" + pair.getSecond().norm(1.0));
+      double sum = model.viewRow(topic).norm(1.0);
+      topicSums.setQuick(topic, sum);
+      log.info("topic " + topic + " sum: " + sum);
     }
     //assert model.rowSize()>100;
     return Pair.of(model, topicSums);
@@ -201,7 +207,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   @Override
   public String toString() {
     StringBuilder buf = new StringBuilder();
-    for (int topic: topics) {
+    for (int topic : topics) {
       String v = dictionary != null
         ? vectorToSortedString(topicTermCounts.viewRow(topic).normalize(1), dictionary)
         : topicTermCounts.viewRow(topic).asFormatString();
@@ -219,7 +225,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public synchronized void reset() {
-    for (int topic: topics ) {
+    for (int topic : topics) {
       topicTermCounts.assignRow(topic, new SequentialAccessSparseVector(numTerms));
     }
     topicSums.assign(1.0);
@@ -243,62 +249,68 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void renormalize() {
-    for (int topic: topics) {
+    for (int topic : topics) {
       topicTermCounts.assignRow(topic, topicTermCounts.viewRow(topic).normalize(1));
       topicSums.assign(1.0);
     }
   }
 
-  public Vector trainDocTopicModel(Vector original, int[] labels, int[] topics,Matrix docTopicModel, boolean inf) {
+  public void trainDocTopicModel(Vector original, int[] labels, Matrix docTopicModel) {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
     List<Integer> terms = new ArrayList<Integer>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
-    double docTermCount = 0.0;
     while (docElementIter.hasNext()) {
       Vector.Element element = docElementIter.next();
       terms.add(element.index());
-      docTermCount += element.get();
     }
     pTopicGivenTerm(terms, labels, docTopicModel);
     normByTopicAndMultiByCount(original, terms, docTopicModel);
-    Vector result=new RandomAccessSparseVector(MathUtil.getMax(topics)+1);
-    if (inf) {
-      for (int topic : topics) {
-        result.set(topic, (docTopicModel.viewRow(topic).norm(1) + alpha) / (docTermCount + numTerms * alpha));
-      }
-      result.assign(Functions.mult(1 / result.norm(1)));
+
+  }
+
+  public Vector inf(Vector orignal, int[] labels) {
+    Matrix docTopicTermDist = new SparseMatrix(numTopics, orignal.size());
+    trainDocTopicModel(orignal, labels, docTopicTermDist);
+    Vector result = new RandomAccessSparseVector(numTopics);
+    double docTermCount = orignal.norm(1.0);
+    for (int topic : topics) {
+      result.set(topic, (docTopicTermDist.viewRow(topic).norm(1) + alpha) / (docTermCount + numTerms * alpha));
     }
+    result.assign(Functions.mult(1 / result.norm(1)));
     return result;
   }
 
   public void update(Matrix docTopicCounts) {
-    for (int topic: topics) {
+    Iterator<MatrixSlice> iter=docTopicCounts.iterator();
+    while(iter.hasNext()){
+      MatrixSlice matrixSlice=iter.next();
+      int topic=matrixSlice.index();
       updaters[topic % updaters.length].update(topic, docTopicCounts.viewRow(topic));
     }
   }
 
-  public void updateTopic(int topic, Vector docTopicCounts) {
+  public void updateTopic(int topic, Vector termCounts) {
     //log.info("get iterateNonZero");
-    Iterator<Vector.Element> docTopicElementIter = docTopicCounts.iterateNonZero();
+    Iterator<Vector.Element> docTopicElementIter = termCounts.iterateNonZero();
     //log.info("got iterateNonZero");
-    Vector distTopicTermCountRow = topicTermCounts.viewRow(topic);
+    Vector globalTermCounts = topicTermCounts.viewRow(topic);
     double topicCountSum = 0.0;
     while (docTopicElementIter.hasNext()) {
       Vector.Element topicTermCount = docTopicElementIter.next();
       int termIndex = topicTermCount.index();
       double count = topicTermCount.get();
       topicCountSum += count;
-      distTopicTermCountRow.setQuick(termIndex, count + distTopicTermCountRow.getQuick(termIndex));
+      globalTermCounts.setQuick(termIndex, count + globalTermCounts.getQuick(termIndex));
     }
-    topicTermCounts.assignRow(topic,distTopicTermCountRow);
+    topicTermCounts.assignRow(topic, globalTermCounts);
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
   }
 
   public void update(int termId, Vector topicCounts) {
-    for (int topic: topics) {
-      topicTermCounts.setQuick(topic,termId,topicTermCounts.getQuick(topic,termId)+topicCounts.get(topic));
+    for (int topic : topics) {
+      topicTermCounts.setQuick(topic, termId, topicTermCounts.getQuick(topic, termId) + topicCounts.get(topic));
     }
     topicSums.assign(topicCounts, Functions.PLUS);
   }
@@ -338,7 +350,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         double termTopicLikelihood = (topicTermCount + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
         termTopicRow.setQuick(termIndex, termTopicLikelihood);
       }
-      termTopicDist.assignRow(topicIndex,termTopicRow);
+      termTopicDist.assignRow(topicIndex, termTopicRow);
     }
   }
 
@@ -354,7 +366,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       Vector.Element e = docElementIter.next();
       int term = e.index();
       double prob = 0;
-      for (int topic: topics) {
+      for (int topic : topics) {
         double d = (docTopics.getQuick(topic) + alpha) / norm;
         double p = d * (topicTermCounts.viewRow(topic).get(term) + eta)
           / (topicSums.get(topic) + eta * numTerms);
@@ -369,13 +381,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
     for (Integer termIndex : terms) {
       double sum = 0;
-      for (int topic: topics) {
+      for (int topic : topics) {
         sum += perTopicSparseDistributions.viewRow(topic).getQuick(termIndex);
       }
       double count = doc.getQuick(termIndex);
-      for (int topic: topics) {
-        double orig= perTopicSparseDistributions.getQuick(topic,termIndex);
-        perTopicSparseDistributions.setQuick(topic,termIndex,orig * count / sum);
+      for (int topic : topics) {
+        double orig = perTopicSparseDistributions.getQuick(topic, termIndex);
+        perTopicSparseDistributions.setQuick(topic, termIndex, orig * count / sum);
       }
     }
   }
@@ -452,7 +464,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
             //log.info("queue size increase to {}", queue.size());
             // return once you got access to the queue
             return true;
-          }else {
+          } else {
             Thread.sleep(100);
           }
         } catch (InterruptedException e) {
@@ -466,7 +478,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       while (!shutdown) {
         try {
           //long t1=System.currentTimeMillis();
-          Pair<Integer, Vector> pair = queue.poll(1,TimeUnit.SECONDS);
+          Pair<Integer, Vector> pair = queue.poll(1, TimeUnit.SECONDS);
           //log.info("queue size decrease to {}", queue.size());
           if (pair != null) {
             //long t2 = System.currentTimeMillis();

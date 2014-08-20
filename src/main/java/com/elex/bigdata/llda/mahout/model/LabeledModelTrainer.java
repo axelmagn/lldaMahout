@@ -80,7 +80,7 @@ public class LabeledModelTrainer {
     return calculatePerplexity(matrix,docTopicLabels, 0);
   }
   public double calculatePerplexity(Vector doc,int[] labels){
-    Vector topicDist=readModel.trainDocTopicModel(doc, labels, topics, new SparseMatrix(MathUtil.getMax(topics)+1,numTerms), true);
+    Vector topicDist=readModel.inf(doc, labels);
     double perplexity = readModel.perplexity(doc, topicDist);
     return perplexity;
   }
@@ -97,7 +97,7 @@ public class LabeledModelTrainer {
       int docId = docSlice.index();
       Vector document = docSlice.vector();
       if (testFraction == 0 || docId % (1 / testFraction) == 0) {
-        Vector topicDist=readModel.trainDocTopicModel(document, topicLabels, topics, new SparseMatrix(MathUtil.getMax(topics)+1,numTerms), true);
+        Vector topicDist=readModel.inf(document, topicLabels);
         perplexity += readModel.perplexity(document, topicDist);
         matrixNorm += document.norm(1);
       }
@@ -137,7 +137,7 @@ public class LabeledModelTrainer {
             numTokensInBatch += document.getNumNondefaultElements();
           }
         } else {
-          batchTrain(batch, topics,true, inf);
+          batchTrain(batch,true);
           long time = System.nanoTime();
           log.debug("trained " + numTrainThreads + "docs with " + numTokensInBatch + " tokens, start time " + batchStart + ", end time " + time);
           batchStart = time;
@@ -145,7 +145,7 @@ public class LabeledModelTrainer {
         }
       } else {
         long start = System.nanoTime();
-        train(document, labels,topics, true, inf);
+        train(document, labels, true);
         if (log.isDebugEnabled()) {
           times[i % times.length] =
             (System.nanoTime() - start) / (1.0e6 * document.getNumNondefaultElements());
@@ -165,14 +165,12 @@ public class LabeledModelTrainer {
 
 
 
-  public void batchTrain(Map<Vector, int[]> batch, int[] topics,boolean update,  boolean isInf) {
+  public void batchTrain(Map<Vector, int[]> batch,boolean update) {
     while (true) {
       try {
         List<TrainerRunnable> runnables = Lists.newArrayList();
         for (Map.Entry<Vector, int[]> entry : batch.entrySet()) {
-          runnables.add(new TrainerRunnable(readModel, null, entry.getKey(),
-            entry.getValue(), topics,new SparseRowMatrix(MathUtil.getMax(topics)+1, numTerms, true),
-            isInf));
+          runnables.add(new TrainerRunnable(readModel, null, entry.getKey(),entry.getValue()));
         }
         threadPool.invokeAll(runnables);
         if (update) {
@@ -187,12 +185,10 @@ public class LabeledModelTrainer {
     }
   }
 
-  public void train(Vector document, int[] labels, int[] topics,boolean update,  boolean isInf) {
+  public void train(Vector document, int[] labels, boolean update) {
     while (true) {
       try {
-        workQueue.put(new TrainerRunnable(readModel, update
-          ? writeModel
-          : null, document, labels,topics, new SparseMatrix(MathUtil.getMax(topics)+1, document.size()),  isInf));
+        workQueue.put(new TrainerRunnable(readModel, update? writeModel: null, document, labels));
         //log.info("workQueue size {}", workQueue.size());
         return;
       } catch (InterruptedException e) {
@@ -201,11 +197,8 @@ public class LabeledModelTrainer {
     }
   }
 
-  public void trainSync(Vector document, int[] labels,int[] topics, boolean update,
-                         boolean isInf) {
-    new TrainerRunnable(readModel, update
-      ? writeModel
-      : null, document, labels,topics, new SparseRowMatrix(MathUtil.getMax(topics)+1, numTerms, true), isInf).run();
+  public void trainSync(Vector document, int[] labels, boolean update) {
+    new TrainerRunnable(readModel, update ? writeModel : null, document, labels).run();
   }
 
 
@@ -244,27 +237,21 @@ public class LabeledModelTrainer {
     private final LabeledTopicModel writeModel;
     private final Vector document;
     private final int[] labels;
-    private final int[] topics;
     private final Matrix docTopicModel;
-    private boolean isInf;
-    private Vector docTopics;
 
     private TrainerRunnable(LabeledTopicModel readModel, LabeledTopicModel writeModel, Vector document,
-                            int[] labels, int[] topics,Matrix docTopicModel, boolean isInf) {
+                            int[] labels) {
       this.readModel = readModel;
       this.writeModel = writeModel;
       this.document = document;
       this.labels = labels;
-      this.topics=topics;
-      this.docTopicModel = docTopicModel;
-      this.isInf = isInf;
-      this.docTopics=new RandomAccessSparseVector(MathUtil.getMax(topics)+1);
+      this.docTopicModel = new SparseMatrix(readModel.getNumTopics(),document.size());
     }
 
 
     @Override
     public void run() {
-      docTopics=readModel.trainDocTopicModel(document, labels,topics, docTopicModel, isInf);
+      readModel.trainDocTopicModel(document, labels, docTopicModel);
       if (writeModel != null) {
         writeModel.update(docTopicModel);
       }
@@ -273,7 +260,9 @@ public class LabeledModelTrainer {
     @Override
     public Double call() {
       run();
+      Vector docTopics=readModel.inf(document,labels);
       return readModel.perplexity(document, docTopics);
     }
+
   }
 }

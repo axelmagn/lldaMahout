@@ -97,7 +97,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
         labelStr.append(label+" ");
       log.info("labels is: "+labelStr.toString());
     }
-    modelTrainer.train(doc.getVector(), labels, topics,true, false);
+    modelTrainer.train(doc.getVector(), labels, true);
   }
 
   @Override
