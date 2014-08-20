@@ -296,7 +296,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public void update(int termId, Vector topicCounts) {
     for (int topic: topics) {
-      topicTermCounts.set(topic,termId,topicTermCounts.get(topic,termId)+topicCounts.get(topic));
+      topicTermCounts.setQuick(topic,termId,topicTermCounts.getQuick(topic,termId)+topicCounts.get(topic));
     }
     topicSums.assign(topicCounts, Functions.PLUS);
   }
@@ -372,8 +372,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       }
       double count = doc.getQuick(termIndex);
       for (int topic: topics) {
-        double orig= perTopicSparseDistributions.get(topic,termIndex);
-        perTopicSparseDistributions.set(topic,termIndex,orig * count / sum);
+        double orig= perTopicSparseDistributions.getQuick(topic,termIndex);
+        perTopicSparseDistributions.setQuick(topic,termIndex,orig * count / sum);
       }
     }
   }
