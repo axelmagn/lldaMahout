@@ -7,7 +7,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
-import org.apache.mahout.clustering.lda.cvb.TopicModel;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileIterable;
@@ -51,6 +50,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   private ThreadPoolExecutor threadPool;
   private Updater[] updaters;
 
+  private int trainNum = 0;
+  private int updateNum = 0;
   public int getNumTerms() {
     return numTerms;
   }
@@ -59,7 +60,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     return topics;
   }
 
-  public int getNumTopics(){
+  public int getNumTopics() {
     return numTopics;
   }
 
@@ -161,6 +162,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       }
     }
     for (int topic : topics) {
+      topicTermCounts.assignRow(topic, topicTermCounts.viewRow(topic));
       topicSums.setQuick(topic, random == null ? 1.0 : topicTermCounts.viewRow(topic).norm(1));
     }
     assert topicTermCounts.rowSize() > 100;
@@ -258,19 +260,27 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   public void trainDocTopicModel(Vector original, int[] labels, Matrix docTopicModel) {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
+    trainNum++;
+    long t1 = System.nanoTime();
     List<Integer> terms = new ArrayList<Integer>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
     while (docElementIter.hasNext()) {
       Vector.Element element = docElementIter.next();
-      terms.add(element.index());
+      if (element.index() < topicTermCounts.columnSize())
+        terms.add(element.index());
     }
     pTopicGivenTerm(terms, labels, docTopicModel);
     normByTopicAndMultiByCount(original, terms, docTopicModel);
-
+    long t2 = System.nanoTime();
+    if (trainNum % 10000 == 1) {
+      System.out.println("train use " + (t2 - t1) / (1000) + " us");
+    }
   }
 
   public Vector inf(Vector orignal, int[] labels) {
     Matrix docTopicTermDist = new SparseMatrix(numTopics, orignal.size());
+    for (int label : labels)
+      docTopicTermDist.assignRow(label, new RandomAccessSparseVector(orignal.size()));
     trainDocTopicModel(orignal, labels, docTopicTermDist);
     Vector result = new RandomAccessSparseVector(numTopics);
     double docTermCount = orignal.norm(1.0);
@@ -282,11 +292,10 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public void update(Matrix docTopicCounts) {
-    Iterator<MatrixSlice> iter=docTopicCounts.iterator();
-    while(iter.hasNext()){
-      MatrixSlice matrixSlice=iter.next();
-      int topic=matrixSlice.index();
-      updaters[topic % updaters.length].update(topic, docTopicCounts.viewRow(topic));
+    Iterator<MatrixSlice> iter = docTopicCounts.iterator();
+    while (iter.hasNext()) {
+      MatrixSlice matrixSlice = iter.next();
+      updaters[(updateNum++) % updaters.length].update(matrixSlice.index(), matrixSlice.vector());
     }
   }
 
@@ -303,7 +312,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topicCountSum += count;
       globalTermCounts.setQuick(termIndex, count + globalTermCounts.getQuick(termIndex));
     }
-    topicTermCounts.assignRow(topic, globalTermCounts);
+    //topicTermCounts.assignRow(topic, globalTermCounts);
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
   }
@@ -330,7 +339,6 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
  */
 
   private void pTopicGivenTerm(List<Integer> terms, int[] topicLabels, Matrix termTopicDist) {
-    int modelTermSize = topicTermCounts.columnSize();
     double Vbeta = eta * numTerms;
     for (Integer topicIndex : topicLabels) {
       Vector termTopicRow = termTopicDist.viewRow(topicIndex);
@@ -338,19 +346,15 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       double topicSum = topicSums.getQuick(topicIndex);
       double docTopicSum = 0.0;
       for (Integer termIndex : terms) {
-        if (termIndex >= modelTermSize)
-          continue;
         docTopicSum += topicTermRow.getQuick(termIndex);
       }
       for (Integer termIndex : terms) {
-        if (termIndex >= modelTermSize)
-          continue;
         double topicTermCount = topicTermRow.getQuick(termIndex);
         double topicWeight = docTopicSum - topicTermCount;
         double termTopicLikelihood = (topicTermCount + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
         termTopicRow.setQuick(termIndex, termTopicLikelihood);
       }
-      termTopicDist.assignRow(topicIndex, termTopicRow);
+      //termTopicDist.assignRow(topicIndex, termTopicRow);
     }
   }
 

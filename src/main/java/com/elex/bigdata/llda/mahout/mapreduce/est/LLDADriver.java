@@ -490,7 +490,7 @@ public class LLDADriver extends AbstractJob {
     Job job = new Job(conf, jobName);
     job.setJarByClass(LLDADriver.class);
     job.setMapperClass(LLDAMapper.class);
-    job.setCombinerClass(VectorSumReducer.class);
+    //job.setCombinerClass(VectorSumReducer.class);
     job.setReducerClass(VectorSumReducer.class);
     job.setNumReduceTasks(numReduceTasks);
     job.setOutputKeyClass(IntWritable.class);
