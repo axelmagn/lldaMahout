@@ -2,7 +2,10 @@ package com.elex.bigdata.llda.mahout.mapreduce.est;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
+import com.elex.bigdata.llda.mahout.data.inputformat.CombineSqInputFormat;
+import com.elex.bigdata.llda.mahout.data.inputformat.CombineSqRecordReader;
 import com.elex.bigdata.llda.mahout.mapreduce.inf.LLDAInferenceMapper;
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -486,6 +489,7 @@ public class LLDADriver extends AbstractJob {
     String jobName = String.format("Iteration %d of %d, input path: %s",
       iterationNumber, maxIterations, modelInput);
     log.info("About to run: " + jobName);
+    FileSystemUtil.setCombineInputSplitSize(conf,corpusInput);
     Job job = new Job(conf, jobName);
     job.setJarByClass(LLDADriver.class);
     job.setMapperClass(LLDAMapper.class);
@@ -494,7 +498,7 @@ public class LLDADriver extends AbstractJob {
     job.setNumReduceTasks(numReduceTasks);
     job.setOutputKeyClass(IntWritable.class);
     job.setOutputValueClass(VectorWritable.class);
-    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setInputFormatClass(CombineSqInputFormat.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     FileInputFormat.addInputPath(job, corpusInput);
     FileOutputFormat.setOutputPath(job, modelOutput);
