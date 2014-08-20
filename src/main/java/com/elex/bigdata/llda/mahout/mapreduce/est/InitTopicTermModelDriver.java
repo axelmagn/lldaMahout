@@ -59,12 +59,13 @@ public class InitTopicTermModelDriver extends AbstractJob{
   public static class InitTopicTermModelMapper extends Mapper<Text, MultiLabelVectorWritable,IntWritable,VectorWritable>{
     private int[] topics;
     private int numTerms;
+    private Matrix topicTermCountMatrix;
     private Random random;
-    private int num=0;
     public void setup(Context context) throws IOException {
       Configuration conf = context.getConfiguration();
       topics=LLDADriver.getTopics(conf);
       numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
+      topicTermCountMatrix=new SparseMatrix(MathUtil.getMax(topics)+1,numTerms);
       System.out.println("numTerms "+numTerms);
       long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
       random= RandomUtils.getRandom(seed);
@@ -74,33 +75,26 @@ public class InitTopicTermModelDriver extends AbstractJob{
       int[] labels=lDoc.getLabels();
       if(labels.length==0)
         labels=topics;
-      num++;
       Vector doc=lDoc.getVector();
-      boolean shouldLog=false;
-      if(num%80000==1)
-      {
-        shouldLog=true;
-        System.out.println("num "+num);
-      }
       for(int label: labels){
-        Vector topicTermCountRow=new RandomAccessSparseVector(numTerms);
+        Vector topicTermCountRow=topicTermCountMatrix.viewRow(label);
         Iterator<Vector.Element> docIter=doc.iterateNonZero();
         while(docIter.hasNext()){
           Vector.Element termE=docIter.next();
           double count=Math.abs(random.nextDouble());
-          topicTermCountRow.setQuick(termE.index(),count);
-          context.write(new IntWritable(label),new VectorWritable(topicTermCountRow));
-          if(shouldLog){
-            StringBuilder builder=new StringBuilder();
-            Iterator<Vector.Element> iter=topicTermCountRow.iterateNonZero();
-            while(iter.hasNext()){
-              Vector.Element e=iter.next();
-              builder.append(e.index()+":"+e.get()+",");
-            }
-          }
+          topicTermCountRow.setQuick(termE.index(), count);
         }
+        topicTermCountMatrix.assignRow(label,topicTermCountRow);
       }
+    }
 
+    public void cleanup(Context context) throws IOException, InterruptedException {
+       Iterator<MatrixSlice> iterator=topicTermCountMatrix.iterator();
+       while(iterator.hasNext()){
+         MatrixSlice matrixSlice=iterator.next();
+         context.write(new IntWritable(matrixSlice.index()),new VectorWritable(matrixSlice.vector()));
+         System.out.println("topic:"+matrixSlice.index()+","+"sum:"+matrixSlice.vector().norm(1.0));
+       }
     }
 
   }

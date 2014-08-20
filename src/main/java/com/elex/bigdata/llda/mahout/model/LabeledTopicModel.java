@@ -150,7 +150,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     if (random != null) {
       for (int topic: topics) {
         for (int term = 0; term < numTerms; term++) {
-          topicTermCounts.viewRow(topic).set(term, random.nextDouble());
+          topicTermCounts.set(topic,term, random.nextDouble());
         }
       }
     }
@@ -186,8 +186,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     AbstractMatrix model = new SparseMatrix(numTopics, numTerms);
     Vector topicSums = new RandomAccessSparseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
-      model.viewRow(pair.getFirst()).assign(pair.getSecond());
-      double sum=pair.getSecond().norm(1.0);
+      model.assignRow(pair.getFirst(),pair.getSecond());
+      double sum=model.viewRow(pair.getFirst()).norm(1.0);
       topicSums.setQuick(pair.getFirst(),sum );
       log.info("topic "+pair.getFirst()+" sum: "+sum);
     }
@@ -289,14 +289,14 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topicCountSum += count;
       distTopicTermCountRow.setQuick(termIndex, count + distTopicTermCountRow.getQuick(termIndex));
     }
+    topicTermCounts.assignRow(topic,distTopicTermCountRow);
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
   }
 
   public void update(int termId, Vector topicCounts) {
     for (int topic: topics) {
-      Vector v = topicTermCounts.viewRow(topic);
-      v.set(termId, v.get(termId) + topicCounts.get(topic));
+      topicTermCounts.set(topic,termId,topicTermCounts.get(topic,termId)+topicCounts.get(topic));
     }
     topicSums.assign(topicCounts, Functions.PLUS);
   }
@@ -336,6 +336,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         double termTopicLikelihood = (topicTermCount + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
         termTopicRow.setQuick(termIndex, termTopicLikelihood);
       }
+      termTopicDist.assignRow(topicIndex,termTopicRow);
     }
   }
 
@@ -371,8 +372,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       }
       double count = doc.getQuick(termIndex);
       for (int topic: topics) {
-        perTopicSparseDistributions.viewRow(topic).setQuick(termIndex,
-          perTopicSparseDistributions.viewRow(topic).getQuick(termIndex) * count / sum);
+        double orig= perTopicSparseDistributions.get(topic,termIndex);
+        perTopicSparseDistributions.set(topic,termIndex,orig * count / sum);
       }
     }
   }

@@ -109,6 +109,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     LabeledTopicModel readFrom = modelTrainer.getReadModel();
     for (MatrixSlice topic : readFrom) {
       context.write(new IntWritable(topic.index()), new VectorWritable(topic.vector()));
+      System.out.println("topic:"+topic+","+"sum:"+topic.vector().norm(1.0));
     }
     readModel.stop();
     writeModel.stop();
