@@ -275,6 +275,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     if (trainNum % 5000 == 1) {
       log.info("trainNum: ",trainNum);
       log.info("train use " + (t2 - t1) / (1000) + " us");
+      for(int label: labels){
+        log.info("label "+label+" sum "+docTopicModel.viewRow(label).norm(1.0));
+      }
     }
   }
 
@@ -366,7 +369,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         double termTopicLikelihood = (topicTermCount + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
         termTopicRow.setQuick(termIndex, termTopicLikelihood);
       }
-      //termTopicDist.assignRow(topicIndex, termTopicRow);
+      termTopicDist.assignRow(topicIndex, termTopicRow);
     }
   }
 
