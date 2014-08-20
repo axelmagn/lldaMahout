@@ -273,7 +273,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     normByTopicAndMultiByCount(original, terms, labels,docTopicModel);
     long t2 = System.nanoTime();
     if (trainNum % 5000 == 1) {
-      log.info("trainNum: ", trainNum );
+      log.info("trainNum: "+trainNum );
       log.info("train use " + (t2 - t1) / (1000) + " us, docSize "+original.size());
       for( int label: labels){
         log.info("label "+label+" sum "+docTopicModel.viewRow(label).norm(1.0));
