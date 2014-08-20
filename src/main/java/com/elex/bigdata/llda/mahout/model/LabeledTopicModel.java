@@ -272,7 +272,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     pTopicGivenTerm(terms, labels, docTopicModel);
     normByTopicAndMultiByCount(original, terms, docTopicModel);
     long t2 = System.nanoTime();
-    if (trainNum % 10000 == 1) {
+    if (trainNum % 5000 == 1) {
       System.out.println("train use " + (t2 - t1) / (1000) + " us");
     }
   }
@@ -318,7 +318,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
     long t2=System.nanoTime();
-    if(updateNum%20000==1){
+    if(trainNum%5000==1){
       log.info("updateTopic: "+topicTermCounts.viewRow(topic).norm(1.0));
       log.info("updateTopic use : "+(t2-t1)/1000 +" us");
     }

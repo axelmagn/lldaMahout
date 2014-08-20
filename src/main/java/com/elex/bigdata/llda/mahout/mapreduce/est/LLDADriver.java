@@ -30,7 +30,6 @@ import org.apache.mahout.common.commandline.DefaultOptionCreator;
 import org.apache.mahout.common.iterator.sequencefile.PathFilters;
 import org.apache.mahout.common.iterator.sequencefile.PathType;
 import org.apache.mahout.common.iterator.sequencefile.SequenceFileDirIterable;
-import org.apache.mahout.common.mapreduce.VectorSumReducer;
 import org.apache.mahout.math.VectorWritable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -490,7 +489,7 @@ public class LLDADriver extends AbstractJob {
     Job job = new Job(conf, jobName);
     job.setJarByClass(LLDADriver.class);
     job.setMapperClass(LLDAMapper.class);
-    //job.setCombinerClass(VectorSumReducer.class);
+    job.setCombinerClass(VectorSumReducer.class);
     job.setReducerClass(VectorSumReducer.class);
     job.setNumReduceTasks(numReduceTasks);
     job.setOutputKeyClass(IntWritable.class);
