@@ -312,6 +312,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       Vector.Element topicTermCount = docTopicElementIter.next();
       int termIndex = topicTermCount.index();
       double count = topicTermCount.get();
+      if(updateNum%5000==1)
+        log.info(termIndex+":"+count);
       topicCountSum += count;
       globalTermCounts.setQuick(termIndex, count + globalTermCounts.getQuick(termIndex));
     }
