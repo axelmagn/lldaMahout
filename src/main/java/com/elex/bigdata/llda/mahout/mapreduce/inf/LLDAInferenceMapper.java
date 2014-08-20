@@ -87,9 +87,8 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
     int[] labels=doc.getLabels();
-    Matrix docModel = new SparseMatrix(MathUtil.getMax(topics)+1,doc.getVector().size());
     LabeledModelTrainer modelTrainer=getModelTrainer();
-    Vector result = modelTrainer.getReadModel().trainDocTopicModel(doc.getVector(),labels,topics,docModel,true);
+    Vector result = modelTrainer.getReadModel().inf(doc.getVector(),labels);
     StringBuilder builder=new StringBuilder();
     Iterator<Element> iter=result.iterateNonZero();
     while(iter.hasNext()){
