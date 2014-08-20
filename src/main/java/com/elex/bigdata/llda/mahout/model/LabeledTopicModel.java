@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.Arrays;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -269,12 +270,14 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       if (element.index() < topicTermCounts.columnSize())
         terms.add(element.index());
     }
-    pTopicGivenTerm(terms, labels, docTopicModel);
-    normByTopicAndMultiByCount(original, terms, labels,docTopicModel);
+    double[] termSums=new double[terms.size()];
+    Arrays.fill(termSums,0.0);
+    pTopicGivenTerm(terms, labels, docTopicModel,termSums);
+    normByTopicAndMultiByCount(original, terms, termSums,labels,docTopicModel);
     long t2 = System.nanoTime();
     if (trainNum % 5000 == 1) {
       log.info("trainNum: "+trainNum );
-      log.info("train use " + (t2 - t1) / (1000) + " us, docSize "+original.size());
+      log.info("train use " + (t2 - t1) / (1000) + " us, docSize " + original.size());
       for( int label: labels){
         log.info("label "+label+" sum "+docTopicModel.viewRow(label).norm(1.0));
       }
@@ -326,7 +329,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
     long t2=System.nanoTime();
     if(updateNum%5000==1){
-      log.info("updateNum "+updateNum);
+      log.info("updateNum " + updateNum);
       log.info("updateTopic: "+topicTermCounts.viewRow(topic).norm(1.0)+" "+globalTermCounts.norm(1.0)+" docSize "+termCounts.size());
       log.info("updateTopic use : "+(t2-t1)/1000 +" us");
     }
@@ -353,7 +356,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
      then the inf can be executed more than once,but there is unsafety because notLabeled url's count may be bigger than labeled
  */
 
-  private void pTopicGivenTerm(List<Integer> terms, int[] topicLabels, Matrix termTopicDist) {
+  private void pTopicGivenTerm(List<Integer> terms, int[] topicLabels, Matrix termTopicDist,double[] termSum) {
     double Vbeta = eta * numTerms;
     for (Integer topicIndex : topicLabels) {
       Vector termTopicRow = termTopicDist.viewRow(topicIndex);
@@ -363,11 +366,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       for (Integer termIndex : terms) {
         docTopicSum += topicTermRow.getQuick(termIndex);
       }
-      for (Integer termIndex : terms) {
+      for (int i=0;i<terms.size();i++) {
+        int termIndex=terms.get(i);
         double topicTermCount = topicTermRow.getQuick(termIndex);
         double topicWeight = docTopicSum - topicTermCount;
         double termTopicLikelihood = (topicTermCount + eta) * (topicWeight + alpha) / (topicSum + Vbeta);
         termTopicRow.setQuick(termIndex, termTopicLikelihood);
+        termSum[i]+=termTopicLikelihood;
       }
       termTopicDist.assignRow(topicIndex, termTopicRow);
     }
@@ -396,17 +401,14 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     return -perplexity;
   }
 
-  private void normByTopicAndMultiByCount(Vector doc, List<Integer> terms, int[] labels,Matrix perTopicSparseDistributions) {
+  private void normByTopicAndMultiByCount(Vector doc, List<Integer> terms, double[] termSums,int[] labels,Matrix perTopicSparseDistributions) {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
-    for (Integer termIndex : terms) {
-      double sum = 0;
-      for (int topic : labels) {
-        sum += perTopicSparseDistributions.viewRow(topic).getQuick(termIndex);
-      }
+    for (int i=0;i<terms.size();i++) {
+      int termIndex=terms.get(i);
       double count = doc.getQuick(termIndex);
       for (int topic : labels) {
         double orig = perTopicSparseDistributions.getQuick(topic, termIndex);
-        perTopicSparseDistributions.setQuick(topic, termIndex, orig * count / sum);
+        perTopicSparseDistributions.setQuick(topic, termIndex, orig * count / termSums[i]);
       }
     }
   }
