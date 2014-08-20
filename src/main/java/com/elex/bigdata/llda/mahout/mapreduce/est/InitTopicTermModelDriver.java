@@ -64,6 +64,9 @@ public class InitTopicTermModelDriver extends AbstractJob{
       topics=LLDADriver.getTopics(conf);
       numTerms = conf.getInt(LLDADriver.NUM_TERMS, -1);
       topicTermCountMatrix=new SparseMatrix(MathUtil.getMax(topics)+1,numTerms);
+      for(int topic: topics){
+        topicTermCountMatrix.assignRow(topic,topicTermCountMatrix.viewRow(topic));
+      }
       System.out.println("numTerms "+numTerms);
       long seed = conf.getLong(LLDADriver.RANDOM_SEED, 1234L);
       random= RandomUtils.getRandom(seed);
@@ -82,7 +85,6 @@ public class InitTopicTermModelDriver extends AbstractJob{
           double count=Math.abs(random.nextDouble());
           topicTermCountRow.setQuick(termE.index(), count);
         }
-        topicTermCountMatrix.assignRow(label,topicTermCountRow);
       }
     }
 
