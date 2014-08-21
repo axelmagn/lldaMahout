@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.model;
 
+import com.elex.bigdata.llda.mahout.math.SparseRowSparseColumnMatrix;
 import com.elex.bigdata.llda.mahout.util.MathUtil;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -245,7 +246,7 @@ public class LabeledModelTrainer {
       this.writeModel = writeModel;
       this.document = document;
       this.labels = labels;
-      this.docTopicModel = new SparseMatrix(readModel.getNumTopics(),document.size());
+      this.docTopicModel = new SparseRowSparseColumnMatrix(readModel.getNumTopics(),document.size());
     }
 
 

@@ -1,7 +1,10 @@
 package com.elex.bigdata.llda.mahout.data;
 
+import com.elex.bigdata.llda.mahout.math.SparseRowDenseColumnMatrix;
 import org.apache.mahout.math.*;
 import org.apache.mahout.math.Vector.Element;
+import org.apache.mahout.math.function.DoubleFunction;
+import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
 import java.util.Iterator;
@@ -37,7 +40,7 @@ public class TestMatrix {
     Vector matrixSlice=matrix.viewRow(row);
     while(iter.hasNext()){
       Element e=iter.next();
-      matrixSlice.set(e.index(),e.get());
+      matrixSlice.set(e.index(), e.get());
     }
     matrix.assignRow(row,matrixSlice);
     /*
@@ -45,5 +48,55 @@ public class TestMatrix {
       System.out.print(e.index()+":"+e.get()+",");
     }
     */
+  }
+
+  @Test
+  public void testVector(){
+    Vector vector1=new DenseVector(1000*1000*2);
+    vector1.assign(1.0);
+    Vector vector2=new DenseVector(1000*1000*2);
+    vector2.assign(2.0);
+    long t1=System.nanoTime();
+    vector1.assign(vector2, Functions.PLUS);
+    long t2=System.nanoTime();
+    System.out.println(t2-t1);
+    Vector vector3=new RandomAccessSparseVector(1000*1000);
+    vector3.assign(1.0);
+    Vector vector4=new RandomAccessSparseVector(1000*1000*2);
+    vector4.assign(1.0);
+    t1=System.nanoTime();
+    for(Element e : vector1){
+      vector4.setQuick(e.index(),vector4.getQuick(e.index())+e.get());
+    }
+    t2=System.nanoTime();
+    System.out.println(t2-t1);
+    t1=System.nanoTime();
+    for(Element e : vector1){
+      vector2.setQuick(e.index(),vector2.getQuick(e.index())+e.get());
+    }
+    t2=System.nanoTime();
+    System.out.println(t2-t1);
+  }
+  @Test
+  public void testSparseRowDenseColumnMatrix(){
+    long t1=System.nanoTime();
+
+    SparseRowDenseColumnMatrix matrix=new SparseRowDenseColumnMatrix(148,1000000);
+    for(int i=0;i<148;i=i+2){
+       matrix.viewRow(i).assign(i+1);
+    }
+
+    long t2=System.nanoTime();
+    System.out.println((t2-t1)/1000);
+    for(MatrixSlice matrixSlice: matrix){
+      System.out.println(matrixSlice.index());
+
+    }
+    System.out.println(matrix.getNumNondefaultElements()[0]+","+matrix.getNumNondefaultElements()[1]);
+    matrix.assign(2.0);
+    System.out.println(matrix.get(0, 1));
+    matrix.set(3,4,5);
+    System.out.println(matrix.get(3,4));
+
   }
 }

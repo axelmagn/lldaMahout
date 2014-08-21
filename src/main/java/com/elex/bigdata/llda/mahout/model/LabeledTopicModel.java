@@ -1,5 +1,7 @@
 package com.elex.bigdata.llda.mahout.model;
 
+import com.elex.bigdata.llda.mahout.math.SparseRowDenseColumnMatrix;
+import com.elex.bigdata.llda.mahout.math.SparseRowSparseColumnMatrix;
 import com.elex.bigdata.llda.mahout.util.MathUtil;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configurable;
@@ -153,8 +155,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   private static Pair<AbstractMatrix, Vector> randomMatrix(int[] topics, int numTerms, Random random) {
-    AbstractMatrix topicTermCounts = new SparseMatrix(MathUtil.getMax(topics) + 1, numTerms);
-    Vector topicSums = new RandomAccessSparseVector(MathUtil.getMax(topics) + 1);
+    AbstractMatrix topicTermCounts = new SparseRowDenseColumnMatrix(MathUtil.getMax(topics) + 1, numTerms);
+    Vector topicSums = new DenseVector(MathUtil.getMax(topics) + 1);
     if (random != null) {
       for (int topic : topics) {
         for (int term = 0; term < numTerms; term++) {
@@ -163,7 +165,6 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       }
     }
     for (int topic : topics) {
-      topicTermCounts.assignRow(topic, topicTermCounts.viewRow(topic));
       topicSums.setQuick(topic, random == null ? 1.0 : topicTermCounts.viewRow(topic).norm(1));
     }
     assert topicTermCounts.rowSize() > 100;
@@ -192,8 +193,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       throw new IOException(java.util.Arrays.toString(modelPaths) + " have no vectors in it");
     }
     log.info("numTopics is {},numTerms is {}", numTopics, numTerms);
-    AbstractMatrix model = new SparseMatrix(numTopics, numTerms);
-    Vector topicSums = new RandomAccessSparseVector(numTopics);
+    AbstractMatrix model = new SparseRowDenseColumnMatrix(numTopics, numTerms);
+    Vector topicSums = new DenseVector(numTopics);
     for (Pair<Integer, Vector> pair : rows) {
       int topic = pair.getFirst();
       model.assignRow(topic, pair.getSecond());
@@ -229,7 +230,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public synchronized void reset() {
     for (int topic : topics) {
-      topicTermCounts.assignRow(topic, new SequentialAccessSparseVector(numTerms));
+      topicTermCounts.assignRow(topic, new DenseVector(numTerms));
     }
     topicSums.assign(1.0);
     if (threadPool.isTerminated()) {
@@ -285,9 +286,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public Vector inf(Vector orignal, int[] labels) {
-    Matrix docTopicTermDist = new SparseMatrix(numTopics, orignal.size());
-    for (int label : labels)
-      docTopicTermDist.assignRow(label, new RandomAccessSparseVector(orignal.size()));
+    Matrix docTopicTermDist = new SparseRowSparseColumnMatrix(numTopics, orignal.size());
     trainDocTopicModel(orignal, labels, docTopicTermDist);
     Vector result = new RandomAccessSparseVector(numTopics);
     double docTermCount = orignal.norm(1.0);
@@ -324,7 +323,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       globalTermCounts.setQuick(termIndex, count + globalTermCounts.getQuick(termIndex));
     }
 
-    topicTermCounts.assignRow(topic, globalTermCounts);
+    //topicTermCounts.assignRow(topic, globalTermCounts);
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
     long t2=System.nanoTime();
@@ -374,7 +373,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         termTopicRow.setQuick(termIndex, termTopicLikelihood);
         termSum[i]+=termTopicLikelihood;
       }
-      termTopicDist.assignRow(topicIndex, termTopicRow);
+      //termTopicDist.assignRow(topicIndex, termTopicRow);
     }
   }
 

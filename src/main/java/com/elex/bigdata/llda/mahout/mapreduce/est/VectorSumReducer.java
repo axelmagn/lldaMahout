@@ -29,7 +29,7 @@ public class VectorSumReducer
         long t1=System.nanoTime();
         vector.assign(v.get(), Functions.PLUS);
         long t2=System.nanoTime();
-        System.out.println("plus within vectors use "+(t2-t1)/1000 + " ms");
+        System.out.println("plus within vectors use "+(t2-t1)/1000 + " us");
       }
     }
     ctx.write(key, new VectorWritable(vector));
