@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.data.mergedocs;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
+import com.elex.bigdata.llda.mahout.math.SequencialSparseVector;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -137,7 +138,7 @@ public class MergeLDocDriver extends AbstractJob {
         urlCountMap.put(termIndex,urlCount.get()+urlCountMap.get(termIndex));
       }
     }
-    Vector finalUrlCounts=new RandomAccessSparseVector(urlCountMap.size()*2);
+    Vector finalUrlCounts=new SequencialSparseVector(urlCountMap.size());
     for(Integer url: urlCountMap.keys().elements()){
       finalUrlCounts.setQuick(url,urlCountMap.get(url));
     }

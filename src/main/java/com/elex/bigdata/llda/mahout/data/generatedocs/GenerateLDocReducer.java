@@ -3,6 +3,7 @@ package com.elex.bigdata.llda.mahout.data.generatedocs;
 import com.elex.bigdata.hashing.BDMD5;
 import com.elex.bigdata.llda.mahout.dictionary.Dictionary;
 import com.elex.bigdata.llda.mahout.mapreduce.etl.ResultEtlDriver;
+import com.elex.bigdata.llda.mahout.math.SequencialSparseVector;
 import com.elex.bigdata.llda.mahout.priocatogory.ParentToChildLabels;
 import com.elex.bigdata.llda.mahout.priocatogory.TopicUrls;
 import com.elex.bigdata.llda.mahout.util.PrefixTrie;
@@ -192,7 +193,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     if (urlCounts.size() == 0)
       return;
     startTime=System.nanoTime();
-    Vector urlCountsVector = new RandomAccessSparseVector(urlCounts.size() * 2);
+    Vector urlCountsVector = new SequencialSparseVector(urlCounts.size());
     for (Map.Entry<Integer, Double> urlCount : urlCounts.entrySet()) {
       urlCountsVector.setQuick(urlCount.getKey(), urlCount.getValue());
     }

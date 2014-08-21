@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.data;
 
+import com.elex.bigdata.llda.mahout.math.SequencialSparseVector;
 import com.elex.bigdata.llda.mahout.math.SparseRowDenseColumnMatrix;
 import org.apache.mahout.math.*;
 import org.apache.mahout.math.Vector.Element;
@@ -60,6 +61,8 @@ public class TestMatrix {
     vector1.assign(vector2, Functions.PLUS);
     long t2=System.nanoTime();
     System.out.println(t2-t1);
+
+
     Vector vector3=new RandomAccessSparseVector(1000*1000);
     vector3.assign(1.0);
     Vector vector4=new RandomAccessSparseVector(1000*1000*2);
@@ -76,6 +79,8 @@ public class TestMatrix {
     }
     t2=System.nanoTime();
     System.out.println(t2-t1);
+
+
   }
   @Test
   public void testSparseRowDenseColumnMatrix(){
@@ -98,5 +103,21 @@ public class TestMatrix {
     matrix.set(3,4,5);
     System.out.println(matrix.get(3,4));
 
+  }
+  @Test
+  public void testSqSparseVector(){
+    SequencialSparseVector sequencialSparseVector=new SequencialSparseVector(1000);
+    for(int i=0;i<sequencialSparseVector.size();i++){
+      sequencialSparseVector.setQuick(1000-i,i);
+    }
+    for(Element e: sequencialSparseVector){
+      System.out.print(e.index()+":"+e.get()+",");
+    }
+    System.out.println();
+    sequencialSparseVector.setQuick(10000,1000);
+    sequencialSparseVector.setQuick(10001,1001);
+    sequencialSparseVector.assign(1.0);
+    System.out.println(sequencialSparseVector.getNumNondefaultElements());
+    System.out.println(sequencialSparseVector.getQuick(677));
   }
 }
