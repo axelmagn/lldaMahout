@@ -36,7 +36,7 @@ public class TransferUidDriver extends AbstractJob{
     job.setMapperClass(TransferUidMapper.class);
     job.setMapOutputValueClass(MultiLabelVectorWritable.class);
     job.setMapOutputKeyClass(Text.class);
-    job.setReducerClass(Reducer.class);
+    job.setNumReduceTasks(0);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     SequenceFileInputFormat.addInputPath(job,inputPath);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
