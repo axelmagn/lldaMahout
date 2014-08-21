@@ -41,6 +41,7 @@ public class TransferUidMapper extends Mapper<Text, MultiLabelVectorWritable, Te
       getCookieIds();
       int sampleRatio=1;
       for (Map.Entry<String, MultiLabelVectorWritable> entry : uid2Doc.entrySet()) {
+        sampleRatio++;
         String cookieId = uid2CookieId.get(entry.getKey());
         if (cookieId == null)
           cookieId = entry.getKey();
@@ -49,8 +50,8 @@ public class TransferUidMapper extends Mapper<Text, MultiLabelVectorWritable, Te
            System.out.println("cookieId:"+cookieId);
         }
       }
-      uid2CookieId.clear();
-      uid2Doc.clear();
+      uid2CookieId=new HashMap<String, String>();
+      uid2Doc=new HashMap<String, MultiLabelVectorWritable>();
 
     }
   }
