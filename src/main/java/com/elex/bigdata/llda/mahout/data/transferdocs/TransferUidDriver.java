@@ -2,12 +2,14 @@ package com.elex.bigdata.llda.mahout.data.transferdocs;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.math.MultiLabelVectorWritable;
 
 import java.io.IOException;
 
@@ -30,6 +32,8 @@ public class TransferUidDriver extends AbstractJob{
     Job job=new Job(conf,"transfer uid "+inputPath.getName());
     job.setJarByClass(TransferUidDriver.class);
     job.setMapperClass(TransferUidMapper.class);
+    job.setMapOutputValueClass(MultiLabelVectorWritable.class);
+    job.setMapOutputKeyClass(Text.class);
     job.setReducerClass(Reducer.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     SequenceFileInputFormat.addInputPath(job,inputPath);
