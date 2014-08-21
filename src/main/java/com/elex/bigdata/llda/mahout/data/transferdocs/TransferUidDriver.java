@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.data.transferdocs;
 
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
@@ -29,6 +30,7 @@ public class TransferUidDriver extends AbstractJob{
     return;
   }
   public Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
+    FileSystemUtil.deleteOutputPath(conf,outputPath);
     Job job=new Job(conf,"transfer uid "+inputPath.getName());
     job.setJarByClass(TransferUidDriver.class);
     job.setMapperClass(TransferUidMapper.class);
