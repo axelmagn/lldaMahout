@@ -2,6 +2,7 @@ package com.elex.bigdata.llda.mahout.model;
 
 import com.elex.bigdata.llda.mahout.math.SparseRowDenseColumnMatrix;
 import com.elex.bigdata.llda.mahout.math.SparseRowSparseColumnMatrix;
+import com.elex.bigdata.llda.mahout.math.SparseRowSqSparseColumnMatrix;
 import com.elex.bigdata.llda.mahout.util.MathUtil;
 import com.google.common.collect.Lists;
 import org.apache.hadoop.conf.Configurable;
@@ -265,16 +266,20 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     trainNum++;
     long t1 = System.nanoTime();
     List<Integer> terms = new ArrayList<Integer>();
+    List<Double>  counts= new ArrayList<Double>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
     while (docElementIter.hasNext()) {
       Vector.Element element = docElementIter.next();
       if (element.index() < topicTermCounts.columnSize())
+      {
         terms.add(element.index());
+        counts.add(element.get());
+      }
     }
     double[] termSums=new double[terms.size()];
     Arrays.fill(termSums,0.0);
     pTopicGivenTerm(terms, labels, docTopicModel,termSums);
-    normByTopicAndMultiByCount(original, terms, termSums,labels,docTopicModel);
+    normByTopicAndMultiByCount(counts,termSums,labels,docTopicModel);
     long t2 = System.nanoTime();
     if (trainNum % 5000 == 1) {
       log.info("trainNum: "+trainNum );
@@ -286,9 +291,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   }
 
   public Vector inf(Vector orignal, int[] labels) {
-    Matrix docTopicTermDist = new SparseRowSparseColumnMatrix(numTopics, orignal.size());
+    Matrix docTopicTermDist = new SparseRowSqSparseColumnMatrix(numTopics, orignal.size());
     trainDocTopicModel(orignal, labels, docTopicTermDist);
-    Vector result = new RandomAccessSparseVector(numTopics);
+    Vector result = new DenseVector(numTopics);
     double docTermCount = orignal.norm(1.0);
     for (int topic : topics) {
       result.set(topic, (docTopicTermDist.viewRow(topic).norm(1) + alpha) / (docTermCount + numTerms * alpha));
@@ -400,14 +405,16 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     return -perplexity;
   }
 
-  private void normByTopicAndMultiByCount(Vector doc, List<Integer> terms, double[] termSums,int[] labels,Matrix perTopicSparseDistributions) {
+  private void normByTopicAndMultiByCount(List<Double> counts, double[] termSums,int[] labels,Matrix perTopicSparseDistributions) {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
-    for (int i=0;i<terms.size();i++) {
-      int termIndex=terms.get(i);
-      double count = doc.getQuick(termIndex);
-      for (int topic : labels) {
-        double orig = perTopicSparseDistributions.getQuick(topic, termIndex);
-        perTopicSparseDistributions.setQuick(topic, termIndex, orig * count / termSums[i]);
+    for(int topic: labels){
+      Vector termDist=perTopicSparseDistributions.viewRow(topic);
+      int i=0;
+      Iterator<Vector.Element> iter=termDist.iterateNonZero();
+      while(iter.hasNext()){
+        Vector.Element e=iter.next();
+        e.set(e.get()*counts.get(i)/termSums[i]);
+        i++;
       }
     }
   }
