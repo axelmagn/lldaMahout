@@ -53,13 +53,13 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     int numUpdateThreads = conf.getInt(LLDADriver.NUM_UPDATE_THREADS, 1);
     int numTrainThreads = conf.getInt(LLDADriver.NUM_TRAIN_THREADS, 4);
     float modelWeight = conf.getFloat(LLDADriver.MODEL_WEIGHT, 1.0f);
-    topics=LLDADriver.getTopics(conf);
+    topics = LLDADriver.getTopics(conf);
 
     System.out.println("Initializing read model");
     Path[] modelPaths = LLDADriver.getModelPaths(conf);
     if (modelPaths != null && modelPaths.length > 0) {
       readModel = new LabeledTopicModel(conf, eta, alpha, null, numUpdateThreads, modelWeight, modelPaths);
-      numTerms=readModel.getNumTerms();
+      numTerms = readModel.getNumTerms();
     } else {
       log.info("No model files found");
       readModel = new LabeledTopicModel(topics, numTerms, eta, alpha, RandomUtils.getRandom(seed), null,
@@ -71,11 +71,11 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
       ? new LabeledTopicModel(topics, numTerms, eta, alpha, null, numUpdateThreads)
       : readModel;
 
-    Map<Integer,Integer> child2ParentLabels= GenerateLDocReducer.getLabelRelations(conf);
-    topics=new int[child2ParentLabels.size()];
-    int i=0;
-    for(Integer topicLabel: child2ParentLabels.keySet())
-      topics[i++]=topicLabel;
+    Map<Integer, Integer> child2ParentLabels = GenerateLDocReducer.getLabelRelations(conf);
+    topics = new int[child2ParentLabels.size()];
+    int i = 0;
+    for (Integer topicLabel : child2ParentLabels.keySet())
+      topics[i++] = topicLabel;
 
     System.out.println("Initializing model trainer");
     modelTrainer = new LabeledModelTrainer(readModel, writeModel, numTrainThreads, topics, numTerms);
@@ -86,17 +86,21 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
   @Override
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
-    int[] labels=doc.getLabels();
-    LabeledModelTrainer modelTrainer=getModelTrainer();
-    Vector result = modelTrainer.getReadModel().inf(doc.getVector(),labels);
-    StringBuilder builder=new StringBuilder();
-    Iterator<Element> iter=result.iterateNonZero();
-    while(iter.hasNext()){
-      Element e=iter.next();
-      builder.append(e.index()+":"+e.get()+",");
+    int[] labels;
+    if (doc.getLabels().length > 0)
+      labels = doc.getLabels();
+    else
+      labels = topics;
+    LabeledModelTrainer modelTrainer = getModelTrainer();
+    Vector result = modelTrainer.getReadModel().inf(doc.getVector(), labels);
+    StringBuilder builder = new StringBuilder();
+    Iterator<Element> iter = result.iterateNonZero();
+    while (iter.hasNext()) {
+      Element e = iter.next();
+      builder.append(e.index() + ":" + e.get() + ",");
     }
-    builder.deleteCharAt(builder.length()-1);
-    context.write(uid,new Text(builder.toString()));
+    builder.deleteCharAt(builder.length() - 1);
+    context.write(uid, new Text(builder.toString()));
   }
 
   @Override
