@@ -294,8 +294,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       for(int label: labels)
         builder.append(label+",");
       StringBuilder docBuilder=new StringBuilder();
-      for(Vector.Element e: original){
-        docBuilder.append(e.index()+":"+e.get()+",");
+      for(int i=0;i<terms.size();i++){
+        docBuilder.append(terms.get(i)+":"+counts.get(i)+",");
       }
       log.info(Thread.currentThread().getName()+"  train use " + (t2 - t1) / (1000) + " us, doc: "+docBuilder.toString() );
       log.info(Thread.currentThread().getName()+"  labels: "+builder.toString());
