@@ -1,6 +1,7 @@
 package com.elex.bigdata.llda.mahout.est;
 
 import com.elex.bigdata.llda.mahout.math.SparseRowDenseColumnMatrix;
+import com.elex.bigdata.llda.mahout.math.SparseRowSparseColumnMatrix;
 import com.elex.bigdata.llda.mahout.math.SparseRowSqSparseColumnMatrix;
 import org.apache.mahout.common.Pair;
 import org.apache.mahout.common.RandomUtils;
@@ -38,7 +39,7 @@ public class TestEstimator {
        counts.add(new Double(i*10+1));
      }
      int[] labels=new int[]{0,2,4,8};
-     Matrix matrix=new SparseRowSqSparseColumnMatrix(20,10);
+     Matrix matrix=new SparseRowSparseColumnMatrix(20,10);
      double[] termSums=new double[10];
      pTopicGivenTerm(terms,labels,matrix,termSums);
      normByTopicAndMultiByCount(counts,termSums,labels,matrix);
