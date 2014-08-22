@@ -115,7 +115,7 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
   private Map<Integer,Double> parseResultLine(String resultLine){
     Map<Integer,Double> labelProbMap=new HashMap<Integer, Double>();
     String[] results = resultLine.split("\t");
-    String[] probs = results[2].split(",");
+    String[] probs = results[results.length-1].split(",");
     for(String probStr: probs){
        String[] tokens=probStr.split(":");
        labelProbMap.put(Integer.parseInt(tokens[0]),Double.parseDouble(tokens[1]));
