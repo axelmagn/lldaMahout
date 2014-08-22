@@ -186,6 +186,7 @@ public class CrondInfDriver extends AbstractJob{
     conf.set(LLDADriver.DOC_TOPIC_SMOOTHING,String.valueOf(default_doc_topic_smoothing));
     conf.set(LLDADriver.TERM_TOPIC_SMOOTHING,String.valueOf(default_term_topic_smoothing));
     conf.set(GenerateLDocDriver.RESOURCE_ROOT,getOption(GenerateLDocDriver.RESOURCE_ROOT));
+    conf.set("mapred.map.child.java.opts","-Xss3036k -Xmx4048m");
   }
 
 
