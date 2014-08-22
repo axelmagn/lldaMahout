@@ -288,20 +288,6 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       log.info("termSums: "+builder.toString());
     }
     normByTopicAndMultiByCount(counts,termSums,labels,docTopicModel);
-    if(trainNum%5000==1){
-      StringBuilder builder=new StringBuilder();
-      for(int label: labels){
-        Vector vector=docTopicModel.viewRow(label);
-        Iterator<Vector.Element> iter=vector.iterateNonZero();
-        builder.append("label "+label+"--");
-        while(iter.hasNext()){
-          Vector.Element e=iter.next();
-          builder.append(e.index()+":"+e.get()+" , ");
-        }
-        builder.append("\r\n");
-      }
-      log.info("docTopicModel \r\n"+builder.toString());
-    }
     long t2 = System.nanoTime();
     if (trainNum % 5000 == 1) {
       StringBuilder builder=new StringBuilder();
