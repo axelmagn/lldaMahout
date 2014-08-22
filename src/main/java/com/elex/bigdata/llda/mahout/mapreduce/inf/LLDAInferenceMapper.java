@@ -95,6 +95,11 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     Vector result = modelTrainer.getReadModel().inf(doc.getVector(), labels);
     StringBuilder builder = new StringBuilder();
     Iterator<Element> iter = result.iterateNonZero();
+    builder.append("[");
+    for(int label: doc.getLabels()){
+      builder.append(label+",");
+    }
+    builder.append("]\t");
     while (iter.hasNext()) {
       Element e = iter.next();
       builder.append(e.index() + ":" + e.get() + ",");

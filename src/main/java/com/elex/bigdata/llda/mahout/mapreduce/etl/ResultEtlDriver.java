@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.mapreduce.etl;
 
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -33,6 +34,7 @@ public class ResultEtlDriver extends AbstractJob {
     addOutputOption();
     addOption(LOCAL_RESULT_ROOT, "lrp", "local result output path", "/data/log/user_category_result/pr");
     addOption(RESULT_TIME, "result_time", "specify the inf result time", false);
+    addOption(GenerateLDocDriver.RESOURCE_ROOT,"resource_root","resource root");
     if (parseArguments(args) == null)
       return -1;
     String day;
@@ -56,7 +58,9 @@ public class ResultEtlDriver extends AbstractJob {
     if(!localResultDir.exists())
       localResultDir.mkdirs();
     File localResultFile=new File(localResultDir, hour + "." + index);
-    Job etlJob = prepareJob(getConf(), inputPath, outputPath);
+    Configuration conf=getConf();
+    conf.set(GenerateLDocDriver.RESOURCE_ROOT,getOption(GenerateLDocDriver.RESOURCE_ROOT));
+    Job etlJob = prepareJob(conf, inputPath, outputPath);
     etlJob.waitForCompletion(true);
     Runtime.getRuntime().exec("hadoop fs -getmerge " + outputPath.toString() + " " + localResultFile.toString());
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
