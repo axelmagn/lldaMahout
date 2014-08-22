@@ -3,8 +3,8 @@ baseDir=`dirname $0`/..
 day=`date +%Y%m%d `
 pattern=$1
 echo $pattern
-resultRoot=user_category/lldaMahout/test/docTopics
-localResultRoot=/data0/log/user_category_result/pr/test
+resultRoot=user_category/lldaMahout/docTopics
+localResultRoot=/data0/log/user_category_result/pr/
 echo " hadoop fs -ls url_count/all_projects/clean | grep ${pattern} "
 files=`hadoop fs -ls url_count/all_projects/clean | grep ${pattern} | tr -s " " " " | cut -f8 -d" "`
 echo ${files[@]}
