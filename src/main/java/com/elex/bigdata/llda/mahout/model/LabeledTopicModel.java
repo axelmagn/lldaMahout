@@ -365,10 +365,10 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
         Vector.Element e=iterator.next();
         builder.append(e.index()+":"+e.get()+",");
       }
-      log.info(Thread.currentThread().getName()+"updateNum " + updateNum);
-      log.info(Thread.currentThread().getName()+"topic: "+topic+", termCounts: "+builder.toString());
-      log.info(Thread.currentThread().getName()+"updateTopic: "+topic+"  "+topicTermCounts.viewRow(topic).norm(1.0)+" "+globalTermCounts.norm(1.0)+" docSize "+termCounts.size());
-      log.info(Thread.currentThread().getName()+"updateTopic use : "+(t2-t1)/1000 +" us");
+      log.info(Thread.currentThread().getName()+"  updateNum " + updateNum);
+      log.info(Thread.currentThread().getName()+"  topic: "+topic+", termCounts: "+builder.toString());
+      log.info(Thread.currentThread().getName()+"  updateTopic: "+topic+"  "+topicTermCounts.viewRow(topic).norm(1.0)+" "+globalTermCounts.norm(1.0)+" docSize "+termCounts.size());
+      log.info(Thread.currentThread().getName()+"  updateTopic use : "+(t2-t1)/1000 +" us");
     }
   }
 
