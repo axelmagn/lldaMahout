@@ -2,7 +2,7 @@
 baseDir=`dirname $0`/..
 JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
 MAIN=com.elex.bigdata.llda.mahout.crond.CrondInfDriver
-rootPath=/user/hadoop/user_category/lldaMahout/
+rootPath=/user/hadoop/user_category/lldaMahout
 inputPath=$1
 logFile=/data0/log/user_category/processLog/llda/crondInf.log
 now=`date`
