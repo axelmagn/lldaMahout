@@ -285,15 +285,15 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       StringBuilder builder=new StringBuilder();
       for(int label: labels)
         builder.append(label+",");
-      log.info("trainNum {} ",trainNum );
-      log.info("train use " + (t2 - t1) / (1000) + " us, doc:{} ",counts.toArray() );
-      log.info(Thread.currentThread().getName()+"labels: "+builder.toString());
+      log.info(Thread.currentThread().getName()+"  trainNum {} ",trainNum );
+      log.info(Thread.currentThread().getName()+"  train use " + (t2 - t1) / (1000) + " us, doc:{} ",counts.toArray() );
+      log.info(Thread.currentThread().getName()+"  labels: "+builder.toString());
       StringBuilder builder1=new StringBuilder();
       for( int label: labels){
         builder1.append("label "+label+": sum "+docTopicModel.viewRow(label).norm(1.0)+" , ");
       }
-      log.info(Thread.currentThread().getName()+builder1.toString());
-      log.info("train complete");
+      log.info(Thread.currentThread().getName()+"  "+builder1.toString());
+      log.info(Thread.currentThread().getName()+"  "+"train complete");
     }
   }
 
@@ -339,7 +339,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     long t2=System.nanoTime();
     if(updateNum%5000==1){
       StringBuilder builder=new StringBuilder();
-      for(Vector.Element e: termCounts){
+      Iterator<Vector.Element> iterator = termCounts.iterateNonZero();
+      while(iterator.hasNext()){
+        Vector.Element e=iterator.next();
         builder.append(e.index()+":"+e.get()+",");
       }
       log.info(Thread.currentThread().getName()+"updateNum " + updateNum);
