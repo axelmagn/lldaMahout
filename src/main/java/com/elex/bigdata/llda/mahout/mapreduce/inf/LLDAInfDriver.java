@@ -116,6 +116,7 @@ public class LLDAInfDriver extends AbstractJob{
     conf.set(MODEL_WEIGHT, "1"); // TODO
     conf.set(TEST_SET_FRACTION, String.valueOf(testFraction));
     conf.set(NUM_REDUCE_TASKS,String.valueOf(numReduceTasks));
+    conf.set("mapred.map.child.java.opts","-Xss3036k -Xmx4048m");
     Job infJob=prepareJob(conf,inputPath,topicModelOutputPath,docTopicOutputPath);
     infJob.submit();
     infJob.waitForCompletion(true);
