@@ -282,11 +282,18 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     normByTopicAndMultiByCount(counts,termSums,labels,docTopicModel);
     long t2 = System.nanoTime();
     if (trainNum % 5000 == 1) {
-      log.info("trainNum: "+trainNum );
-      log.info("train use " + (t2 - t1) / (1000) + " us, docSize " + original.size());
+      StringBuilder builder=new StringBuilder();
+      for(int label: labels)
+        builder.append(label+",");
+      log.info("trainNum {} ",trainNum );
+      log.info("train use " + (t2 - t1) / (1000) + " us, doc:{} ",counts.toArray() );
+      log.info(Thread.currentThread().getName()+"labels: "+builder.toString());
+      StringBuilder builder1=new StringBuilder();
       for( int label: labels){
-        log.info("label "+label+" sum "+docTopicModel.viewRow(label).norm(1.0));
+        builder1.append("label "+label+": sum "+docTopicModel.viewRow(label).norm(1.0)+" , ");
       }
+      log.info(Thread.currentThread().getName()+builder1.toString());
+      log.info("train complete");
     }
   }
 
@@ -322,8 +329,6 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       Vector.Element topicTermCount = docTopicElementIter.next();
       int termIndex = topicTermCount.index();
       double count = topicTermCount.get();
-      if(updateNum%5000==1)
-        log.info(termIndex+":"+count);
       topicCountSum += count;
       globalTermCounts.setQuick(termIndex, count + globalTermCounts.getQuick(termIndex));
     }
@@ -333,9 +338,14 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
     long t2=System.nanoTime();
     if(updateNum%5000==1){
-      log.info("updateNum " + updateNum);
-      log.info("updateTopic: "+topicTermCounts.viewRow(topic).norm(1.0)+" "+globalTermCounts.norm(1.0)+" docSize "+termCounts.size());
-      log.info("updateTopic use : "+(t2-t1)/1000 +" us");
+      StringBuilder builder=new StringBuilder();
+      for(Vector.Element e: termCounts){
+        builder.append(e.index()+":"+e.get()+",");
+      }
+      log.info(Thread.currentThread().getName()+"updateNum " + updateNum);
+      log.info(Thread.currentThread().getName()+"topic: "+topic+", termCounts: "+builder.toString());
+      log.info(Thread.currentThread().getName()+"updateTopic: "+topic+"  "+topicTermCounts.viewRow(topic).norm(1.0)+" "+globalTermCounts.norm(1.0)+" docSize "+termCounts.size());
+      log.info(Thread.currentThread().getName()+"updateTopic use : "+(t2-t1)/1000 +" us");
     }
   }
 

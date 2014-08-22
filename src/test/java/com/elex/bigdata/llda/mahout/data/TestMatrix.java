@@ -111,13 +111,8 @@ public class TestMatrix {
       sequencialSparseVector.setQuick(1000-i,i);
     }
     for(Element e: sequencialSparseVector){
-      System.out.print(e.index()+":"+e.get()+",");
+      e.set(e.get()*2+3);
     }
-    System.out.println();
-    sequencialSparseVector.setQuick(10000,1000);
-    sequencialSparseVector.setQuick(10001,1001);
-    sequencialSparseVector.assign(1.0);
-    System.out.println(sequencialSparseVector.getNumNondefaultElements());
-    System.out.println(sequencialSparseVector.getQuick(677));
+    System.out.println("hh");
   }
 }
