@@ -310,10 +310,14 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       log.info(Thread.currentThread().getName()+"  train use " + (t2 - t1) / (1000) + " us, doc:{} ",counts.toArray() );
       log.info(Thread.currentThread().getName()+"  labels: "+builder.toString());
       StringBuilder builder1=new StringBuilder();
+      double allTopicProbSum=0.0;
       for( int label: labels){
-        builder1.append("label "+label+": sum "+docTopicModel.viewRow(label).norm(1.0)+" , ");
+        double topicProb=docTopicModel.viewRow(label).norm(1.0);
+        allTopicProbSum+=topicProb;
+        builder1.append("label "+label+": sum "+topicProb+" , ");
       }
       log.info(Thread.currentThread().getName()+"  "+builder1.toString());
+      log.info(Thread.currentThread().getName()+"  allTopicProbSum "+allTopicProbSum);
       log.info(Thread.currentThread().getName()+"  "+"train complete");
     }
   }
