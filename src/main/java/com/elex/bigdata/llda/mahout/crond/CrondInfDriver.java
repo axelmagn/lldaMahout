@@ -2,6 +2,7 @@ package com.elex.bigdata.llda.mahout.crond;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.mergedocs.MergeLDocDriver;
+import com.elex.bigdata.llda.mahout.data.transferdocs.TransferUidDriver;
 import com.elex.bigdata.llda.mahout.dictionary.Dictionary;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver;
@@ -33,8 +34,9 @@ public class CrondInfDriver extends AbstractJob{
   public static final String MODEL_INPUT="model_input";
   public static final String DOC_ROOT="doc_root";
   public static final String INF_DOC_DIR ="inf";
-  private double default_term_topic_smoothing=0.01;
-  private double default_doc_topic_smoothing=0.2;
+  public static final String PRE_INF_DOC_DIR="pre_inf";
+  private double default_term_topic_smoothing=0.05;
+  private double default_doc_topic_smoothing=0.6;
 
   public CrondInfDriver(){
 
@@ -107,6 +109,7 @@ public class CrondInfDriver extends AbstractJob{
       fs.mkdirs(todayDocsPath);
 
     Path currentDocsPath=new Path(todayDocsPath,Minute+"_"+nextMinute);
+    Path docsPreInfPath=new Path(docsRootPath,PRE_INF_DOC_DIR);
     Path docsForInfPath=new Path(docsRootPath, INF_DOC_DIR);
 
     Path dictRootPath=new Path(getOption(UpdateDictDriver.DICT_ROOT));
@@ -134,11 +137,18 @@ public class CrondInfDriver extends AbstractJob{
     }
 
     conf.set(GenerateLDocDriver.UID_PATH,uidFilePath.toString());
-    Job complementJob= MergeLDocDriver.prepareJob(conf, comJobInputPaths.toArray(new Path[comJobInputPaths.size()]), docsForInfPath);
+    conf.set(MergeLDocDriver.USE_COOKIEID,"cookieId");
+    Job complementJob= MergeLDocDriver.prepareJob(conf, comJobInputPaths.toArray(new Path[comJobInputPaths.size()]), docsPreInfPath);
     ControlledJob controlledComplementJob=new ControlledJob(conf);
     controlledComplementJob.setJob(complementJob);
     controlledComplementJob.addDependingJob(controlledGenJob);
     jobControl.addJob(controlledComplementJob);
+
+    Job transferUidJob= TransferUidDriver.prepareJob(conf,docsPreInfPath,docsForInfPath);
+    ControlledJob controlledTransferUidJob=new ControlledJob(conf);
+    controlledTransferUidJob.setJob(transferUidJob);
+    controlledTransferUidJob.addDependingJob(controlledComplementJob);
+    jobControl.addJob(controlledTransferUidJob);
 
     Path modelInputPath= new Path(getOption(MODEL_INPUT));
     Path docTopicPath= getOutputPath();
@@ -150,7 +160,7 @@ public class CrondInfDriver extends AbstractJob{
     conf.set(LLDADriver.NUM_TERMS,String.valueOf(numTerms));
     ControlledJob controlledInfJob=new ControlledJob(conf);
     controlledInfJob.setJob(infJob);
-    controlledInfJob.addDependingJob(controlledComplementJob);
+    controlledInfJob.addDependingJob(controlledTransferUidJob);
     jobControl.addJob(controlledInfJob);
 
     Thread jcThread=new Thread(jobControl);

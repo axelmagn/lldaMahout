@@ -29,7 +29,7 @@ public class TransferUidDriver extends AbstractJob{
     job.waitForCompletion(true);
     return;
   }
-  public Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
+  public static Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
     FileSystemUtil.deleteOutputPath(conf,outputPath);
     Job job=new Job(conf,"transfer uid "+inputPath.getName());
     job.setJarByClass(TransferUidDriver.class);

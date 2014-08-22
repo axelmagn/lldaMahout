@@ -279,7 +279,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     double[] termSums=new double[terms.size()];
     Arrays.fill(termSums,0.0);
     pTopicGivenTerm(terms, labels, docTopicModel,termSums);
-    if(trainNum%5000 == 1){
+    if(trainNum%20000 == 1){
       log.info(Thread.currentThread().getName()+"  trainNum {} ",trainNum );
       StringBuilder builder=new StringBuilder();
       for(double termSum: termSums){
@@ -289,7 +289,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
     normByTopicAndMultiByCount(counts,termSums,labels,docTopicModel);
     long t2 = System.nanoTime();
-    if (trainNum % 5000 == 1) {
+    if (trainNum % 20000 == 1) {
       StringBuilder builder=new StringBuilder();
       for(int label: labels)
         builder.append(label+",");
@@ -352,7 +352,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
     long t2=System.nanoTime();
-    if(updateNum%5000==1){
+    if(updateNum%20000==1){
       StringBuilder builder=new StringBuilder();
       Iterator<Vector.Element> iterator = termCounts.iterateNonZero();
       while(iterator.hasNext()){
