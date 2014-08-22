@@ -279,13 +279,34 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     double[] termSums=new double[terms.size()];
     Arrays.fill(termSums,0.0);
     pTopicGivenTerm(terms, labels, docTopicModel,termSums);
+    if(trainNum%5000 == 1){
+      log.info(Thread.currentThread().getName()+"  trainNum {} ",trainNum );
+      StringBuilder builder=new StringBuilder();
+      for(double termSum: termSums){
+        builder.append(termSum+" , ");
+      }
+      log.info("termSums: "+builder.toString());
+    }
     normByTopicAndMultiByCount(counts,termSums,labels,docTopicModel);
+    if(trainNum%5000==1){
+      StringBuilder builder=new StringBuilder();
+      for(int label: labels){
+        Vector vector=docTopicModel.viewRow(label);
+        Iterator<Vector.Element> iter=vector.iterateNonZero();
+        builder.append("label "+label+"--");
+        while(iter.hasNext()){
+          Vector.Element e=iter.next();
+          builder.append(e.index()+":"+e.get()+" , ");
+        }
+        builder.append("\r\n");
+      }
+      log.info("docTopicModel \r\n"+builder.toString());
+    }
     long t2 = System.nanoTime();
     if (trainNum % 5000 == 1) {
       StringBuilder builder=new StringBuilder();
       for(int label: labels)
         builder.append(label+",");
-      log.info(Thread.currentThread().getName()+"  trainNum {} ",trainNum );
       log.info(Thread.currentThread().getName()+"  train use " + (t2 - t1) / (1000) + " us, doc:{} ",counts.toArray() );
       log.info(Thread.currentThread().getName()+"  labels: "+builder.toString());
       StringBuilder builder1=new StringBuilder();
