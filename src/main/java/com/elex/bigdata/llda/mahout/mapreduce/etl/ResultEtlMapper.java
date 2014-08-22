@@ -91,6 +91,11 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
        context.write(new Text(uid),new Text(String.valueOf(0)));
        context.write(new Text(uid.toUpperCase()),new Text(String.valueOf(0)));
     }else {
+       if(!destParentLabels.contains(maxProbParentLabel)){
+         context.write(new Text(uid),new Text(String.valueOf(0)));
+         context.write(new Text(uid.toUpperCase()),new Text(String.valueOf(0)));
+         return;
+       }
        int[] labels=parent2ChildLabels.get(maxProbParentLabel);
        int maxProbChildLabel=0;
        maxProbValue=new Double(0.0);
