@@ -9,6 +9,7 @@ import org.apache.mahout.math.AbstractMatrix;
 import org.apache.mahout.math.DenseVector;
 import org.apache.mahout.math.Matrix;
 import org.apache.mahout.math.Vector;
+import org.apache.mahout.math.function.Functions;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -29,6 +30,7 @@ public class TestEstimator {
   private Vector topicSums=pair.getSecond();
   private double eta=0.02;
   private double alpha=0.3;
+  private int[] topics=new int[]{0,1,2,3,4,7,8,10};
   @Test
   public void testTrain(){
      List<Integer> terms=new ArrayList<Integer>();
@@ -44,6 +46,46 @@ public class TestEstimator {
      pTopicGivenTerm(terms,labels,matrix,termSums);
      normByTopicAndMultiByCount(counts,termSums,labels,matrix);
      System.out.println("hh");
+  }
+
+  @Test
+  public void testInf(){
+    List<Integer> terms=new ArrayList<Integer>();
+    List<Double> counts=new ArrayList<Double>();
+    for(int i=0;i<10;i++)
+    {
+      terms.add(i);
+      counts.add(new Double(i*10+1));
+    }
+    int[] labels=new int[]{0,2,4,8};
+    Vector result=inf(counts,terms,labels);
+    System.out.println("hh");
+    System.out.println(result.norm(1));
+    StringBuilder builder=new StringBuilder();
+    Iterator<Vector.Element> iter = result.iterateNonZero();
+    while (iter.hasNext()) {
+      Vector.Element e = iter.next();
+      builder.append(e.index() + ":" + e.get() + ",");
+    }
+    System.out.println(builder.toString());
+  }
+
+  public Vector inf(List<Double> counts,List<Integer> terms, int[] labels) {
+    Matrix docTopicTermDist = new SparseRowSqSparseColumnMatrix(20, 10);
+    double[] termSums=new double[counts.size()];
+    pTopicGivenTerm(terms, labels, docTopicTermDist,termSums);
+    normByTopicAndMultiByCount(counts,termSums,labels,docTopicTermDist);
+    Vector result = new DenseVector(20);
+    double docTermCount=0.0;
+    for(Double count: counts){
+       docTermCount+=count;
+    }
+    for (int topic : topics) {
+      result.set(topic, (docTopicTermDist.viewRow(topic).norm(1) + alpha) / (docTermCount + 100*1000 * alpha));
+    }
+    System.out.println(result.norm(1));
+    result.assign(Functions.mult(1 / result.norm(1)));
+    return result;
   }
   private void normByTopicAndMultiByCount(List<Double> counts, double[] termSums,int[] labels,Matrix perTopicSparseDistributions) {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1

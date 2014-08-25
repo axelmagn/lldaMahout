@@ -33,6 +33,8 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
   private LabeledTopicModel readModel;
   private LabeledTopicModel writeModel;
   private int[] topics;
+  private int sampleRatio=10000;
+  private int numUid=0;
 
   protected LabeledModelTrainer getModelTrainer() {
     return modelTrainer;
@@ -106,6 +108,11 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
     }
     builder.deleteCharAt(builder.length() - 1);
     context.write(uid, new Text(builder.toString()));
+    numUid++;
+    if(numUid%10000==0){
+      log.info("result norm(1.0) is "+result.norm(1.0));
+      log.info("result is "+builder.toString());
+    }
   }
 
   @Override
