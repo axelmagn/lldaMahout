@@ -81,7 +81,7 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
     Integer maxProbParentLabel = 0;
     Double maxProbValue = new Double(0.0);
     for (Map.Entry<Integer, Double> entry : parentLabelProbMap.entrySet()) {
-      if (entry.getValue() > maxProbValue) {
+      if (destParentLabels.contains(entry.getKey()) && entry.getValue() > maxProbValue) {
         maxProbParentLabel = entry.getKey();
         maxProbValue = entry.getValue();
       }
@@ -102,13 +102,17 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
         maxProbValue = probValue;
       }
     }
-    if (maxProbValue < 1 / ((double) labelProbMap.size()*2)) {
+    if (maxProbValue < 1 / ((double) labelProbMap.size() * 2)) {
+      context.write(new Text(uid), new Text(String.valueOf(0)));
+      context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(0)));
+    } else if (maxProbValue < 1 / ((double) labelProbMap.size())) {
       context.write(new Text(uid), new Text(String.valueOf(maxProbParentLabel)));
       context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(maxProbParentLabel)));
     } else {
       context.write(new Text(uid), new Text(String.valueOf(maxProbChildLabel)));
       context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(maxProbChildLabel)));
     }
+
   }
 
   private Map<Integer, Double> parseResultLine(String resultLine) {
