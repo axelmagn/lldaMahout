@@ -102,9 +102,9 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
         maxProbValue = probValue;
       }
     }
-    if (maxProbValue < 1 / ((double) labelProbMap.size()*1.5)) {
-      context.write(new Text(uid), new Text(String.valueOf(0)));
-      context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(0)));
+    if (maxProbValue < 1 / ((double) labelProbMap.size()*2)) {
+      context.write(new Text(uid), new Text(String.valueOf(maxProbParentLabel)));
+      context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(maxProbParentLabel)));
     } else {
       context.write(new Text(uid), new Text(String.valueOf(maxProbChildLabel)));
       context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(maxProbChildLabel)));
