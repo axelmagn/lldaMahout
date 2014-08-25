@@ -75,24 +75,24 @@ public class PrefixTrie {
 
   public int prefixSearch(String word) {
     Node current = root;
-
+    int category=-1;
     for (int i = 0; i < word.length(); i++) {
       char letter = word.charAt(i);
       if (letter >= 48 && letter <= 57) {
         current = current.subNode((int) letter - 48);
         if (current == null)
-          return -1;
+          return category;
         else if (current.category != -1)
-          return current.category;
+          category=current.category;
       } else if (letter >= 97 && letter <= 122) {
         current = current.subNode((int) letter - 97);
         if (current == null)
-          return -1;
+          return category;
         else if (current.category != -1)
-          return current.category;
+          category=current.category;
       }
     }
-    return current.category;
+    return category;
   }
 
   public void deleteWord(String word) {
