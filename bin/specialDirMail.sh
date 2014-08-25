@@ -1,5 +1,5 @@
 #!/bin/bash
-resultRoot=/data0/log/user_category_result/pr/test
+resultRoot=/data0/log/user_category_result/pr
 day=$1
 resultDir=${resultRoot}/${day}
 resultFile=${resultDir}/result
