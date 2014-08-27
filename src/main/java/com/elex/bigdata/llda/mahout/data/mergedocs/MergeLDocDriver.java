@@ -89,7 +89,10 @@ public class MergeLDocDriver extends AbstractJob {
     job.setOutputValueClass(MultiLabelVectorWritable.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
     SequenceFileOutputFormat.setOutputPath(job,outputPath);
-    job.setJobName("merge docs");
+    StringBuilder builder=new StringBuilder();
+    for(Path inputPath: inputPaths)
+      builder.append(inputPath.toString()+":");
+    job.setJobName("merge docs "+builder.toString());
     job.setJarByClass(MergeLDocDriver.class);
     return job;
   }
