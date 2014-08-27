@@ -335,7 +335,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   public void updateTopic(int topic, Vector termCounts) {
     //log.info("get iterateNonZero");
-    long t1=System.nanoTime();
+    //long t1=System.nanoTime();
     Iterator<Vector.Element> docTopicElementIter = termCounts.iterateNonZero();
     //log.info("got iterateNonZero");
     Vector globalTermCounts = topicTermCounts.viewRow(topic);
@@ -351,7 +351,9 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     //topicTermCounts.assignRow(topic, globalTermCounts);
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
+    /*
     long t2=System.nanoTime();
+
     if(updateNum%100000==1){
       StringBuilder builder=new StringBuilder();
       Iterator<Vector.Element> iterator = termCounts.iterateNonZero();
@@ -363,7 +365,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       log.info(Thread.currentThread().getName()+"  topic: "+topic+", termCounts: "+builder.toString());
       log.info(Thread.currentThread().getName()+"  updateTopic: "+topic+"  "+topicTermCounts.viewRow(topic).norm(1.0)+" "+globalTermCounts.norm(1.0)+" docSize "+termCounts.size());
       log.info(Thread.currentThread().getName()+"  updateTopic use : "+(t2-t1)/1000 +" us");
-    }
+    }*/
   }
 
   public void update(int termId, Vector topicCounts) {
