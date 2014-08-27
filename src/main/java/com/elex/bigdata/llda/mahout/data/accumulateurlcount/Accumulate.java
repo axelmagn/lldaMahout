@@ -242,7 +242,10 @@ public class Accumulate extends AbstractJob {
         }
         String game = Bytes.toString(Arrays.copyOfRange(rk, 11, index));
         String uid = Bytes.toString(Arrays.copyOfRange(rk, index + 1, rk.length));
-        String url = urlPre + File.separator + Bytes.toString(result.getValue(familyBytes, lanBytes)).substring(0, 2) +
+        String lan=Bytes.toString(result.getValue(familyBytes, lanBytes));
+        if(lan.length()>2)
+          lan=lan.substring(0,2);
+        String url = urlPre + File.separator + lan +
           File.separator + gt2Url.get(Bytes.toString(result.getValue(familyBytes, gtBytes))) + File.separator +
           game;
         kvSize++;
