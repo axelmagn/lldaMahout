@@ -352,7 +352,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     //log.info("topic: {}; docTopicCounts: {}", new Object[]{topic, builder.toString()});
     topicSums.setQuick(topic, topicSums.getQuick(topic) + topicCountSum);
     long t2=System.nanoTime();
-    if(updateNum%20000==1){
+    if(updateNum%100000==1){
       StringBuilder builder=new StringBuilder();
       Iterator<Vector.Element> iterator = termCounts.iterateNonZero();
       while(iterator.hasNext()){
