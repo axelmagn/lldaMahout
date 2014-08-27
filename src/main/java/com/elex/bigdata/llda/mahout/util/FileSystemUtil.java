@@ -24,11 +24,11 @@ public class FileSystemUtil {
 
   public static long getLen(FileSystem fs, Path path) throws IOException {
     FileStatus[] totalStatus = fs.globStatus(path);
-    if (totalStatus.length>1 || !totalStatus[0].getPath().getName().equals(path.getName())) {
-      long len=0l;
-      for(FileStatus status: totalStatus){
+    if (totalStatus.length > 1 || !totalStatus[0].getPath().getName().equals(path.getName())) {
+      long len = 0l;
+      for (FileStatus status : totalStatus) {
         System.out.println(status.getPath().toString());
-        len+=getLen(fs,status.getPath());
+        len += getLen(fs, status.getPath());
       }
       return len;
     } else {
@@ -44,31 +44,55 @@ public class FileSystemUtil {
       }
     }
   }
-  public static void setCombineInputSplitSize(Configuration conf,Path inputPath) throws IOException {
-    JobClient jobClient=new JobClient(conf);
-    ClusterStatus clusterStatus=jobClient.getClusterStatus();
-    int maxMapTaskNum=clusterStatus.getMaxMapTasks();
-    System.out.println("max Map Task Num "+maxMapTaskNum);
-    long totalSize= FileSystemUtil.getLen(conf,inputPath);
-    System.out.println("total input Size "+totalSize);
-    long maxSplitSize=totalSize/maxMapTaskNum;
-    System.out.println("mapred.max.split.size "+maxSplitSize);
+
+  public static void setCombineInputSplitSize(Configuration conf, Path inputPath) throws IOException {
+    JobClient jobClient = new JobClient(conf);
+    ClusterStatus clusterStatus = jobClient.getClusterStatus();
+    int maxMapTaskNum = clusterStatus.getMaxMapTasks();
+    System.out.println("max Map Task Num " + maxMapTaskNum);
+    long totalSize = FileSystemUtil.getLen(conf, inputPath);
+    System.out.println("total input Size " + totalSize);
+    long maxSplitSize = totalSize / maxMapTaskNum;
+    System.out.println("mapred.max.split.size " + maxSplitSize);
     conf.setLong("mapred.max.split.size", maxSplitSize); // 1G
     conf.setLong("mapreduce.input.fileinputformat.split.maxsize", maxSplitSize);
-    long minSplitSizePerNode=maxSplitSize/2;
-    System.out.println("mapred.min.split.size.per.node "+minSplitSizePerNode);
-    conf.setLong("mapred.min.split.size.per.node",minSplitSizePerNode);
-    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node",minSplitSizePerNode);
-    long minSplitSizePerRack=(maxSplitSize/3)*2;
-    System.out.println("mapred.min.split.size.per.rack "+minSplitSizePerRack);
-    conf.setLong("mapred.min.split.size.per.rack",minSplitSizePerRack);
-    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack",minSplitSizePerRack);
+    long minSplitSizePerNode = maxSplitSize / 2;
+    System.out.println("mapred.min.split.size.per.node " + minSplitSizePerNode);
+    conf.setLong("mapred.min.split.size.per.node", minSplitSizePerNode);
+    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node", minSplitSizePerNode);
+    long minSplitSizePerRack = (maxSplitSize / 3) * 2;
+    System.out.println("mapred.min.split.size.per.rack " + minSplitSizePerRack);
+    conf.setLong("mapred.min.split.size.per.rack", minSplitSizePerRack);
+    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack", minSplitSizePerRack);
   }
 
-  public static void deleteOutputPath(Configuration conf,Path outputPath) throws IOException {
-    FileSystem fs=FileSystem.get(conf);
-    if(fs.exists(outputPath))
-      fs.delete(outputPath,true);
+  public static void setCombineInputSplitSize(Configuration conf, Path[] inputPaths) throws IOException {
+    JobClient jobClient = new JobClient(conf);
+    ClusterStatus clusterStatus = jobClient.getClusterStatus();
+    int maxMapTaskNum = clusterStatus.getMaxMapTasks();
+    System.out.println("max Map Task Num " + maxMapTaskNum);
+    long totalSize = 0;
+    for (Path inputPath : inputPaths)
+      totalSize += FileSystemUtil.getLen(conf, inputPath);
+    System.out.println("total input Size " + totalSize);
+    long maxSplitSize = totalSize / maxMapTaskNum;
+    System.out.println("mapred.max.split.size " + maxSplitSize);
+    conf.setLong("mapred.max.split.size", maxSplitSize); // 1G
+    conf.setLong("mapreduce.input.fileinputformat.split.maxsize", maxSplitSize);
+    long minSplitSizePerNode = maxSplitSize / 2;
+    System.out.println("mapred.min.split.size.per.node " + minSplitSizePerNode);
+    conf.setLong("mapred.min.split.size.per.node", minSplitSizePerNode);
+    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.node", minSplitSizePerNode);
+    long minSplitSizePerRack = (maxSplitSize / 3) * 2;
+    System.out.println("mapred.min.split.size.per.rack " + minSplitSizePerRack);
+    conf.setLong("mapred.min.split.size.per.rack", minSplitSizePerRack);
+    conf.setLong("mapreduce.input.fileinputformat.split.minsize.per.rack", minSplitSizePerRack);
+  }
+
+  public static void deleteOutputPath(Configuration conf, Path outputPath) throws IOException {
+    FileSystem fs = FileSystem.get(conf);
+    if (fs.exists(outputPath))
+      fs.delete(outputPath, true);
   }
 
 }

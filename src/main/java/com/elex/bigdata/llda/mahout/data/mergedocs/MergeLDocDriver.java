@@ -1,7 +1,9 @@
 package com.elex.bigdata.llda.mahout.data.mergedocs;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
+import com.elex.bigdata.llda.mahout.data.inputformat.CombineSqInputFormat;
 import com.elex.bigdata.llda.mahout.math.SequencialSparseVector;
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -69,6 +71,7 @@ public class MergeLDocDriver extends AbstractJob {
   }
 
   public static Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath) throws IOException {
+    FileSystemUtil.setCombineInputSplitSize(conf,inputPaths);
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(outputPath))
       fs.delete(outputPath,true);
@@ -81,7 +84,7 @@ public class MergeLDocDriver extends AbstractJob {
     }
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(MultiLabelVectorWritable.class);
-    job.setInputFormatClass(SequenceFileInputFormat.class);
+    job.setInputFormatClass(CombineSqInputFormat.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(MultiLabelVectorWritable.class);
     job.setOutputFormatClass(SequenceFileOutputFormat.class);
