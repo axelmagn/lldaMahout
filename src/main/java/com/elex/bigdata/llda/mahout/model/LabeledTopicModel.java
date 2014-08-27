@@ -199,10 +199,10 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     for (Pair<Integer, Vector> pair : rows) {
       int topic = pair.getFirst();
       model.assignRow(topic, pair.getSecond());
-      System.out.println("topic:" + topic + ",sum:" + pair.getSecond().norm(1.0));
+      //System.out.println("topic:" + topic + ",sum:" + pair.getSecond().norm(1.0));
       double sum = model.viewRow(topic).norm(1.0);
       topicSums.setQuick(topic, sum);
-      log.info("topic " + topic + " sum: " + sum);
+      //log.info("topic " + topic + " sum: " + sum);
     }
     //assert model.rowSize()>100;
     return Pair.of(model, topicSums);
@@ -279,7 +279,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     double[] termSums=new double[terms.size()];
     Arrays.fill(termSums,0.0);
     pTopicGivenTerm(terms, labels, docTopicModel,termSums);
-    if(trainNum%20000 == 1){
+    if(trainNum%100000 == 1){
       log.info(Thread.currentThread().getName()+"  trainNum {} ",trainNum );
       StringBuilder builder=new StringBuilder();
       for(double termSum: termSums){
@@ -289,7 +289,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
     normByTopicAndMultiByCount(counts,termSums,labels,docTopicModel);
     long t2 = System.nanoTime();
-    if (trainNum % 20000 == 1) {
+    if (trainNum % 100000 == 1) {
       StringBuilder builder=new StringBuilder();
       for(int label: labels)
         builder.append(label+",");
