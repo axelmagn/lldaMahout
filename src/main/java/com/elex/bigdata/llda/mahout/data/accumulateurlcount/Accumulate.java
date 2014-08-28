@@ -118,6 +118,7 @@ public class Accumulate extends AbstractJob {
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
     job.setOutputFormatClass(TextOutputFormat.class);
+    job.setNumReduceTasks(4);
     FileOutputFormat.setOutputPath(job, outputPath);
     job.setJarByClass(Accumulate.class);
     return job;
