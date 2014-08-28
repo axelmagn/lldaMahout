@@ -60,6 +60,12 @@ public class AccumulateMapper extends TableMapper<Text,Text>{
     }
   }
 
+  public void cleanup(Context context) throws IOException, InterruptedException {
+    for(Map.Entry<UidWord,Integer> entry: uidWord2Count.entrySet()){
+      context.write(new Text(entry.getKey().toString()),new Text(String.valueOf(entry.getValue())));
+    }
+  }
+
   private static class UidWord{
     private String uid;
     private String word;
