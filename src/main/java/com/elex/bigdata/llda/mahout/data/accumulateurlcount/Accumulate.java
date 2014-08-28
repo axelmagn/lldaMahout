@@ -111,7 +111,7 @@ public class Accumulate extends AbstractJob {
     Path outputPath=new Path(output,tableName);
     FileSystemUtil.deleteOutputPath(conf,outputPath);
     conf.set(TABLE_TYPE,tabletype.getClass().getName());
-    Job job=new Job(conf,"accumulate "+tableName+" "+outputPath.getName());
+    Job job=new Job(conf,"accumulate "+tableName+" "+outputPath.toString());
     Scan scan=tabletype.getScan(startTime,endTime);
     TableMapReduceUtil.initTableMapperJob(tableName, scan, AccumulateMapper.class, Text.class, IntWritable.class, job);
     job.setReducerClass(AccumulateReducer.class);
