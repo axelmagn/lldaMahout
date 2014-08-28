@@ -79,17 +79,23 @@ public class Accumulate extends AbstractJob {
     if (parseArguments(args) == null)
       return -1;
     init(getOption(OUTPUT_BASE), getOption(STARTTIME), getOption(ENDTIME));
+    /*
     JobControl jobControl=new JobControl("accumulate "+startTimeStamp+" "+endTimeStamp);
     ControlledJob preJob=null;
+    */
     for(Map.Entry<String,SuperTable> entry: table2Type.entrySet()){
       Job job=prepareJob(entry.getKey(),entry.getValue(),startTimeStamp,endTimeStamp);
-      ControlledJob currentJob=new ControlledJob(conf);
+      job.submit();
+      job.waitForCompletion(true);
+      /*ControlledJob currentJob=new ControlledJob(conf);
       currentJob.setJob(job);
       if(preJob!=null)
         currentJob.addDependingJob(preJob);
       preJob=currentJob;
       jobControl.addJob(preJob);
+      */
     }
+    /*
     jobControl.run();
     Thread jcThread=new Thread(jobControl);
     jcThread.start();
@@ -104,7 +110,8 @@ public class Accumulate extends AbstractJob {
         jobControl.stop();
         return 1;
       }
-    }
+    }*/
+    return 0;
   }
 
   public Job prepareJob(String tableName,SuperTable tabletype,long startTime,long endTime) throws IOException, ClassNotFoundException, InterruptedException {
