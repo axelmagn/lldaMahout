@@ -1,5 +1,7 @@
 package com.elex.bigdata.llda.mahout.data.accumulateurlcount;
 
+import com.elex.bigdata.llda.mahout.data.accumulateurlcount.tables.*;
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import com.elex.bigdata.util.MetricMapping;
 import com.xingcloud.xa.hbase.filter.SkipScanFilter;
 import com.xingcloud.xa.hbase.model.KeyRange;
@@ -11,7 +13,13 @@ import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.mapreduce.TableMapReduceUtil;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
+import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
@@ -33,26 +41,18 @@ import java.util.concurrent.TimeUnit;
  * To change this template use File | Settings | File Templates.
  */
 public class Accumulate extends AbstractJob {
-  String outputBase;
-  String startTime;
-  String endTime;
+  String outputBase,output;
   private long startTimeStamp, endTimeStamp;
 
-  private ExecutorService service = new ThreadPoolExecutor(3, 8, 10, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(20));
-  private FileSystem fs;
-  private HBaseAdmin admin;
   private Configuration conf;
   // Option string
   private static String OUTPUT_BASE = "outputBase";
   private static String STARTTIME = "startTime";
   private static String ENDTIME = "endTime";
+  public static String TABLE_TYPE="table_type";
 
   private static final String[] CustomTables = new String[]{"dmp_user_action", "yac_user_action"};
-
-
-  private static PutUrlCount putUrlCount = null;
-  private int kvSizeBatch=500000;
-
+  private static final String TABLE_NAV="nav_all",TABLE_AD="ad_all_log",TABLE_GM337="gm_user_action";
   public Accumulate() {
 
   }
@@ -63,263 +63,14 @@ public class Accumulate extends AbstractJob {
 
   private void init(String outputBase, String startTime, String endTime) throws ParseException, IOException {
     this.outputBase = outputBase;
-    this.startTime = startTime;
-    this.endTime = endTime;
+    output=outputBase+File.separator+startTime+"_"+endTime;
     SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
     startTimeStamp = dateFormat.parse(startTime).getTime();
     endTimeStamp = dateFormat.parse(endTime).getTime();
     conf = HBaseConfiguration.create();
-    fs = FileSystem.get(conf);
-    admin = new HBaseAdmin(conf);
-    putUrlCount = new PutUrlCount(fs);
-  }
-
-  private class CustomTableGetter {
-    private String tableName;
-    private final String[] families = {"ua"};
-    private final String ACTION = "a", URL = "url", DURATION = "d", PROJECT_AREA = "pa", PROJECT = "p", PLUG_CATEGORY = "cat", ORIG_URL = "ou";
-    private final int UID_INDEX = 9;
-
-    public CustomTableGetter(String tableName) {
-      this.tableName = tableName;
-    }
-
-    public void getUrls() throws IOException {
-      if (!admin.tableExists(tableName))
-        return;
-      HTable hTable = new HTable(conf, tableName);
-      Scan scan = new Scan();
-      byte[] startRk = Bytes.add(Bytes.toBytesBinary("\\x01"), Bytes.toBytes(startTimeStamp));
-      byte[] endRk = Bytes.add(Bytes.toBytesBinary("\\x01"), Bytes.toBytes(endTimeStamp));
-      System.out.println("start: " + Bytes.toStringBinary(startRk) + ", end: " + Bytes.toStringBinary(endRk));
-      scan.setStartRow(startRk);
-      scan.setStopRow(endRk);
-      scan.addColumn(Bytes.toBytes(families[0]), Bytes.toBytes(URL));
-      int cacheSize = 10000;
-      scan.setBatch(10);
-      scan.setCaching(cacheSize);
-      ResultScanner scanner = hTable.getScanner(scan);
-      int kvSize = 0;
-      Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
-      long transferCost = 0, processCost = 0, t1 = System.currentTimeMillis();
-      for (Result result : scanner) {
-        for (KeyValue kv : result.raw()) {
-          long t2 = System.currentTimeMillis();
-          byte[] rk = kv.getRow();
-          String uid = Bytes.toString(Arrays.copyOfRange(rk, UID_INDEX, rk.length));
-          String url = Bytes.toString(kv.getValue());
-          if (url.startsWith("http://"))
-            url = url.substring(7);
-          if (url.startsWith("https://"))
-            url = url.substring(8);
-          if (url.endsWith("/"))
-            url = url.substring(0, url.length() - 1);
-          kvSize++;
-          accumulateUrlCount(uid, url, 1, uidUrlCountMap, kvSize, tableName.split("_")[0]);
-          if (kvSize >= kvSizeBatch)
-            kvSize = 0;
-          processCost += (System.currentTimeMillis() - t2);
-        }
-      }
-      long totalCost = System.currentTimeMillis() - t1;
-      System.out.println("process cost " + processCost + " ms; transfer cost " + (totalCost - transferCost) + " ms");
-
-      putToHdfs(uidUrlCountMap, tableName.split("_")[0]);
-    }
-  }
-
-  private class NavTableGetter {
-    private final String tableName = "nav_all";
-    private final String[] families = {"basis", "extend"};
-    private final String URL = "url", IP = "ip", CONTENT = "content";
-    private final int UID_INDEX_NAV = 17;
-
-    public NavTableGetter() {
-    }
-
-    public void getUrls() throws IOException {
-      if (!admin.tableExists(tableName))
-        return;
-      HTable hTable = new HTable(conf, tableName);
-      Map<String, List<String>> familyColumns = new HashMap<String, List<String>>();
-      List<String> columns = new ArrayList<String>();
-      columns.add(URL);
-      familyColumns.put(families[0], columns);
-      ResultScanner scanner = hTable.getScanner(getScan(familyColumns, false));
-      int kvSize = 0;
-      Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
-      for (Result result : scanner) {
-        for (KeyValue kv : result.raw()) {
-          byte[] rk = kv.getRow();
-          String uid = Bytes.toString(Arrays.copyOfRange(rk, UID_INDEX_NAV, rk.length));
-          String url = Bytes.toString(kv.getValue());
-
-          kvSize++;
-          accumulateUrlCount(uid, url, 2, uidUrlCountMap, kvSize, tableName.split("_")[0]);
-          if (kvSize >= kvSizeBatch)
-            kvSize = 0;
-        }
-        putToHdfs(uidUrlCountMap, tableName.split("_")[0]);
-      }
-    }
-  }
-
-  private class AdTableGetter {
-    private final String tableName = "ad_all_log";
-    private final String[] families = {"basis", "h"};
-    private final String TITLE = "title", CATEGORY = "c";
-    private final int UID_INDEX = 11;
-    private String jogosUrl = "www.jogos.com", comprasUrl = "www.compras.com", otherUrl = "www.other.com",
-      friendsUrl = "www.friends.com", tourismUrl = "www.tourism.com";
-
-    public void getUrls() throws IOException {
-      if (!admin.tableExists(tableName))
-        return;
-      HTable hTable = new HTable(conf, tableName);
-      Map<String, List<String>> familyColumns = new HashMap<String, List<String>>();
-      List<String> columns = new ArrayList<String>();
-      columns.add(CATEGORY);
-      familyColumns.put(families[0], columns);
-      ResultScanner scanner = hTable.getScanner(getScan(familyColumns, true));
-
-      byte[] family = Bytes.toBytes(families[0]);
-      byte[] categoryColumn = Bytes.toBytes(CATEGORY);
-      Map<Integer, String> categoryToUrlMap = new HashMap<Integer, String>();
-      categoryToUrlMap.put(new Integer(0), otherUrl);
-      categoryToUrlMap.put(new Integer(1), jogosUrl);
-      categoryToUrlMap.put(new Integer(2), comprasUrl);
-      categoryToUrlMap.put(new Integer(3), friendsUrl);
-      categoryToUrlMap.put(new Integer(4), tourismUrl);
-      categoryToUrlMap.put(new Integer(99), otherUrl);
-      Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
-      int kvSize = 0;
-      for (Result result : scanner) {
-        byte[] rk = result.getRow();
-        String uid = Bytes.toString(Arrays.copyOfRange(rk, UID_INDEX, rk.length));
-        int category = Integer.parseInt(Bytes.toString(result.getValue(family, categoryColumn)));
-        String url = categoryToUrlMap.get(category);
-        kvSize++;
-        accumulateUrlCount(uid, url, 8, uidUrlCountMap, kvSize, tableName.split("_")[0]);
-        if (kvSize >= kvSizeBatch)
-          kvSize = 0;
-      }
-      putToHdfs(uidUrlCountMap, tableName.split("_")[0]);
-    }
-  }
-
-  private class Gm337TableGetter {
-    private String tableName = "gm_user_action";
-    private String family = "ua";
-    private String LAN = "l", GAME_TYPE = "gt";
-    private int index = 0;
-    private String urlPre = "www.337.com";
-    private Map<String, String> gt2Url = new HashMap<String, String>();
-
-    public Gm337TableGetter() {
-      gt2Url.put("web", "webgameplay");
-      gt2Url.put("mini", "minigame/play");
-    }
-
-    public void getUrls() throws IOException {
-      if (!admin.tableExists(tableName))
-        return;
-      HTable hTable = new HTable(conf, tableName);
-      Scan scan = new Scan();
-      byte[] familyBytes = Bytes.toBytes(family), lanBytes = Bytes.toBytes(LAN), gtBytes = Bytes.toBytes(GAME_TYPE);
-      scan.addColumn(familyBytes, lanBytes);
-      scan.addColumn(familyBytes, gtBytes);
-      scan.setStartRow(Bytes.add(Bytes.toBytes("pl"), Bytes.toBytes(startTimeStamp)));
-      scan.setStopRow(Bytes.add(Bytes.toBytes("pl"), Bytes.toBytes(endTimeStamp)));
-      ResultScanner scanner = hTable.getScanner(scan);
-      Map<String, Map<String, Integer>> uidUrlCountMap = new HashMap<String, Map<String, Integer>>();
-      int kvSize = 0;
-      for (Result result : scanner) {
-        byte[] rk = result.getRow();
-        for (index = 11; index < rk.length; index++) {
-          if (rk[index] == 1) {
-            break;
-          }
-        }
-        String game = Bytes.toString(Arrays.copyOfRange(rk, 11, index));
-        String uid = Bytes.toString(Arrays.copyOfRange(rk, index + 1, rk.length));
-        String lan=Bytes.toString(result.getValue(familyBytes, lanBytes));
-        if(lan.length()>2)
-          lan=lan.substring(0,2);
-        String url = urlPre + File.separator + lan +
-          File.separator + gt2Url.get(Bytes.toString(result.getValue(familyBytes, gtBytes))) + File.separator +
-          game;
-        kvSize++;
-        accumulateUrlCount(uid, url, 2, uidUrlCountMap, kvSize, tableName.split("_")[0]);
-        if (kvSize >= kvSizeBatch)
-          kvSize = 0;
-      }
-      putToHdfs(uidUrlCountMap, tableName.split("_")[0]);
-    }
-  }
-
-  private void accumulateUrlCount(String uid, String url, int urlCount, Map<String, Map<String, Integer>> uidUrlCountMap, int kvSize, String tableName) throws IOException {
-    Map<String, Integer> urlCountMap = uidUrlCountMap.get(uid);
-    if (urlCountMap == null) {
-      urlCountMap = new HashMap<String, Integer>();
-      uidUrlCountMap.put(uid, urlCountMap);
-    }
-    Integer count = urlCountMap.get(url);
-    if (count == null)
-      urlCountMap.put(url, urlCount);
-    else
-      urlCountMap.put(url, count + urlCount);
-    if (kvSize >= kvSizeBatch) {
-      System.out.println("put to hdfs");
-      putToHdfs(uidUrlCountMap, tableName);
-      uidUrlCountMap.clear();
-    }
-  }
-
-
-  private void putToHdfs(Map<String, Map<String, Integer>> urlCountMap, String flag) throws IOException {
-    Path filePath = getFinalPath(flag);
-    service.execute(putUrlCount.getRunnable(filePath, urlCountMap));
-  }
-
-  /*
-  private Path getOutputPath(String project, String flag) throws IOException {
-
-    Path parentDir = new Path(outputBase + File.separator + project + File.separator + startTime + "_" + endTime);
-    if (!fs.exists(parentDir)) {
-      fs.mkdirs(parentDir);
-    }
-    Path outputFile = new Path(parentDir, "part-" + flag);
-    return outputFile;
-  }
-  */
-  private Path getFinalPath(String flag) throws IOException {
-    Path parentDir = new Path(outputBase + File.separator + startTime + "_" + endTime);
-    if (!fs.exists(parentDir)) {
-      fs.mkdirs(parentDir);
-    }
-    Path outputFile = new Path(parentDir, "part-" + flag);
-    return outputFile;
-  }
-
-  public void shutdown() throws InterruptedException {
-    service.shutdown();
-    service.awaitTermination(10, TimeUnit.MINUTES);
   }
 
   public static void main(String[] args) throws Exception {
-    /*input has output Path(named with day(hour(minute)))
-      if has the second arg,then it is the startTime.the Time should be format of 'yyyyMMddHHmmss';
-      if not then set the endTime to currentTime. and the start time should be set to scanUnit before it.
-    */
-    /*
-      first get the length of args.
-      if the length <1 or >2 then return;
-      if the length =1 then set the endTime and get ScanStartTime
-      else if the length=2
-              get the first Char of args[1],
-              if it is 's', parse to the ScanStartTime and get ScanEndTime
-              else if it is 'e',parse to the ScanEndTime and getScanStartTime
-    */
     ToolRunner.run(HBaseConfiguration.create(), new Accumulate(), args);
 
   }
@@ -332,85 +83,29 @@ public class Accumulate extends AbstractJob {
     if (parseArguments(args) == null)
       return -1;
     init(getOption(OUTPUT_BASE), getOption(STARTTIME), getOption(ENDTIME));
-    long t1 = System.currentTimeMillis();
-    new NavTableGetter().getUrls();
-    new AdTableGetter().getUrls();
-    for (String tableName : CustomTables) {
-      new CustomTableGetter(tableName).getUrls();
+    runJob(TABLE_AD,new AdTable(),startTimeStamp,endTimeStamp);
+    runJob(TABLE_NAV,new NavTable(),startTimeStamp,endTimeStamp);
+    runJob(TABLE_GM337,new Gm337Table(),startTimeStamp,endTimeStamp);
+    for(String tableName: CustomTables){
+      runJob(tableName,new CustomTable(),startTimeStamp,endTimeStamp);
     }
-    new Gm337TableGetter().getUrls();
-    shutdown();
-    long t2 = System.currentTimeMillis();
-    System.out.println("accumulate cost " + (t2 - t1) + " ms");
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return 0;
   }
 
-  private Scan getScan(Map<String, List<String>> familyColumns, boolean timeAsLong) {
-    List<KeyRange> keyRanges = getSortedKeyRanges(timeAsLong);
-    Scan scan = new Scan();
-    Filter filter = new SkipScanFilter(keyRanges);
-    scan.setFilter(filter);
-    scan.setStartRow(keyRanges.get(0).getLowerRange());
-    scan.setStopRow(keyRanges.get(keyRanges.size() - 1).getUpperRange());
-    int cacheSize = 10000;
-    scan.setCaching(cacheSize);
-    for (Map.Entry<String, List<String>> entry : familyColumns.entrySet()) {
-      String family = entry.getKey();
-      for (String column : entry.getValue()) {
-        scan.addColumn(Bytes.toBytes(family), Bytes.toBytes(column));
-      }
-    }
-
-    return scan;
-  }
-
-  private List<KeyRange> getSortedKeyRanges(boolean timeAsLong) {
-    List<KeyRange> keyRanges = new ArrayList<KeyRange>();
-    List<String> projects = new ArrayList<String>();
-    //todo
-    //list all projects and add to list projects
-    for (String project : MetricMapping.getInstance().getAllProjectShortNameMapping().keySet())
-      projects.add(project);
-    Map<Byte, String> projectMap = new HashMap<Byte, String>();
-    for (String proj : projects) {
-      Byte projectId = MetricMapping.getInstance().getProjectURLByte(proj);
-      projectMap.put(projectId, proj);
-      Set<String> nations = new HashSet<String>();
-      System.out.println("projectId " + projectId + " project: " + proj);
-      //todo
-      //get nations according to proj and execute the runner.
-      long t3 = System.currentTimeMillis();
-      Set<String> nationSet = MetricMapping.getNationsByProjectID(projectId);
-      for (String nation : nationSet) {
-        nations.add(nation);
-      }
-      System.out.println("get nations use " + (System.currentTimeMillis() - t3) + " ms");
-
-      if (nations.size() != 0 && projectId != null) {
-        keyRanges.addAll(getKeyRanges(proj, nations, timeAsLong));
-      }
-    }
-    KeyRangeComparator comparator = new KeyRangeComparator();
-    Collections.sort(keyRanges, comparator);
-    /*
-    for (KeyRange keyRange : keyRanges) {
-      System.out.println("add keyRange " + Bytes.toStringBinary(keyRange.getLowerRange()) + "---" + Bytes.toStringBinary(keyRange.getUpperRange()));
-    }
-    */
-    return keyRanges;
-  }
-
-  //if timestamp in rk is long type or string ,rk should be different
-  private List<KeyRange> getKeyRanges(String project, Set<String> nations, boolean timeAsLong) {
-    List<KeyRange> keyRangeList = new ArrayList<KeyRange>();
-    for (String nation : nations) {
-      byte[] startRk = Bytes.add(new byte[]{MetricMapping.getInstance().getProjectURLByte(project)}, Bytes.toBytes(nation), timeAsLong ? Bytes.toBytes(startTimeStamp) : Bytes.toBytes(startTime));
-      byte[] endRk = Bytes.add(new byte[]{MetricMapping.getInstance().getProjectURLByte(project)}, Bytes.toBytes(nation), timeAsLong ? Bytes.toBytes(endTimeStamp) : Bytes.toBytes(endTime));
-      KeyRange keyRange = new KeyRange(startRk, true, endRk, false);
-      keyRangeList.add(keyRange);
-    }
-    KeyRangeComparator comparator = new KeyRangeComparator();
-    Collections.sort(keyRangeList, comparator);
-    return keyRangeList;
+  public void runJob(String tableName,SuperTable tabletype,long startTime,long endTime) throws IOException, ClassNotFoundException, InterruptedException {
+    Path outputPath=new Path(output,tableName);
+    FileSystemUtil.deleteOutputPath(conf,outputPath);
+    conf.set(TABLE_TYPE,tabletype.getClass().getName());
+    Job job=new Job(conf,"accumulate "+tableName+" "+outputPath.getName());
+    Scan scan=tabletype.getScan(startTime,endTime);
+    TableMapReduceUtil.initTableMapperJob(tableName,scan,AccumulateMapper.class,Text.class, IntWritable.class,job);
+    job.setReducerClass(AccumulateReducer.class);
+    job.setOutputKeyClass(Text.class);
+    job.setOutputValueClass(Text.class);
+    job.setOutputFormatClass(TextOutputFormat.class);
+    FileOutputFormat.setOutputPath(job, outputPath);
+    job.setJarByClass(Accumulate.class);
+    job.submit();
+    job.waitForCompletion(true);
   }
 }
