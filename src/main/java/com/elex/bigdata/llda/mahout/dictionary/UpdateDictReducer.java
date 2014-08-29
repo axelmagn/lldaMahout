@@ -50,12 +50,13 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
     String dictRoot = conf.get(UpdateDictDriver.DICT_ROOT);
     System.out.println("dict Root is " + dictRoot);
     FileSystem fs=FileSystem.get(conf);
+    /*
     try {
       dict = new Dictionary(dictRoot, fs, conf);
       bdmd5 = BDMD5.getInstance();
     } catch (HashingException e) {
       e.printStackTrace();
-    }
+    }*/
   }
 
   public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
