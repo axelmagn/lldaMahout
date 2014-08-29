@@ -10,6 +10,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.util.ToolRunner;
 import org.apache.hadoop.util.bloom.BloomFilter;
 import org.apache.hadoop.util.bloom.Key;
 import org.apache.mahout.common.AbstractJob;
@@ -59,5 +60,8 @@ public class LappedWordDriver extends AbstractJob{
        else
          bloomFilter.add(new Key(Bytes.toBytes(tokens[0])));
      }
+  }
+  public static void main(String[] args) throws Exception {
+    ToolRunner.run(new Configuration(),new LappedWordDriver(),args);
   }
 }
