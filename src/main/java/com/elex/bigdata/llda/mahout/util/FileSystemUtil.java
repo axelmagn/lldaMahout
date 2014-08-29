@@ -72,8 +72,10 @@ public class FileSystemUtil {
     int maxMapTaskNum = clusterStatus.getMaxMapTasks();
     System.out.println("max Map Task Num " + maxMapTaskNum);
     long totalSize = 0;
-    for (Path inputPath : inputPaths)
+    for (Path inputPath : inputPaths){
+      System.out.println("inputPath "+inputPath.toString());
       totalSize += FileSystemUtil.getLen(conf, inputPath);
+    }
     System.out.println("total input Size " + totalSize);
     long maxSplitSize = totalSize / maxMapTaskNum;
     System.out.println("mapred.max.split.size " + maxSplitSize);
