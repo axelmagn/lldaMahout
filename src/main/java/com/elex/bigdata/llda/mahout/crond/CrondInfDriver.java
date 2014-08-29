@@ -122,9 +122,8 @@ public class CrondInfDriver extends AbstractJob{
 
     conf.set(GenerateLDocDriver.UID_PATH,uidFilePath.toString());
     Job generateLDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,dictRootPath,resourceRootPath,currentDocsPath);
-    ControlledJob controlledGenJob=new ControlledJob(conf);
-    controlledGenJob.setJob(generateLDocJob);
-    jobControl.addJob(controlledGenJob);
+    generateLDocJob.submit();
+    generateLDocJob.waitForCompletion(true);
 
     List<Path> comJobInputPaths=new ArrayList<Path>();
     comJobInputPaths.add(new Path(todayDocsPath,"*"));
@@ -141,7 +140,6 @@ public class CrondInfDriver extends AbstractJob{
     Job complementJob= MergeLDocDriver.prepareJob(conf, comJobInputPaths.toArray(new Path[comJobInputPaths.size()]), docsPreInfPath);
     ControlledJob controlledComplementJob=new ControlledJob(conf);
     controlledComplementJob.setJob(complementJob);
-    controlledComplementJob.addDependingJob(controlledGenJob);
     jobControl.addJob(controlledComplementJob);
 
     Job transferUidJob= TransferUidDriver.prepareJob(conf,docsPreInfPath,docsForInfPath);
