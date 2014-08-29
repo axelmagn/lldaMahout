@@ -77,15 +77,18 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
         shouldWrite = true;
     }
     if (shouldWrite) {
+      context.write(key,new IntWritable(wordCount));
+      /*
       try {
         dict.update(bdmd5.toMD5(word).substring(UpdateDictDriver.MD5_START_INDEX, UpdateDictDriver.MD5_END_INDEX));
       } catch (HashingException e) {
         e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
       }
+      */
     }
   }
 
   public void cleanup(Context context) throws IOException {
-    dict.flushDict();
+    //dict.flushDict();
   }
 }
