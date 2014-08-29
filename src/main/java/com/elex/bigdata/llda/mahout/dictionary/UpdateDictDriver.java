@@ -62,8 +62,7 @@ public class UpdateDictDriver extends AbstractJob{
     Path dictOutputPath=new Path(dictRootPath,"updateDictOut_"+inputPath.getName().substring(0,inputPath.getName().length()-1));
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(dictOutputPath))
-      fs.delete(dictOutputPath);
-
+      fs.delete(dictOutputPath,true);
     Job updateDictJob=new Job(conf);
     updateDictJob.setInputFormatClass(CombineTextInputFormat.class);
     updateDictJob.setMapperClass(UpdateDictMapper.class);
