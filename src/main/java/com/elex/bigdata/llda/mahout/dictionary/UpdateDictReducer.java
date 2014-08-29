@@ -41,22 +41,22 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
 
   public void setup(Context context) throws IOException, InterruptedException {
     Configuration conf = context.getConfiguration();
-    Pair<Map<String,String>,Map<String,Integer>> pair=GenerateLDocReducer.loadUrlTopics(conf,prefixTrie);
-    url_category_map=pair.getFirst();
+    Pair<Map<String, String>, Map<String, Integer>> pair = GenerateLDocReducer.loadUrlTopics(conf, prefixTrie);
+    url_category_map = pair.getFirst();
     word_count_threshold = Integer.parseInt(conf.get(UpdateDictDriver.COUNT_THRESHOLD));
     System.out.println("word count lower boundary is " + word_count_threshold);
     word_count_upper_threshold = Integer.parseInt(conf.get(UpdateDictDriver.COUNT_UPPER_THRESHOLD));
     System.out.println("word count upper boundary is " + word_count_upper_threshold);
     String dictRoot = conf.get(UpdateDictDriver.DICT_ROOT);
     System.out.println("dict Root is " + dictRoot);
-    FileSystem fs=FileSystem.get(conf);
-    /*
+    FileSystem fs = FileSystem.get(conf);
+
     try {
       dict = new Dictionary(dictRoot, fs, conf);
       bdmd5 = BDMD5.getInstance();
     } catch (HashingException e) {
       e.printStackTrace();
-    }*/
+    }
   }
 
   public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException {
@@ -78,7 +78,8 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
         shouldWrite = true;
     }
     if (shouldWrite) {
-      context.write(key,new IntWritable(wordCount));
+      if (!dict.contains(word))
+        context.write(key, new IntWritable(wordCount));
       /*
       try {
         dict.update(bdmd5.toMD5(word).substring(UpdateDictDriver.MD5_START_INDEX, UpdateDictDriver.MD5_END_INDEX));
