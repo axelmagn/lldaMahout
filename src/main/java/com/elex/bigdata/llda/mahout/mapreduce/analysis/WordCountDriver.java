@@ -69,23 +69,10 @@ public class WordCountDriver extends AbstractJob {
     public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
       String line = value.toString();
       String[] tokens = line.split("\t");
-      if (tokens.length < 3)
+      if (tokens.length < 2)
         return;
-      String word=tokens[1];
-      String count=tokens[2];
-      int index=word.indexOf('?');
-      if(index!=-1)
-        word=word.substring(0,index);
-      int frequent=0;
-      for(int i=0;i<word.length();i++){
-        if(word.charAt(i)=='/'){
-          frequent++;
-          if(frequent==3){
-            word=word.substring(0,i);
-            break;
-          }
-        }
-      }
+      String word=tokens[tokens.length-2];
+      String count=tokens[tokens.length-1];
       try {
         context.write(new Text(bdmd5.toMD5(word)), new IntWritable(Integer.parseInt(count)));
       } catch (HashingException e) {
@@ -95,7 +82,7 @@ public class WordCountDriver extends AbstractJob {
   }
 
   public static class WordCountReducer extends Reducer<Text, IntWritable, Text, Text> {
-    private int[] thredhold = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 40, 60, 80, 100, 200, 400, 800, 1600, 3200, 6400,12800,25600,51200,102400};
+    private int[] thredhold = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20, 25, 30, 40, 50,60,70, 80,90, 100,120,140,160,180, 200,250,300, 400,600, 800,1200, 1600,2000, 2400,3200, 4000,4800,5600,6400,8000,9600,11200,12800,16000,19200,22800,25600,30000,40000,51200,60000,70000,80000,90000,102400};
     private int[] wordCount = new int[thredhold.length];
     private int totalCount=0;
     public void setup(Context context) {
