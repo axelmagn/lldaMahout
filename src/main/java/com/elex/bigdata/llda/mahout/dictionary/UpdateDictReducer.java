@@ -64,7 +64,8 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
     String word = key.toString();
     boolean shouldWrite = false;
     if (url_category_map.containsKey(key.toString()) || prefixTrie.prefixSearch(key.toString()) != -1) {
-      shouldWrite = true;
+      //shouldWrite = true;
+      return;
     } else if (word.contains("shop") || word.contains("games") || word.contains("amazon")) {
       shouldWrite = true;
     } else {
@@ -78,12 +79,7 @@ public class UpdateDictReducer extends Reducer<Text, IntWritable, Text, IntWrita
         shouldWrite = true;
     }
     if (shouldWrite) {
-      try {
-        if (!dict.contains(bdmd5.toMD5(word).substring(UpdateDictDriver.MD5_START_INDEX, UpdateDictDriver.MD5_END_INDEX)))
-          context.write(key, new IntWritable(wordCount));
-      } catch (HashingException e) {
-        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-      }
+       context.write(key,new IntWritable(wordCount));
       /*
       try {
         dict.update(bdmd5.toMD5(word).substring(UpdateDictDriver.MD5_START_INDEX, UpdateDictDriver.MD5_END_INDEX));
