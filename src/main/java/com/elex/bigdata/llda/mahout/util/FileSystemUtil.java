@@ -24,6 +24,14 @@ public class FileSystemUtil {
 
   public static long getLen(FileSystem fs, Path path) throws IOException {
     FileStatus[] totalStatus = fs.globStatus(path);
+    if(totalStatus==null){
+      System.out.println(path.toString()+" glob Status is null");
+      return 0;
+    }
+    if(totalStatus.length==0){
+      System.out.println(path.toString()+" glob Status returns zero");
+      return 0;
+    }
     if (totalStatus.length > 1 || !totalStatus[0].getPath().getName().equals(path.getName())) {
       long len = 0l;
       for (FileStatus status : totalStatus) {
