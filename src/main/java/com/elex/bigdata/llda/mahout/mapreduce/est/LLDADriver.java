@@ -488,8 +488,8 @@ public class LLDADriver extends AbstractJob {
 
   public static void runIteration(Configuration conf, Path corpusInput, Path modelInput, Path modelOutput,
                                   int iterationNumber, int maxIterations, int numReduceTasks) throws IOException, ClassNotFoundException, InterruptedException {
-    String jobName = String.format("Iteration %d of %d, input path: %s",
-      iterationNumber, maxIterations, modelInput);
+    String jobName = String.format("Iteration %d of %d, model input path: %s, input path: %s",
+      iterationNumber, maxIterations, modelInput,corpusInput);
     log.info("About to run: " + jobName);
     FileSystemUtil.setCombineInputSplitSize(conf,corpusInput);
     Job job = new Job(conf, jobName);
