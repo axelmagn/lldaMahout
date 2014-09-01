@@ -11,6 +11,7 @@ now=`date +%Y%m%d`
 multiInput=${rootPath}/docs/to${twoDayAgo}:${rootPath}/docs/${oneDayAgo}/*
 mergeOutput=${rootPath}/docs/to${oneDayAgo}
 estInput=${rootPath}/docs/est
+echo "---------------------------------------------------------------------------------" >> $logFile
 echo ${now} >> $logFile
 sh ${baseDir}/bin/updateDict.sh  url_count/all_projects/clean/${oneDayAgo}*  >> $logFile 2>&1
 sh ${baseDir}/bin/mergeLDocs.sh  ${multiInput} ${mergeOutput}   >> $logFile 2>&1
