@@ -66,6 +66,7 @@ public class Accumulate extends AbstractJob {
     endTimeStamp = dateFormat.parse(endTime).getTime();
     conf = HBaseConfiguration.create();
     this.content=content;
+    System.out.println("init ");
     loadTableTypeConfig("/table_type.xml",content);
   }
 
