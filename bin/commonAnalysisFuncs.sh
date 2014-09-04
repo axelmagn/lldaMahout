@@ -78,7 +78,7 @@ function anaHitWord(){
    hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources >> $logFile 2>&1
 }
 
-fucntion getWordHistory(){
+function getWordHistory(){
    rootPath=/user/hadoop/user_category/lldaMahout
    logFile=/data0/log/user_category/processLog/llda/analysis.log
    MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.GetWordHistoryDriver
