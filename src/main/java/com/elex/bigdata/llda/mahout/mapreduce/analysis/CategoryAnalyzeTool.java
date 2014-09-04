@@ -102,7 +102,17 @@ public class CategoryAnalyzeTool extends AbstractJob {
     }
     public void map(Object key,Text value,Context context){
       String[] tokens=value.toString().split("\t");
-      Integer category=Integer.parseInt(tokens[0]);
+      if(tokens.length<2)
+        return;
+      Integer category=null;
+      for(Map.Entry<Integer,BloomFilter> entry:category2BloomFilter.entrySet()){
+        if(entry.getValue().membershipTest(new Key(Bytes.toBytes(tokens[0])))){
+          category=entry.getKey();
+          break;
+        }
+      }
+      if(category==null)
+        return;
       Map<String,Integer> nation2Count=categoryNation2Count.get(category);
       if(nation2Count==null){
         nation2Count=new HashMap<String, Integer>();
