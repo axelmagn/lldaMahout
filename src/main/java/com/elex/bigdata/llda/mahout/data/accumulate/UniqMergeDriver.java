@@ -66,6 +66,8 @@ public class UniqMergeDriver extends AbstractJob{
   public static class UniqMergeMapper extends Mapper<Object,Text,Text,NullWritable> {
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
       String[] tokens=value.toString().split("\t");
+      if(tokens.length<2)
+        return;
       context.write(new Text(tokens[0] + "\t" + tokens[1]), NullWritable.get());
     }
   }
