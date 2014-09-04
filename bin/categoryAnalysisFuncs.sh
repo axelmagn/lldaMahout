@@ -35,6 +35,7 @@ function anaCategoryDist(){
   rootPath=/user/hadoop/user_category/lldaMahout
   MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.CategoryAnalyzeTool
   logFile=/data0/log/user_category/processLog/llda/analysis/categoryDist.log
+  echo "hadoop jar $JAR $MAIN --input $1 --output $2 --category_result_dir ${rootPath}/analysis/category >> $logFile 2>&1"
   hadoop jar $JAR $MAIN --input $1 --output $2 --category_result_dir ${rootPath}/analysis/category >> $logFile 2>&1
 }
 

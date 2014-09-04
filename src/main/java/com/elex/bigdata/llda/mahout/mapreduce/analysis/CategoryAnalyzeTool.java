@@ -30,9 +30,9 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class CategoryAnalyzeTool extends AbstractJob {
-  public final String CATEGORY_RESULT_DIR="category_result_dir";
-  public final String CATEGORY_FILE="userCategory";
-  public final String ANALYTIC_FILE="analytics";
+  public static final String CATEGORY_RESULT_DIR="category_result_dir";
+  public static final String CATEGORY_FILE="userCategory";
+  public static final String ANALYTIC_FILE="analytics";
 
   @Override
   public int run(String[] args) throws Exception {
@@ -63,7 +63,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
     return job;
   }
 
-  public class CategoryAnalyzeMapper extends Mapper<Object,Text,Text,IntWritable>{
+  public static class CategoryAnalyzeMapper extends Mapper<Object,Text,Text,IntWritable>{
     private Map<Integer,BloomFilter> category2BloomFilter=new HashMap<Integer,BloomFilter>();
     private Map<Integer,Map<String,Integer>> categoryNation2Count=new HashMap<Integer, Map<String, Integer>>();
     public void setup(Context context) throws IOException {
@@ -113,7 +113,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
 
   }
 
-  public class CategoryAnalyzeReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
+  public static class CategoryAnalyzeReducer extends Reducer<Text,IntWritable,Text,IntWritable> {
     public void reduce(Text key,Iterable<IntWritable> values,Context context) throws IOException, InterruptedException {
        int count=0;
        for(IntWritable value: values){
