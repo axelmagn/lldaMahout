@@ -35,10 +35,10 @@ function getNt()
 
 function batchGetNt(){
   origDay=$1;count=$2
-  for((i=0;i<$count;i++))do
+  for((i=0;i<$count;i++));do
      startDay=`date +%Y%m%d -d "$origDay +${i} days"`
      ((j=i+1))
-     endDay=`date +%Y%m%d -d "$origDay +${j} days"
+     endDay=`date +%Y%m%d -d "$origDay +${j} days" `
      getNt ${startDay}000000 ${endDay}000000
   done
 }
