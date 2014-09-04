@@ -63,14 +63,14 @@ public class UniqMergeDriver extends AbstractJob{
 
   }
 
-  private class UniqMergeMapper extends Mapper<Object,Text,Text,NullWritable> {
+  public class UniqMergeMapper extends Mapper<Object,Text,Text,NullWritable> {
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
       String[] tokens=value.toString().split("\t");
       context.write(new Text(tokens[0] + "\t" + tokens[1]), NullWritable.get());
     }
   }
 
-  private class UniqMergeReducer extends Reducer<Text,NullWritable,Text,NullWritable>{
+  public class UniqMergeReducer extends Reducer<Text,NullWritable,Text,NullWritable>{
     public void reduce(Text key,Iterable<NullWritable> values,Context context) throws IOException, InterruptedException {
       context.write(key, NullWritable.get());
     }
