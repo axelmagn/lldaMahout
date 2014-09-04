@@ -37,6 +37,7 @@ public class TransNtUidDriver extends AbstractJob{
 
   public static Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
     FileSystemUtil.deleteOutputPath(conf, outputPath);
+    conf.set("mapred.reduce.child.java.opts","-Xmx8192m");
     Job job=new Job(conf,"transfer nt uid "+inputPath.getName());
     job.setJarByClass(TransNtUidDriver.class);
     job.setMapperClass(TransNtUidMapper.class);
