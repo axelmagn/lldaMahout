@@ -119,7 +119,10 @@ public class CategoryAnalyzeTool extends AbstractJob {
         }
       }
       if(category==null)
+      {
+        System.out.println(" not hit "+tokens[0]);
         return;
+      }
       Map<String,Integer> nation2Count=categoryNation2Count.get(category);
       if(nation2Count==null){
         nation2Count=new HashMap<String, Integer>();
