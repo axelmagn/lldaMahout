@@ -52,7 +52,7 @@ function updateNtByDay(){
   startTime=${day:0:8}000000; endTime=${nextDay}000000
   getNt  $startTime $endTime
   outputBase=user_category/lldaMahout/nations
-  mergetNations ${outputBase}/${startTime}_${endTime}:${outputBase}/to${preDay} ${outputBase}/to${day:0:8}
+  mergetNations ${outputBase}/${startTime}_${endTime}/*:${outputBase}/to${preDay} ${outputBase}/to${day:0:8}
   transNtUid  ${outputBase}/to${day:0:8} ${outputBase}/transTotal
 }
 
