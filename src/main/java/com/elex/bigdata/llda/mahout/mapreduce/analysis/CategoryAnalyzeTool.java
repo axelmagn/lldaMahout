@@ -83,7 +83,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
         String[] tokens=line.split(" ");
         if(tokens.length<2)
           continue;
-        category2BloomFilter.put(Integer.parseInt(tokens[0]),new BloomFilter(Integer.parseInt(tokens[1]),3,0));
+        category2BloomFilter.put(Integer.parseInt(tokens[0]), new BloomFilter(Integer.parseInt(tokens[1]), 3, 0));
       }
       reader.close();
       reader=new BufferedReader(new InputStreamReader(fs.open(categoryFile)));
@@ -91,7 +91,13 @@ public class CategoryAnalyzeTool extends AbstractJob {
         String[] tokens=line.split("\t");
         if(tokens.length<2)
           continue;
-        category2BloomFilter.get(Integer.parseInt(tokens[1])).add(new Key(Bytes.toBytes(tokens[0])));
+        Key key=new Key(Bytes.toBytes(tokens[0]));
+        if(key.getBytes().length<1)
+        {
+          System.out.println(key);
+          continue;
+        }
+        category2BloomFilter.get(Integer.parseInt(tokens[1])).add(key);
       }
     }
     public void map(Object key,Text value,Context context){
