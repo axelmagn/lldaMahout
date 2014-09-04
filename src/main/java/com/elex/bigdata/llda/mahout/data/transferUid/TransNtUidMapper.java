@@ -39,7 +39,7 @@ public class TransNtUidMapper extends TransUidMapper<Object, Text, Text, Text> {
           cookieId = entry.getKey();
         context.write(new Text(cookieId), new Text(entry.getValue()));
         if (sampleRatio % 20000 == 0) {
-          System.out.println("cookieId:" + cookieId);
+          System.out.println("cookieId:" + cookieId +" uid: "+entry.getKey());
         }
       }
       uid2CookieId = new HashMap<String, String>();
