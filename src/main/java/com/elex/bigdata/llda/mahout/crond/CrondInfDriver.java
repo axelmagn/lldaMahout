@@ -2,7 +2,7 @@ package com.elex.bigdata.llda.mahout.crond;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.mergedocs.MergeLDocDriver;
-import com.elex.bigdata.llda.mahout.data.transferdocs.TransferUidDriver;
+import com.elex.bigdata.llda.mahout.data.transferUid.TransDocUidDriver;
 import com.elex.bigdata.llda.mahout.dictionary.Dictionary;
 import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
 import com.elex.bigdata.llda.mahout.mapreduce.est.LLDADriver;
@@ -142,7 +142,7 @@ public class CrondInfDriver extends AbstractJob{
     controlledComplementJob.setJob(complementJob);
     jobControl.addJob(controlledComplementJob);
 
-    Job transferUidJob= TransferUidDriver.prepareJob(conf,docsPreInfPath,docsForInfPath);
+    Job transferUidJob= TransDocUidDriver.prepareJob(conf, docsPreInfPath, docsForInfPath);
     ControlledJob controlledTransferUidJob=new ControlledJob(conf);
     controlledTransferUidJob.setJob(transferUidJob);
     controlledTransferUidJob.addDependingJob(controlledComplementJob);

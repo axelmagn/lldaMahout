@@ -1,5 +1,0 @@
-nav_all=com.elex.bigdata.llda.mahout.data.accumulateurlcount.tables.NavTable
-ad_all_log=com.elex.bigdata.llda.mahout.data.accumulateurlcount.tables.AdTable
-gm_user_action=com.elex.bigdata.llda.mahout.data.accumulateurlcount.tables.Gm337Table
-yac_user_action=com.elex.bigdata.llda.mahout.data.accumulateurlcount.tables.CustomTable
-dmp_user_action=com.elex.bigdata.llda.mahout.data.accumulateurlcount.tables.CustomTable
