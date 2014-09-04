@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <contens>
-    <content id="url">
+    <url>
         <nav_all>com.elex.bigdata.llda.mahout.data.hbase.nav.NavUrlTable</nav_all>
         <ad_all_log>com.elex.bigdata.llda.mahout.data.hbase.ad.AdUrlTable</ad_all_log>
         <yac_user_action>com.elex.bigdata.llda.mahout.data.hbase.custom.CustomUrlTable</yac_user_action>
         <dmp_user_action>com.elex.bigdata.llda.mahout.data.hbase.custom.CustomUrlTable</dmp_user_action>
         <gm_user_action>com.elex.bigdata.llda.mahout.data.hbase.gm337.Gm337UrlTable</gm_user_action>
-    </content>
-    <content id="nt">
+    </url>
+    <nt>
         <nav_all>com.elex.bigdata.llda.mahout.data.hbase.nav.NavNtTable</nav_all>
         <ad_all_log>com.elex.bigdata.llda.mahout.data.hbase.ad.AdNtTable</ad_all_log>
         <yac_user_action>com.elex.bigdata.llda.mahout.data.hbase.custom.CustomNtTable</yac_user_action>
         <dmp_user_action>com.elex.bigdata.llda.mahout.data.hbase.custom.CustomNtTable</dmp_user_action>
         <gm_user_action>com.elex.bigdata.llda.mahout.data.hbase.gm337.Gm337NtTable</gm_user_action>
-    </content>
+    </nt>
 </contens>
