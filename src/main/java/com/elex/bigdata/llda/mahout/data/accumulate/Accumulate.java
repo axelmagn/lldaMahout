@@ -90,6 +90,7 @@ public class Accumulate extends AbstractJob {
         Node childNode = nodes.item(j);
         if(childNode.getNodeType()!=Node.ELEMENT_NODE)
           continue;
+        System.out.println("hit");
         Element element=(Element)childNode;
         String tableName=element.getTagName();
         String tableTypeName=element.getTextContent();
