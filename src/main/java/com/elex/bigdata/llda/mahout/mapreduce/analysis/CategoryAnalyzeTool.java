@@ -1,5 +1,6 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis;
 
+import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -50,6 +51,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
   }
 
   public Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
+    FileSystemUtil.deleteOutputPath(conf,outputPath);
     Job job=new Job(conf,"category analyze "+inputPath.toString());
     job.setMapperClass(CategoryAnalyzeMapper.class);
     job.setMapOutputKeyClass(Text.class);
