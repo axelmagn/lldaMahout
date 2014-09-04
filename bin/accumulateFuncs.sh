@@ -47,8 +47,8 @@ function mergeNations()
 {
   MAIN=com.elex.bigdata.llda.mahout.data.accumulate.UniqMergeDriver
   logFile=/data0/log/user_category/processLog/llda/mergeNations.log
-  hadoop jar $JAR $MAIN --multi_input $1 --output $2 >> $logFile 2>&1
   echo "hadoop jar $JAR $MAIN --multi_input $1 --output $2 >> $logFile 2>&1 "
+  hadoop jar $JAR $MAIN --multi_input $1 --output $2 >> $logFile 2>&1
 }
 
 function transNtUid(){
