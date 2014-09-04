@@ -24,21 +24,21 @@ import java.util.Map;
  */
 public class TransNtUidMapper extends TransUidMapper<Object, Text, Text, Text> {
   private Map<String, String> uid2Nation = new HashMap<String, String>();
-
+  private int sampleRatio = 1;
   public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
     String[] tokens = value.toString().split("\t");
     uid2Nation.put(tokens[0], tokens[1]);
     uidNum++;
     if (uidNum % 10000 == 1) {
       getCookieIds(uid2Nation.keySet());
-      int sampleRatio = 1;
+
       for (Map.Entry<String, String> entry : uid2Nation.entrySet()) {
         sampleRatio++;
         String cookieId = uid2CookieId.get(entry.getKey());
         if (cookieId == null)
           cookieId = entry.getKey();
         context.write(new Text(cookieId), new Text(entry.getValue()));
-        if (sampleRatio % 10000 == 0) {
+        if (sampleRatio % 20000 == 0) {
           System.out.println("cookieId:" + cookieId);
         }
       }
