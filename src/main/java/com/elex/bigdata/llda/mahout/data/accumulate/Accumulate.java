@@ -78,18 +78,15 @@ public class Accumulate extends AbstractJob {
     Document doc=documentBuilder.parse(url.getPath());
     Element rootElement=doc.getDocumentElement();
     NodeList nodeList=rootElement.getElementsByTagName(content);
-    System.out.println(nodeList.getLength());
     for(int i=0;i<nodeList.getLength();i++){
       Node node=nodeList.item(i);
       if(node.getNodeType()!=Node.ELEMENT_NODE)
         continue;
       NodeList nodes=node.getChildNodes();
-      System.out.println(nodes.getLength());
       for(int j=0;j<nodes.getLength();j++){
         Node childNode = nodes.item(j);
         if(childNode.getNodeType()!=Node.ELEMENT_NODE)
           continue;
-        System.out.println("hit");
         Element element=(Element)childNode;
         String tableName=element.getTagName();
         String tableTypeName=element.getTextContent();
