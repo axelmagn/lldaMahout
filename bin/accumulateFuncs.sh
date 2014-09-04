@@ -2,7 +2,6 @@
 baseDir=`dirname $0`/..
 JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
 
-echo `date` >> $logFile
 function cleanWord(){
    rootPath=/user/hadoop/user_category/lldaMahout
    logFile=/data0/log/user_category/processLog/llda/analysis.log
