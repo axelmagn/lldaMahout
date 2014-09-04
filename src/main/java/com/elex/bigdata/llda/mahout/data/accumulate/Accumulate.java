@@ -132,7 +132,7 @@ public class Accumulate extends AbstractJob {
     conf.set(TABLE_TYPE,tabletype.getClass().getName());
     Job job=new Job(conf,"accumulate "+tableName+" "+content+" "+outputPath.toString());
     Scan scan=tabletype.getScan(startTime,endTime);
-    TableMapReduceUtil.initTableMapperJob(tableName, scan, AccumulateMapper.class, Text.class, IntWritable.class, job);
+    TableMapReduceUtil.initTableMapperJob(tableName, scan, AccumulateMapper.class, Text.class, Text.class, job);
     if(content.equals("url"))
       job.setNumReduceTasks(0);
     else if(content.equals("nt"))
