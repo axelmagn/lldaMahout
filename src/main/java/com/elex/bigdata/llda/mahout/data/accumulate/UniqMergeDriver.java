@@ -46,6 +46,7 @@ public class UniqMergeDriver extends AbstractJob{
   public Job prepareJob(Configuration conf,Path[] inputPaths,Path outputPath) throws IOException {
     FileSystemUtil.setCombineInputSplitSize(conf,inputPaths);
     FileSystemUtil.deleteOutputPath(conf,outputPath);
+    conf.set("mapred.reduce.child.java.opts","-Xmx8192m");
     Job job=new Job(conf,"UniqMerge ");
     job.setMapperClass(UniqMergeMapper.class);
     job.setInputFormatClass(CombineTextInputFormat.class);
@@ -55,6 +56,7 @@ public class UniqMergeDriver extends AbstractJob{
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(NullWritable.class);
     job.setReducerClass(UniqMergeReducer.class);
+    job.setNumReduceTasks(4);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(NullWritable.class);
     TextOutputFormat.setOutputPath(job,outputPath);
