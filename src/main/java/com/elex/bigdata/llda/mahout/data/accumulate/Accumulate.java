@@ -67,7 +67,7 @@ public class Accumulate extends AbstractJob {
     conf = HBaseConfiguration.create();
     this.content=content;
     System.out.println("init ");
-    loadTableTypeConfig("/table_type.xml",content);
+    loadTableTypeConfig("/table_type.xml", content);
   }
 
   private void loadTableTypeConfig(String configFile,String content) throws ParserConfigurationException, IOException, SAXException, ClassNotFoundException, IllegalAccessException, InstantiationException {
@@ -111,10 +111,16 @@ public class Accumulate extends AbstractJob {
       return -1;
     init(getOption(OUTPUT_BASE), getOption(STARTTIME), getOption(ENDTIME),getOption(CONTENT,"url"));
     System.out.println("init complete "+table2Type.size());
+    List<Job> jobs=new ArrayList<Job>();
     for(Map.Entry<String,SuperTable> entry: table2Type.entrySet()){
       System.out.println(entry.getKey()+":"+entry.getValue().getClass().getName());
       Job job=prepareJob(entry.getKey(),entry.getValue(),startTimeStamp,endTimeStamp);
+      jobs.add(job);
+    }
+    for(Job job: jobs){
       job.submit();
+    }
+    for(Job job: jobs){
       job.waitForCompletion(true);
     }
     return 0;
