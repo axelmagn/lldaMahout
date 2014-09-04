@@ -123,6 +123,7 @@ public class Accumulate extends AbstractJob {
   public Job prepareJob(String tableName,SuperTable tabletype,long startTime,long endTime) throws IOException, ClassNotFoundException, InterruptedException {
     Path outputPath=new Path(output,tableName);
     FileSystemUtil.deleteOutputPath(conf,outputPath);
+    conf.set("mapred.reduce.child.java.opts","-Xmx8192m");
     conf.set(TABLE_TYPE,tabletype.getClass().getName());
     Job job=new Job(conf,"accumulate "+tableName+" "+content+" "+outputPath.toString());
     Scan scan=tabletype.getScan(startTime,endTime);
