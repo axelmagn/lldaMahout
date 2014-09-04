@@ -53,6 +53,6 @@ public class TransNtUidDriver extends AbstractJob{
   }
 
   public static  void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(), new TransDocUidDriver(), args);
+    ToolRunner.run(new Configuration(), new TransNtUidDriver(), args);
   }
 }

@@ -68,6 +68,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
   public static class CategoryAnalyzeMapper extends Mapper<Object,Text,Text,IntWritable>{
     private Map<Integer,BloomFilter> category2BloomFilter=new HashMap<Integer,BloomFilter>();
     private Map<Integer,Map<String,Integer>> categoryNation2Count=new HashMap<Integer, Map<String, Integer>>();
+    private int sampleNum=0;
     public void setup(Context context) throws IOException {
       Configuration conf=context.getConfiguration();
       String categoryResultDir=conf.get(CATEGORY_RESULT_DIR);
@@ -83,20 +84,25 @@ public class CategoryAnalyzeTool extends AbstractJob {
         String[] tokens=line.split(" ");
         if(tokens.length<2)
           continue;
+        System.out.println(Integer.parseInt(tokens[0])+"\t"+Integer.parseInt(tokens[1]));
         category2BloomFilter.put(Integer.parseInt(tokens[0]), new BloomFilter(Integer.parseInt(tokens[1]), 3, 0));
       }
       reader.close();
       reader=new BufferedReader(new InputStreamReader(fs.open(categoryFile)));
+      int num=0;
       while((line=reader.readLine())!=null){
         String[] tokens=line.split("\t");
         if(tokens.length<2)
           continue;
+        num++;
         Key key=new Key(Bytes.toBytes(tokens[0]));
         if(key.getBytes().length<1)
         {
           System.out.println(key);
           continue;
         }
+        if(num%20000==1)
+          System.out.println("category "+Integer.parseInt(tokens[1]));
         category2BloomFilter.get(Integer.parseInt(tokens[1])).add(key);
       }
     }
@@ -105,6 +111,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
       if(tokens.length<2)
         return;
       Integer category=null;
+      sampleNum++;
       for(Map.Entry<Integer,BloomFilter> entry:category2BloomFilter.entrySet()){
         if(entry.getValue().membershipTest(new Key(Bytes.toBytes(tokens[0])))){
           category=entry.getKey();
