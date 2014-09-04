@@ -101,7 +101,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
       }
     }
     public void map(Object key,Text value,Context context){
-      String[] tokens=value.toString().split("\t");
+      String[] tokens=value.toString().trim().split("\t");
       if(tokens.length<2)
         return;
       Integer category=null;
