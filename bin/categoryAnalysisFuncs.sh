@@ -46,7 +46,7 @@ function updateAnaCategoryDist(){
   source $baseDir/bin/accumulateFuncs.sh
   updateNtByDay $day
   anaEstResult $day
-  anaCategoryDist ${nationDir}/to${day} ${categoryAnaDir}/categoryDist
+  anaCategoryDist ${nationDir}/to${day} ${categoryAnaDir}/dist
   hadoop fs -cat ${categoryAnaDir}/categoryDist/* > ${resultRoot}/${day}/categoryDist
   preDay=`date +%Y%m%d -d "$day -1 days"`
   compareCategoryDist $day  $preDay
