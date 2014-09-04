@@ -1,10 +1,12 @@
 package com.elex.bigdata.llda.mahout.data.transferUid;
 
+import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
@@ -37,6 +39,7 @@ public class TransNtUidDriver extends AbstractJob{
 
   public static Job prepareJob(Configuration conf,Path inputPath,Path outputPath) throws IOException {
     FileSystemUtil.deleteOutputPath(conf, outputPath);
+    FileSystemUtil.setCombineInputSplitSize(conf,inputPath);
     conf.set("mapred.reduce.child.java.opts","-Xmx8192m");
     Job job=new Job(conf,"transfer nt uid "+inputPath.getName());
     job.setJarByClass(TransNtUidDriver.class);
@@ -46,8 +49,8 @@ public class TransNtUidDriver extends AbstractJob{
     job.setMapOutputKeyClass(Text.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(Text.class);
-    job.setInputFormatClass(TextInputFormat.class);
-    TextInputFormat.addInputPath(job, inputPath);
+    job.setInputFormatClass(CombineTextInputFormat.class);
+    FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     TextOutputFormat.setOutputPath(job,outputPath);
     return job;
