@@ -22,8 +22,8 @@ function anaEstResult(){
   resultRoot=/data0/log/user_category_result/pr/total
   estResultDir=${resultRoot}/${day}
   estResultFile=${estResultDir}/analytics
-  cat ${estResultDir}/*  | awk '{print $1}'| sort | uniq | wc -l >> $estResultFile
-  cat ${estResultDir}/*  | sort | uniq |  \
+  cat ${estResultDir}/*  | awk '{print $1}'| wc -l >> $estResultFile
+  cat ${estResultDir}/*  |   \
           awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep ^[0-9] >> $estResultFile
   cat ${estResultFile} | mail -s " est category analytics to${day}" "yangbo@elex-tech.com"
   hadoop fs -rm ${rootPath}/analysis/category/*
