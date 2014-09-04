@@ -85,6 +85,7 @@ public class Accumulate extends AbstractJob {
       if(node.getNodeType()!=Node.ELEMENT_NODE)
         continue;
       NodeList nodes=node.getChildNodes();
+      System.out.println(nodes.getLength());
       for(int j=0;j<nodes.getLength();j++){
         Node childNode = nodes.item(j);
         if(childNode.getNodeType()!=Node.ELEMENT_NODE)
@@ -114,6 +115,7 @@ public class Accumulate extends AbstractJob {
     init(getOption(OUTPUT_BASE), getOption(STARTTIME), getOption(ENDTIME),getOption(CONTENT,"url"));
     System.out.println("init complete");
     for(Map.Entry<String,SuperTable> entry: table2Type.entrySet()){
+      System.out.println(entry.getKey()+":"+entry.getValue().getClass().getName());
       Job job=prepareJob(entry.getKey(),entry.getValue(),startTimeStamp,endTimeStamp);
       job.submit();
       job.waitForCompletion(true);
