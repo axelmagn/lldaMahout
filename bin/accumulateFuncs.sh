@@ -33,6 +33,16 @@ function getNt()
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $1 --endTime $2  >> $logFile 2>&1
 }
 
+function batchGetNt(){
+  origDay=$1;count=$2
+  for((i=0;i<$count;i++))do
+     startDay=`date +%Y%m%d -d "$origDay +${i} days"`
+     ((j=i+1))
+     endDay=`date +%Y%m%d -d "$origDay +${j} days"
+     getNt ${startDay}000000 ${endDay}000000
+  done
+}
+
 function mergeNations()
 {
   MAIN=com.elex.bigdata.llda.mahout.data.UniqMergeDriver
