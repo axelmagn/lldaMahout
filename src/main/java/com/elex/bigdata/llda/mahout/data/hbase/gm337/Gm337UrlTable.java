@@ -30,13 +30,13 @@ public class Gm337UrlTable extends Gm337Table{
 
   @Override
   public ResultParser getResultParser() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return new Gm337UrlResultParser();
   }
-  private  class Gm337ResultParser implements ResultParser{
+  private  class Gm337UrlResultParser implements ResultParser{
     private String urlPre="www.337.com";
     private Map<String, String> gt2Url = new HashMap<String, String>();
     private int parseNum=0;
-    public Gm337ResultParser(){
+    public Gm337UrlResultParser(){
       gt2Url.put("web", "webgameplay");
       gt2Url.put("mini", "minigame/play");
     }
