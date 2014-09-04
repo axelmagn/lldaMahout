@@ -1,6 +1,4 @@
 #!/bin/bash
-baseDir=`dirname $0`/..
-JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 function anaInfResult(){
    resultRoot=/data0/log/user_category_result/pr

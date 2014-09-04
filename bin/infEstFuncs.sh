@@ -1,6 +1,4 @@
 #!/bin/bash
-baseDir=`dirname $0`/..
-JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
 
 function genDocs(){
    MAIN=com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver
@@ -125,7 +123,7 @@ function infOrigData(){
   localResultRoot=/data0/log/user_category_result/pr
   now=`date`
   echo $now >> $logFile
-  sh $baseDir/bin/accumulateFuncs.sh
+  source $baseDir/bin/accumulateFuncs.sh
   startTime=$1 ; endTime=$2
   countUrl $startTime $endTime
   crondInf ${textInputRoot}/clean/${startTime}_${endTime}

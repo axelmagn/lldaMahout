@@ -73,11 +73,13 @@ public class Accumulate extends AbstractJob {
   private void loadTableTypeConfig(String configFile,String content) throws ParserConfigurationException, IOException, SAXException, ClassNotFoundException, IllegalAccessException, InstantiationException {
     Map<String,SuperTable> table2Type=new HashMap<String,SuperTable>();
     URL url=this.getClass().getResource(configFile);
+    System.out.println(url.getPath());
     DocumentBuilderFactory documentBuilderFactory=DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder=documentBuilderFactory.newDocumentBuilder();
     Document doc=documentBuilder.parse(url.getPath());
     Element rootElement=doc.getDocumentElement();
     NodeList nodeList=rootElement.getElementsByTagName(content);
+    System.out.println(nodeList.getLength());
     for(int i=0;i<nodeList.getLength();i++){
       Node node=nodeList.item(i);
       if(node.getNodeType()!=Node.ELEMENT_NODE)
