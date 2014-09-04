@@ -5,15 +5,15 @@ function anaInfResult(){
    rootPath=/user/hadoop/user_category/lldaMahout
    day=$1
    infResultDir=${resultRoot}/${day}
-   infResultFile=${infResultDir}/result
-   if test -e ${infResultDir}
+   infResultFile=${infResultDir}/analytics
+   if test -e ${infResultFile}
      then
-     rm ${infResultDir}
+     rm ${infResultFile}
    fi
    cat ${infResultDir}/*  | awk '{print $1}'| sort | uniq | wc -l >> $infResultFile
    cat ${infResultDir}/*  | sort | uniq |  \
        awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep ^[0-9] >> $infResultFile
-   cat ${infResultDir}/result | mail -s " inf category result ${day}" "yangbo@elex-tech.com"
+   cat $infResultFile | mail -s " inf category result ${day}" "yangbo@elex-tech.com"
 }
 
 function anaEstResult(){
@@ -21,14 +21,14 @@ function anaEstResult(){
   rootPath=/user/hadoop/user_category/lldaMahout
   resultRoot=/data0/log/user_category_result/pr/total
   estResultDir=${resultRoot}/total/${day}
-  estResultFile=${estResultDir}/result
+  estResultFile=${estResultDir}/analytics
   cat ${estResultDir}/*  | awk '{print $1}'| sort | uniq | wc -l >> $estResultFile
   cat ${estResultDir}/*  | sort | uniq |  \
           awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep ^[0-9] >> $estResultFile
-  cat ${estResultDir}/result | mail -s " est category result to${day}" "yangbo@elex-tech.com"
+  cat ${estResultFile} | mail -s " est category analytics to${day}" "yangbo@elex-tech.com"
   hadoop fs -rm ${rootPath}/analysis/category/*
-  hadoop fs -copyFromLocal  ${resultRoot}/${day}/0.0  ${rootPath}/analysis/category/userCategory
-  hadoop fs -copyFromLocal  ${resultRoot}/${day}/result ${rootPath}/analysis/category/analytics
+  hadoop fs -copyFromLocal  ${estResultDir}/0.0  ${rootPath}/analysis/category/userCategory
+  hadoop fs -copyFromLocal  ${estResultFile} ${rootPath}/analysis/category/analytics
 }
 
 function anaCategoryDist(){
