@@ -110,6 +110,7 @@ public class Accumulate extends AbstractJob {
     if (parseArguments(args) == null)
       return -1;
     init(getOption(OUTPUT_BASE), getOption(STARTTIME), getOption(ENDTIME),getOption(CONTENT,"url"));
+    System.out.println("init complete");
     for(Map.Entry<String,SuperTable> entry: table2Type.entrySet()){
       Job job=prepareJob(entry.getKey(),entry.getValue(),startTimeStamp,endTimeStamp);
       job.submit();
