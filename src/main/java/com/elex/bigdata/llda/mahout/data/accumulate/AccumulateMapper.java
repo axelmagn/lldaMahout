@@ -33,6 +33,7 @@ public class AccumulateMapper extends TableMapper<Text,Text>{
       Class tableTypeClass=Class.forName(tableType);
       SuperTable typeTable=(SuperTable)tableTypeClass.newInstance();
       resultParser=typeTable.getResultParser();
+      System.out.println("tableType "+tableType);
     } catch (ClassNotFoundException e) {
       e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
     } catch (InstantiationException e) {
