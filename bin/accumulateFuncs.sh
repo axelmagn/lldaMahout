@@ -1,5 +1,5 @@
 #!/bin/bash
-dir=`dirname $0`
+dir=`dirname  $0`
 export baseDir=$dir/..
 export JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
 echo $baseDir
