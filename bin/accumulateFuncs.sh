@@ -1,6 +1,7 @@
 #!/bin/bash
 export baseDir=`dirname $0`/..
 export JAR=$baseDir/target/lldaMahout-1.0-SNAPSHOT-jar-with-dependencies.jar
+echo $baseDir
 
 function cleanWord(){
    rootPath=/user/hadoop/user_category/lldaMahout
