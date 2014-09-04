@@ -20,7 +20,7 @@ function anaEstResult(){
   day=$1
   rootPath=/user/hadoop/user_category/lldaMahout
   resultRoot=/data0/log/user_category_result/pr/total
-  estResultDir=${resultRoot}/total/${day}
+  estResultDir=${resultRoot}/${day}
   estResultFile=${estResultDir}/analytics
   cat ${estResultDir}/*  | awk '{print $1}'| sort | uniq | wc -l >> $estResultFile
   cat ${estResultDir}/*  | sort | uniq |  \
@@ -43,7 +43,7 @@ function updateAnaCategoryDist(){
   nationDir=user_category/lldaMahout/nations
   categoryAnaDir=user_category/lldaMahout/analysis/category
   resultRoot=/data0/log/user_category_result/pr/total
-  sh $baseDir/bin/accumulateFuncs.sh
+  source $baseDir/bin/accumulateFuncs.sh
   updateNtByDay $day
   anaEstResult $day
   anaCategoryDist ${nationDir}/to${day} ${categoryAnaDir}/categoryDist
