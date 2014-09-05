@@ -5,7 +5,7 @@ logFile=/data0/log/user_category/processLog/llda/dayEst.log
 oneDayAgo=`date +%Y%m%d -d "-1 days"`
 source $baseDir/bin/infEstFuncs.sh
 echo "updateEstByDay $oneDayAgo" >> $logFile
-updateEstByDay $oneDayAgo
+#updateEstByDay $oneDayAgo
 source $baseDir/bin/categoryAnalysisFuncs.sh
 echo "anaInfResult $oneDayAgo" >> $logFile
 anaInfResult $oneDayAgo
