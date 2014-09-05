@@ -34,7 +34,9 @@ def compareResult(fileName1,fileName2):
 fileName1=sys.argv[1]
 fileName2=sys.argv[2]
 sum2,keys,result=compareResult(fileName1,fileName2)
-for key in list(keys).sort():
+keyList=list(keys)
+keyList.sort()
+for key in keyList:
     if key in sum2:
         print key,sum2[key],result[key]
     else:
