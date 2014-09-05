@@ -48,7 +48,7 @@ function updateAnaCategoryDist(){
   updateNtByDay $day
   anaEstResult $day
   anaCategoryDist ${nationDir}/transTotal ${categoryAnaDir}/dist
-  hadoop fs -cat ${categoryAnaDir}/categoryDist/* > ${resultRoot}/${day}/categoryDist
+  hadoop fs -cat ${categoryAnaDir}/dist/* > ${resultRoot}/${day}/categoryDist
   cat ${resultRoot}/${day}/categoryDist | mail -s " category comp result ${day}" "yangbo@elex-tech.com"
   preDay=`date +%Y%m%d -d "$day -1 days"`
   #compareCategoryDist $day  $preDay
