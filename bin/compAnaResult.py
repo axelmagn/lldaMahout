@@ -8,7 +8,7 @@ def compareResult(fileName1,fileName2):
            break
         tokens=line.split("\t")
         print tokens[0],tokens[1]
-        sum1[tokens[0]]=tokens[1]
+        sum1[tokens[0]]=int(tokens[1])
     file1.close()
     sum2={}
     file2=file(fileName2,"r")
@@ -18,7 +18,7 @@ def compareResult(fileName1,fileName2):
             break
         tokens=line.split("\t")
         print tokens[0],tokens[1]
-        sum2[tokens[0]]=tokens[1]
+        sum2[tokens[0]]=int(tokens[1])
     file2.close()
     result={}
     for key in sum1:
