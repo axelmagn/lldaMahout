@@ -70,7 +70,7 @@ public class UniqMergeDriver extends AbstractJob{
       String[] tokens=value.toString().split("\t");
       if(tokens.length<2)
         return;
-      context.write(new Text(tokens[0] + "\t" + tokens[1]), NullWritable.get());
+      context.write(new Text(tokens[0] + "\t" + tokens[1].substring(0,2)), NullWritable.get());
     }
   }
 
