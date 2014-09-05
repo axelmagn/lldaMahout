@@ -20,7 +20,7 @@ def compareResult(fileName1,fileName2):
         print tokens[0],tokens[1]
         sum2[tokens[0]]=int(tokens[1])
     file2.close()
-    keys=sum1.keys() | sum2.keys()
+    keys=set(sum1.keys()) | set(sum2.keys())
     result={}
     for key in keys:
         if (key in sum2) and (key in sum1):
