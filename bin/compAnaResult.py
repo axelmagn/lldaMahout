@@ -4,6 +4,8 @@ def compareResult(fileName1,fileName2):
     file1=file(fileName1,"r")
     while True:
         line=file1.readline()
+        if len(line)==0:
+           break
         tokens=line.split("\t")
         print tokens[0],tokens[1]
         sum1[tokens[0]]=tokens[1]
