@@ -20,9 +20,15 @@ def compareResult(fileName1,fileName2):
         print tokens[0],tokens[1]
         sum2[tokens[0]]=int(tokens[1])
     file2.close()
+    keys=sum1.keys() | sum2.keys()
     result={}
-    for key in sum1:
-        result[key]=sum2[key]-sum1[key]
+    for key in keys:
+        if (key in sum2) and (key in sum1):
+            result[key]=sum2[key]-sum1[key]
+        elif key in sum2 :
+            result[key]=sum2[key]
+        else:
+            result[key]=0-sum1[key]
     return sum2 , result
 
 fileName1=sys.argv[1]
