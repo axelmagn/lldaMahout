@@ -5,6 +5,7 @@ def compareResult(fileName1,fileName2):
     while True:
         line=file1.readline()
         tokens=line.split(" ")
+        print tokens[0],tokens[1]
         sum1[tokens[0]]=tokens[1]
     file1.close()
     sum2={}
@@ -14,6 +15,7 @@ def compareResult(fileName1,fileName2):
         if len(line)==0:
             break
         tokens=line.split(" ")
+        print tokens[0],tokens[1]
         sum2[tokens[0]]=tokens[1]
     file2.close()
     result={}

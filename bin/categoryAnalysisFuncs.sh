@@ -22,9 +22,13 @@ function anaEstResult(){
   resultRoot=/data0/log/user_category_result/pr/total
   estResultDir=${resultRoot}/${day}
   estResultFile=${estResultDir}/analytics
+  if test -e $estResultFile
+    then
+      rm $estResultFile
+  fi
   cat ${estResultDir}/*  | awk '{print $1}'| wc -l >> $estResultFile
   cat ${estResultDir}/*  |   \
-          awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep ^[0-9] >> $estResultFile
+          awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep ^[0-9]{1,3} >> $estResultFile
   cat ${estResultFile} | mail -s " est category analytics to${day}" "yangbo@elex-tech.com"
   hadoop fs -rm ${rootPath}/analysis/category/*
   hadoop fs -copyFromLocal  ${estResultDir}/0.0  ${rootPath}/analysis/category/userCategory
@@ -61,7 +65,9 @@ function compareCategoryDist(){
   file1=${resultRoot}/${day}/categoryDist; file2=${resultRoot}/${anoDay}/categoryDist
   resultFile=${resultRoot}/${day}/categoryDistComp
   python $baseDir/bin/compAnaResult.py $file1 $file2 > $resultFile
-  cat $resultFile | mail -s " category dist comp result ${day}" "yangbo@elex-tech.com"
+  yangBoMail=yangbo@elex-tech.com
+  chenShiHuaMail=chenshihua@elex-tech.com
+  cat $resultFile | mail -s " category dist comp result ${day}" ""
 }
 
 
