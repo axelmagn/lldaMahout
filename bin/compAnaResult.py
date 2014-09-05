@@ -29,10 +29,13 @@ def compareResult(fileName1,fileName2):
             result[key]=sum2[key]
         else:
             result[key]=0-sum1[key]
-    return sum2 , result
+    return sum2 , keys,result
 
 fileName1=sys.argv[1]
 fileName2=sys.argv[2]
-sum2,result=compareResult(fileName1,fileName2)
-for key in sum2:
-    print key,sum2[key],result[key]
+sum2,keys,result=compareResult(fileName1,fileName2)
+for key in keys:
+    if key in sum2:
+        print key,sum2[key],result[key]
+    else:
+        print key,0,result[key]
