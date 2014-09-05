@@ -67,7 +67,7 @@ function compareCategoryDist(){
   python $baseDir/bin/compAnaResult.py $file1 $file2 > $resultFile
   yangBoMail=yangbo@elex-tech.com
   chenShiHuaMail=chenshihua@elex-tech.com
-  cat $resultFile | mail -s " category dist comp result ${day}" ""
+  cat $resultFile | mail -s " category dist comp result ${day}" "$yangBoMail $chenShiHuaMail"
 }
 
 
