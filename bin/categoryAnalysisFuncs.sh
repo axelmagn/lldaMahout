@@ -49,9 +49,9 @@ function updateAnaCategoryDist(){
   anaEstResult $day
   anaCategoryDist ${nationDir}/transTotal ${categoryAnaDir}/dist
   hadoop fs -cat ${categoryAnaDir}/dist/* > ${resultRoot}/${day}/categoryDist
-  cat ${resultRoot}/${day}/categoryDist | mail -s " category comp result ${day}" "yangbo@elex-tech.com"
+  cat ${resultRoot}/${day}/categoryDist | mail -s " category dist result ${day}" "yangbo@elex-tech.com"
   preDay=`date +%Y%m%d -d "$day -1 days"`
-  #compareCategoryDist $day  $preDay
+  compareCategoryDist $day  $preDay
 
 }
 
@@ -61,7 +61,7 @@ function compareCategoryDist(){
   file1=${resultRoot}/${day}/categoryDist; file2=${resultRoot}/${anoDay}/categoryDist
   resultFile=${resultRoot}/${day}/categoryDistComp
   python $baseDir/bin/compAnaResult.py $file1 $file2 > $resultFile
-  cat $resultFile | mail -s " category comp result ${day}" "yangbo@elex-tech.com"
+  cat $resultFile | mail -s " category dist comp result ${day}" "yangbo@elex-tech.com"
 }
 
 
