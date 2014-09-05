@@ -85,7 +85,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
         if(tokens.length<2)
           continue;
         System.out.println(Integer.parseInt(tokens[0])+"\t"+Integer.parseInt(tokens[1]));
-        category2BloomFilter.put(Integer.parseInt(tokens[0]), new BloomFilter(Integer.parseInt(tokens[1]), 3, 0));
+        category2BloomFilter.put(Integer.parseInt(tokens[0]), new BloomFilter(3*Integer.parseInt(tokens[1]), 3, 0));
       }
       reader.close();
       reader=new BufferedReader(new InputStreamReader(fs.open(categoryFile)));
