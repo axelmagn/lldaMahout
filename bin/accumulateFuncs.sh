@@ -19,7 +19,7 @@ function countUrl()
    echo "hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $1 --endTime $2 >> $logFile 2>&1"
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $1 --endTime $2  >> $logFile 2>&1
 
-   cleanWord ${outputBase}/$1_$2 ${outputBase}/clean/$1_$2
+   cleanWord ${outputBase}/$1_$2/* ${outputBase}/clean/$1_$2
 }
 
 function getNt()
