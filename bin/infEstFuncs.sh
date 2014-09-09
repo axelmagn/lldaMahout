@@ -123,7 +123,7 @@ function infOrigData(){
   localResultRoot=/data0/log/user_category_result/pr
   now=`date`
   echo $now >> $logFile
-  source $baseDir/bin/accumulateFuncs.sh
+  source ${baseDir}/bin/accumulateFuncs.sh
   startTime=$1 ; endTime=$2
   countUrl $startTime $endTime
   crondInf ${textInputRoot}/clean/${startTime}_${endTime}
