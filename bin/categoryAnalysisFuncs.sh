@@ -79,10 +79,10 @@ function compareCategoryDist(){
 function batchAnaCategoryDist(){
    local dayPattern=$1
    local resultRoot=/data0/log/user_category_result/pr/total
-   files=`ls $resultRoot | grep $datPattern`\
+   files=`ls $resultRoot | grep $datPattern`
    source $baseDir/bin/accumulateFuncs.sh
    local nationBase=user_category/lldaMahout/nations
-   for file in files;do
+   for file in ${files[@]};do
     local day=${file##*/}
     anaEstResult $day
     transNtUid ${nationBase}/to${day}
