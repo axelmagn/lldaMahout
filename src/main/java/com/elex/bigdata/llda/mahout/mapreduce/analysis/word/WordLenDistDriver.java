@@ -1,4 +1,4 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.mapreduce.analysis.word;
 
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
  * Time: 5:55 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WordLenDriver {
+public class WordLenDistDriver {
   public static final String SPECIAL = "www.special.jpeg";
   public static final String REPEAT = "repeat";
   public static final String NOREPEAT = "noRepeat";
@@ -52,7 +52,7 @@ public class WordLenDriver {
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
-    job.setJarByClass(WordLenDriver.class);
+    job.setJarByClass(WordLenDistDriver.class);
     job.setJobName("word analysis " + inputPath.toString());
     job.submit();
     job.waitForCompletion(true);

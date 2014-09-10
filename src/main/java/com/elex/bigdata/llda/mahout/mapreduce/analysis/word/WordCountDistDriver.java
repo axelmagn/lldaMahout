@@ -1,8 +1,9 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.mapreduce.analysis.word;
 
 import com.elex.bigdata.hashing.BDMD5;
 import com.elex.bigdata.hashing.HashingException;
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
+import com.elex.bigdata.llda.mahout.mapreduce.analysis.user.WordCountByUserDistDriver;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -29,7 +30,7 @@ import java.util.Iterator;
  * Time: 6:10 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WordCountDriver extends AbstractJob {
+public class WordCountDistDriver extends AbstractJob {
   public static final BDMD5 bdmd5 = BDMD5.getInstance();
 
   @Override
@@ -60,7 +61,7 @@ public class WordCountDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
-    job.setJarByClass(WordCountByUserDriver.class);
+    job.setJarByClass(WordCountByUserDistDriver.class);
     job.setJobName("word count "+inputPath.toString());
     return job;
   }
@@ -116,6 +117,6 @@ public class WordCountDriver extends AbstractJob {
     }
   }
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new WordCountDriver(),args);
+    ToolRunner.run(new Configuration(),new WordCountDistDriver(),args);
   }
 }

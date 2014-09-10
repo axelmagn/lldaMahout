@@ -1,4 +1,4 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.mapreduce.analysis.user;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
@@ -28,7 +28,7 @@ import java.util.Set;
  * Time: 3:50 PM
  * To change this template use File | Settings | File Templates.
  */
-public class GetWordHistoryDriver extends AbstractJob{
+public class WordsByUserDriver extends AbstractJob{
   public static final String UID_FILE="uid_file";
   @Override
   public int run(String[] args) throws Exception {
@@ -61,7 +61,7 @@ public class GetWordHistoryDriver extends AbstractJob{
     TextOutputFormat.setOutputPath(job,outputPath);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(Text.class);
-    job.setJarByClass(GetWordHistoryDriver.class);
+    job.setJarByClass(WordsByUserDriver.class);
     return job;
   }
   public static class GetWordHistoryMapper extends Mapper<Object,Text,Text,Text> {
@@ -95,6 +95,6 @@ public class GetWordHistoryDriver extends AbstractJob{
     }
   }
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new GetWordHistoryDriver(),args);
+    ToolRunner.run(new Configuration(),new WordsByUserDriver(),args);
   }
 }

@@ -4,7 +4,7 @@ function anaUserTrained(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.UserTrainedDriver
+   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.user.WordCountByUserTrainedDistDriver
    echo "hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1"
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
@@ -12,7 +12,7 @@ function anaUserTrained(){
 function anaUser(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCountByUserDriver
+   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.user.WordCountByUserDistDriver
    echo "hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1"
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
@@ -25,27 +25,11 @@ function anaTopicModel(){
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
 
-function anaUniqWord(){
-   rootPath=/user/hadoop/user_category/lldaMahout
-   local logFile=/data0/log/user_category/processLog/llda/analysis.log
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordUniqDriver
-   echo "hadoop jar $JAR $MAIN $1 ${rootPath}/analysis/tmp $2 >> $logFile 2>&1"
-   hadoop jar $JAR $MAIN $1 ${rootPath}/analysis/tmp $2 >> $logFile 2>&1
-}
 
 function anaWordCount(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCountDriver
-   echo "hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1"
-   hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
-}
-
-function anaLappedWord(){
-   rootPath=/user/hadoop/user_category/lldaMahout
-   local logFile=/data0/log/user_category/processLog/llda/analysis.log
-
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.LappedWordDriver
+   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.word.WordCountDistDriver
    echo "hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1"
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
@@ -54,7 +38,7 @@ function anaWordExtract(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordExtractDriver
+   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.word.WordPrefixExtractDriver
    echo "hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1"
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
@@ -65,7 +49,7 @@ function anaHitWord(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.HitWordCountDriver
+   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.word.PreClassifiedWordDriver
    echo "hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources >> $logFile 2>&1"
    hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources >> $logFile 2>&1
 }
@@ -73,7 +57,7 @@ function anaHitWord(){
 function getWordHistory(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.GetWordHistoryDriver
+   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.user.WordsByUserDriver
    echo "hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources >> $logFile 2>&1"
    hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources >> $logFile 2>&1
 }
@@ -82,7 +66,7 @@ function anaWordLen(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordLenDriver
+   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.word.WordLenDistDriver
    echo "hadoop jar $JAR $MAIN $1 $2 >> $logFile 2>&1"
    hadoop jar $JAR $MAIN $1 $2 >> $logFile 2>&1
 }

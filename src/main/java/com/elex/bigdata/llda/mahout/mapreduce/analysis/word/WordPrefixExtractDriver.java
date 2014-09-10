@@ -1,4 +1,4 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.mapreduce.analysis.word;
 
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
@@ -26,7 +26,7 @@ import java.util.*;
  * Time: 3:42 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WordExtractDriver extends AbstractJob{
+public class WordPrefixExtractDriver extends AbstractJob{
   public static final int TOP_COUNT_WORD=10000;
   @Override
   public int run(String[] args) throws Exception {
@@ -56,7 +56,7 @@ public class WordExtractDriver extends AbstractJob{
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
-    job.setJarByClass(WordExtractDriver.class);
+    job.setJarByClass(WordPrefixExtractDriver.class);
     job.setJobName("word extract  "+inputPath.toString());
     return job;
   }
@@ -129,6 +129,6 @@ public class WordExtractDriver extends AbstractJob{
   }
 
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new WordExtractDriver(),args);
+    ToolRunner.run(new Configuration(),new WordPrefixExtractDriver(),args);
   }
 }

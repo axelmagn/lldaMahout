@@ -1,4 +1,4 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.mapreduce.analysis.word;
 
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
@@ -31,7 +31,7 @@ import java.util.Map;
  * Time: 10:47 AM
  * To change this template use File | Settings | File Templates.
  */
-public class HitWordCountDriver extends AbstractJob {
+public class PreClassifiedWordDriver extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
     addOutputOption();
@@ -51,7 +51,7 @@ public class HitWordCountDriver extends AbstractJob {
     FileSystemUtil.setCombineInputSplitSize(conf, inputPath);
     FileSystemUtil.deleteOutputPath(conf, outputPath);
     Job job = new Job(conf,"hit Word Count "+inputPath.getName());
-    job.setMapperClass(WordExtractDriver.WordExtractMapper.class);
+    job.setMapperClass(WordPrefixExtractDriver.WordExtractMapper.class);
     job.setReducerClass(HitWordCountReducer.class);
     job.setOutputKeyClass(Text.class);
     job.setOutputValueClass(IntWritable.class);
@@ -59,7 +59,7 @@ public class HitWordCountDriver extends AbstractJob {
     FileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
-    job.setJarByClass(HitWordCountDriver.class);
+    job.setJarByClass(PreClassifiedWordDriver.class);
     return job;
   }
 
@@ -120,6 +120,6 @@ public class HitWordCountDriver extends AbstractJob {
   }
 
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(), new HitWordCountDriver(), args);
+    ToolRunner.run(new Configuration(), new PreClassifiedWordDriver(), args);
   }
 }

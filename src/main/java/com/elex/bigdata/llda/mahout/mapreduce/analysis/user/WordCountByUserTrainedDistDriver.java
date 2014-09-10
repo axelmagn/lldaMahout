@@ -1,7 +1,5 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.mapreduce.analysis.user;
 
-import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
-import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -27,7 +25,7 @@ import java.util.Iterator;
  * Time: 3:17 PM
  * To change this template use File | Settings | File Templates.
  */
-public class UserTrainedDriver extends AbstractJob{
+public class WordCountByUserTrainedDistDriver extends AbstractJob{
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
@@ -48,14 +46,14 @@ public class UserTrainedDriver extends AbstractJob{
     if(fs.exists(outputPath))
       fs.delete(outputPath);
     job.setMapperClass(UserTrainedMapper.class);
-    job.setReducerClass(WordCountByUserDriver.WordCountByUserReducer.class);
+    job.setReducerClass(WordCountByUserDistDriver.WordCountByUserReducer.class);
     job.setMapOutputKeyClass(Text.class);
     job.setMapOutputValueClass(IntWritable.class);
     job.setInputFormatClass(SequenceFileInputFormat.class);
     SequenceFileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job, outputPath);
-    job.setJarByClass(UserTrainedDriver.class);
+    job.setJarByClass(WordCountByUserTrainedDistDriver.class);
     job.setJobName("user trained analysis "+inputPath.toString());
     return job;
   }
@@ -72,6 +70,6 @@ public class UserTrainedDriver extends AbstractJob{
     }
   }
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new UserTrainedDriver(),args);
+    ToolRunner.run(new Configuration(),new WordCountByUserTrainedDistDriver(),args);
   }
 }

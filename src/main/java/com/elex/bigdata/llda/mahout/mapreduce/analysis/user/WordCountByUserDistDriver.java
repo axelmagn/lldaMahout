@@ -1,4 +1,4 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.mapreduce.analysis.user;
 
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
@@ -15,8 +15,6 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
-import org.apache.mahout.math.MultiLabelVectorWritable;
-import org.apache.mahout.math.Vector;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -28,7 +26,7 @@ import java.util.Iterator;
  * Time: 3:51 PM
  * To change this template use File | Settings | File Templates.
  */
-public class WordCountByUserDriver extends AbstractJob{
+public class WordCountByUserDistDriver extends AbstractJob{
 
   @Override
   public int run(String[] args) throws Exception {
@@ -58,12 +56,12 @@ public class WordCountByUserDriver extends AbstractJob{
     SequenceFileInputFormat.addInputPath(job, inputPath);
     job.setOutputFormatClass(TextOutputFormat.class);
     FileOutputFormat.setOutputPath(job,outputPath);
-    job.setJarByClass(WordCountByUserDriver.class);
+    job.setJarByClass(WordCountByUserDistDriver.class);
     job.setJobName("word count by user analysis "+inputPath.toString());
     return job;
   }
   public static void main(String[] args) throws Exception {
-    ToolRunner.run(new Configuration(),new WordCountByUserDriver(),args);
+    ToolRunner.run(new Configuration(),new WordCountByUserDistDriver(),args);
   }
   public static class WordCountByUserMapper extends Mapper<Object,Text,Text,IntWritable> {
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
