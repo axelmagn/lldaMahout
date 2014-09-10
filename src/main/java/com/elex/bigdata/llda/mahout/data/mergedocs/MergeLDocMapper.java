@@ -31,7 +31,7 @@ import java.util.*;
  * To change this template use File | Settings | File Templates.
  */
 public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text, MultiLabelVectorWritable> {
-  private Set<String> uids = new HashSet<String>();
+  private Map<String,String> uid2CookieId = new HashMap<String,String>();
   private boolean filtering, useCookieId;
 
   public void setup(Context context) throws IOException {
@@ -62,7 +62,7 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
       byte[] family=Bytes.toBytes("cu"),idColumn=Bytes.toBytes("uid");
       int uidNum=0;
       while (uidReader.next(uid, nullWritable)) {
-        uids.add(uid.toString());
+        //uids.add(uid.toString());
         uidNum++;
         Get get=new Get(Bytes.toBytes("u_"+ uid.toString()));
         get.addColumn(family,idColumn);
@@ -76,10 +76,10 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
 
     } else {
       while (uidReader.next(uid, nullWritable)) {
-        uids.add(uid.toString());
+        uid2CookieId.put(uid.toString(),uid.toString());
       }
     }
-    System.out.println("uids is " + uids.size());
+    System.out.println("uids is " + uid2CookieId.size());
     uidReader.close();
     filtering = true;
     System.out.println("filtering is " + filtering);
@@ -97,8 +97,9 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
       }
     }
     for(Result result :table.get(uidGets)){
+      String cookieId=Bytes.toString(result.getRow()).substring(2);
       for(KeyValue kv : result.raw()){
-        uids.add(Bytes.toString(kv.getValue()));
+        uid2CookieId.put(Bytes.toString(kv.getValue()),cookieId);
       }
     }
   }
@@ -107,7 +108,7 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
      /*
         create a labeledDocument with size of dictSize according to value
      */
-    if (!filtering || uids.contains(key.toString()))
-      context.write(key, value);
+    if (!filtering || uid2CookieId.containsKey(key.toString()))
+      context.write(new Text(uid2CookieId.get(key.toString())), value);
   }
 }

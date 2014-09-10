@@ -137,17 +137,17 @@ public class CrondInfDriver extends AbstractJob{
 
     conf.set(GenerateLDocDriver.UID_PATH,uidFilePath.toString());
     conf.set(MergeLDocDriver.USE_COOKIEID,"cookieId");
-    Job complementJob= MergeLDocDriver.prepareJob(conf, comJobInputPaths.toArray(new Path[comJobInputPaths.size()]), docsPreInfPath);
+    Job complementJob= MergeLDocDriver.prepareJob(conf, comJobInputPaths.toArray(new Path[comJobInputPaths.size()]), docsForInfPath);
     ControlledJob controlledComplementJob=new ControlledJob(conf);
     controlledComplementJob.setJob(complementJob);
     jobControl.addJob(controlledComplementJob);
-
+    /*
     Job transferUidJob= TransDocUidDriver.prepareJob(conf, docsPreInfPath, docsForInfPath);
     ControlledJob controlledTransferUidJob=new ControlledJob(conf);
     controlledTransferUidJob.setJob(transferUidJob);
     controlledTransferUidJob.addDependingJob(controlledComplementJob);
     jobControl.addJob(controlledTransferUidJob);
-
+    */
     Path modelInputPath= new Path(getOption(MODEL_INPUT));
     Path docTopicPath= getOutputPath();
     Job infJob=LLDAInfDriver.prepareJob(conf,docsForInfPath,modelInputPath,docTopicPath);
@@ -158,7 +158,7 @@ public class CrondInfDriver extends AbstractJob{
     conf.set(LLDADriver.NUM_TERMS,String.valueOf(numTerms));
     ControlledJob controlledInfJob=new ControlledJob(conf);
     controlledInfJob.setJob(infJob);
-    controlledInfJob.addDependingJob(controlledTransferUidJob);
+    controlledInfJob.addDependingJob(controlledComplementJob);
     jobControl.addJob(controlledInfJob);
 
     Thread jcThread=new Thread(jobControl);

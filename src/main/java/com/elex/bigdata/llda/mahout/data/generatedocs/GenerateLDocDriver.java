@@ -64,7 +64,7 @@ public class GenerateLDocDriver extends AbstractJob {
     if(fs.exists(outputPath))
       fs.delete(outputPath);
     Job genLDocJob=new Job(conf);
-    genLDocJob.setNumReduceTasks(1);
+    genLDocJob.setNumReduceTasks(5);
     genLDocJob.setMapperClass(GenerateLDocMapper.class);
     genLDocJob.setReducerClass(GenerateLDocReducer.class);
     genLDocJob.setMapOutputKeyClass(Text.class);
