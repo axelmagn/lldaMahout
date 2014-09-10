@@ -65,10 +65,6 @@ function updateAnaCategoryDist(){
 
 }
 
-function batchAnaCategoryDist(){
-
-}
-
 function compareCategoryDist(){
   local day=$1;local anoDay=$2
   local resultRoot=/data0/log/user_category_result/pr/total
@@ -78,6 +74,27 @@ function compareCategoryDist(){
   yangBoMail=yangbo@elex-tech.com
   #chenShiHuaMail=chenshihua@elex-tech.com
   cat $resultFile | mail -s " category dist comp result ${anoDay}" "$yangBoMail $chenShiHuaMail"
+}
+
+function batchAnaCategoryDist(){
+   local dayPattern=$1
+   local resultRoot=/data0/log/user_category_result/pr/total
+   files=`ls $resultRoot | grep $datPattern`\
+   source $baseDir/bin/accumulateFuncs.sh
+   local nationBase=user_category/lldaMahout/nations
+   for file in files;do
+    local day=${file##*/}
+    anaEstResult $day
+    transNtUid ${nationBase}/to${day}
+    anaCategoryDist ${nationDir}/transTotal ${categoryAnaDir}/dist
+    hadoop fs -cat ${categoryAnaDir}/dist/* > ${resultRoot}/${day}/categoryDist
+    cat ${resultRoot}/${day}/categoryDist | mail -s " category dist result ${day}" "yangbo@elex-tech.com"
+   done
+   for file in files;do
+    local day=${file##*/}
+    local preDay=`date +%Y%m%d -d "$day -1 days"`
+    compareCategoryDist $preDay $day
+   done
 }
 
 
