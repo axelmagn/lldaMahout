@@ -70,7 +70,7 @@ public class LLDADriver extends AbstractJob {
   public static final String BACKFILL_PERPLEXITY = "backfill_perplexity";
   private static final String MODEL_PATHS = "mahout.lda.cvb.modelPath";
 
-  private static final double DEFAULT_CONVERGENCE_DELTA = 0.00005;
+  private static final double DEFAULT_CONVERGENCE_DELTA = 0.0005;
   private static final double DEFAULT_DOC_TOPIC_SMOOTHING = 0.6;
   private static final double DEFAULT_TERM_TOPIC_SMOOTHING = 0.08;
   private static final int DEFAULT_ITERATION_BLOCK_SIZE = 10;
@@ -235,7 +235,7 @@ public class LLDADriver extends AbstractJob {
     conf.set(MAX_ITERATIONS_PER_DOC, String.valueOf(maxItersPerDoc));
     conf.set(MODEL_WEIGHT, "1"); // TODO
     conf.set(TEST_SET_FRACTION, String.valueOf(testFraction));
-    conf.set("mapred.map.child.java.opts","-Xss3036k -Xmx4048m");
+    conf.set("mapred.map.child.java.opts","-Xss3036k -Xmx5096m");
     conf.set("mapred.reduce.child.java.opts","-Xmx8192m");
 
     List<Double> perplexities = Lists.newArrayList();
