@@ -177,12 +177,12 @@ function updateEstByDay(){
   #echo "---------------------------------------------------------------------------------" >> $logFile
   #echo ${now} >> $logFile
 
-  updateDict  url_count/all_projects/clean/${day}*
-  mergeDocs  ${multiInput} ${mergeOutput}
-  transDocUid ${mergeOutput} ${estInput}
+  #updateDict  url_count/all_projects/clean/${day}*
+  #mergeDocs  ${multiInput} ${mergeOutput}
+  #transDocUid ${mergeOutput} ${estInput}
   #hadoop fs -rm -r ${rootPath}/tmpModels/*
-  estDocs ${estInput}
-  etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${day}000000
+  #estDocs ${estInput}
+  #etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${day}000000
 
 }
 
