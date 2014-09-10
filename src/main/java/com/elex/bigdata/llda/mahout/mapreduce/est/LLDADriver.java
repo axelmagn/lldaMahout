@@ -306,12 +306,13 @@ public class LLDADriver extends AbstractJob {
     Job topicModelOutputJob = topicModelOutputPath != null
       ? writeTopicModel(conf, finalIterationData, topicModelOutputPath)
       : null;
-    Job docInferenceJob = docTopicOutputPath != null
-      ? writeDocTopicInference(conf, inputPath, finalIterationData, docTopicOutputPath)
-      : null;
     if (topicModelOutputJob != null && !topicModelOutputJob.waitForCompletion(true)) {
       return -1;
     }
+    Job docInferenceJob = docTopicOutputPath != null
+      ? writeDocTopicInference(conf, inputPath, finalIterationData, docTopicOutputPath)
+      : null;
+
     if (docInferenceJob != null && !docInferenceJob.waitForCompletion(true)) {
       return -1;
     }
