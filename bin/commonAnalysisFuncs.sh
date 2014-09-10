@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function anaUserTrained(){
+function anaWordCountByUserTrainedDist(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
@@ -9,7 +9,7 @@ function anaUserTrained(){
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
 
-function anaUser(){
+function anaWordCountByUserDist(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
    local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.user.WordCountByUserDistDriver
@@ -26,7 +26,7 @@ function anaTopicModel(){
 }
 
 
-function anaWordCount(){
+function anaWordCountDist(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
    local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.word.WordCountDistDriver
@@ -34,7 +34,7 @@ function anaWordCount(){
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
 
-function anaWordExtract(){
+function extractWordPrefix(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
@@ -45,7 +45,7 @@ function anaWordExtract(){
 
 
 
-function anaHitWord(){
+function anaPreClassifiedWord(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
@@ -54,7 +54,7 @@ function anaHitWord(){
    hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources >> $logFile 2>&1
 }
 
-function getWordHistory(){
+function getWordsByUser(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
    local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.user.WordsByUserDriver
@@ -62,7 +62,7 @@ function getWordHistory(){
    hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources >> $logFile 2>&1
 }
 
-function anaWordLen(){
+function anaWordLenDist(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
