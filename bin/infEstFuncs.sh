@@ -173,10 +173,6 @@ function updateEstByDay(){
   local mergeOutput=${rootPath}/docs/to${day}
   local estInput=${rootPath}/docs/est
 
-  #now=`date +%Y%m%d`
-  #echo "---------------------------------------------------------------------------------" >> $logFile
-  #echo ${now} >> $logFile
-
   #updateDict  url_count/all_projects/clean/${day}*
   #mergeDocs  ${multiInput} ${mergeOutput}
   #transDocUid ${mergeOutput} ${estInput}
@@ -184,5 +180,19 @@ function updateEstByDay(){
   #estDocs ${estInput}
   #etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${day}000000
 
+}
+
+function batchFillUpEst(){
+  local pattern=$1
+  echo $pattern
+  local resultRoot=user_category/lldaMahout/docTopics
+  local localResultRoot=/data0/log/user_category_result/pr/
+  echo " hadoop fs -ls user_category/lldaMahout/docs/to* | grep ${pattern} "
+  files=`hadoop fs -ls user_category/lldaMahout/docs/to* | grep ${pattern} | tr -s " " " " | cut -f8 -d" "`
+  echo ${files[@]}
+  for file in ${files[@]};do
+    estDocs $file
+    etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${file##*to}000000
+  done
 }
 
