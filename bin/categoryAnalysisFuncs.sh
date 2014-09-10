@@ -12,7 +12,7 @@ function anaInfResult(){
    fi
    cat ${infResultDir}/*  | awk '{print $1}'| sort | uniq | wc -l >> $infResultFile
    cat ${infResultDir}/*  | sort | uniq |  \
-       awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep ^[0-9] >> $infResultFile
+       awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep "^[0-9]\{1,3\} " >> $infResultFile
    cat $infResultFile | mail -s " inf category result ${day}" "yangbo@elex-tech.com"
 }
 
