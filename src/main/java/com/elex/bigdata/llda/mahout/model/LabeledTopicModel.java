@@ -279,16 +279,18 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     double[] termSums=new double[terms.size()];
     Arrays.fill(termSums,0.0);
     pTopicGivenTerm(terms, labels, docTopicModel,termSums);
+    /*
     if(trainNum%100000 == 1){
       log.info(Thread.currentThread().getName()+"  trainNum {} ",trainNum );
       StringBuilder builder=new StringBuilder();
       for(double termSum: termSums){
         builder.append(termSum+" , ");
       }
-      log.info("termSums: "+builder.toString());
-    }
+      //log.info("termSums: "+builder.toString());
+    }*/
     normByTopicAndMultiByCount(counts,termSums,labels,docTopicModel);
     long t2 = System.nanoTime();
+    /*
     if (trainNum % 100000 == 1) {
       StringBuilder builder=new StringBuilder();
       for(int label: labels)
@@ -309,7 +311,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       log.info(Thread.currentThread().getName()+"  "+builder1.toString());
       log.info(Thread.currentThread().getName()+"  allTopicProbSum "+allTopicProbSum);
       log.info(Thread.currentThread().getName()+"  "+"train complete");
-    }
+    }*/
   }
 
   public Vector inf(Vector orignal, int[] labels) {
