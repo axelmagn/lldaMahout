@@ -1,9 +1,6 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.dictionary;
 
-import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
-import com.elex.bigdata.llda.mahout.dictionary.UpdateDictDriver;
-import com.elex.bigdata.llda.mahout.dictionary.UpdateDictMapper;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;

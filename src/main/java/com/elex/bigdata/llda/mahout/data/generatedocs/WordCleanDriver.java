@@ -1,16 +1,11 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.data.generatedocs;
 
-import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
-import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
-import com.elex.bigdata.llda.mahout.dictionary.UpdateDictMapper;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
-import com.elex.bigdata.llda.mahout.util.PrefixTrie;
 import com.elex.bigdata.llda.mahout.util.Trie;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -21,10 +16,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 

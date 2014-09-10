@@ -161,6 +161,15 @@ function updateDict(){
   fi
 }
 
+function getDictWord(){
+   rootPath=/user/hadoop/user_category/lldaMahout
+   local logFile=/data0/log/user_category/processLog/llda/getDictWord.log
+
+   local MAIN=com.elex.bigdata.llda.mahout.dictionary.GetDictWordDriver
+   echo "hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1"
+   hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
+}
+
 function updateEstByDay(){
   local day=$1
   local preDay=`date +%Y%m%d -d " $day -1 days"`

@@ -3,7 +3,7 @@ function cleanWord(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
-   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCleanDriver
+   local MAIN=com.elex.bigdata.llda.mahout.data.generatedocs.WordCleanDriver
    echo "hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1"
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
