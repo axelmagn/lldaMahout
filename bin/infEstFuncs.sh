@@ -163,13 +163,13 @@ function updateDict(){
 
 function updateEstByDay(){
   day=$1
-  oneDayAgo=`date +%Y%m%d -d " $day -1 days"`
+  preDay=`date +%Y%m%d -d " $day -1 days"`
   rootPath=/user/hadoop/user_category/lldaMahout
   resultRoot=user_category/lldaMahout/docTopics
   localResultRoot=/data0/log/user_category_result/pr
   logFile=/data0/log/user_category/processLog/llda/dayEst.log
 
-  multiInput=${rootPath}/docs/to${oneDayAgo}:${rootPath}/docs/${day}/*
+  multiInput=${rootPath}/docs/to${preDay}:${rootPath}/docs/${day}/*
   mergeOutput=${rootPath}/docs/to${day}
   estInput=${rootPath}/docs/est
 

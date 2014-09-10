@@ -28,7 +28,7 @@ function anaEstResult(){
   fi
   cat ${estResultDir}/*  | awk '{print $1}'| wc -l >> $estResultFile
   cat ${estResultDir}/*  |   \
-          awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep ^[0-9]{1,3} >> $estResultFile
+          awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}' | grep ^\d{1,3} >> $estResultFile
   cat ${estResultFile} | mail -s " est category analytics to${day}" "yangbo@elex-tech.com"
   hadoop fs -rm ${rootPath}/analysis/category/*
   hadoop fs -copyFromLocal  ${estResultDir}/0.0  ${rootPath}/analysis/category/userCategory
