@@ -83,6 +83,7 @@ function batchAnaCategoryDist(){
    echo ${files[@]}
    source $baseDir/bin/accumulateFuncs.sh
    local nationBase=user_category/lldaMahout/nations
+   local categoryAnaDir=user_category/lldaMahout/analysis/category
    for file in ${files[@]};do
     local day=$file
     anaEstResult $day
