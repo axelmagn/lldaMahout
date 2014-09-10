@@ -182,12 +182,12 @@ function updateEstByDay(){
   local mergeOutput=${rootPath}/docs/to${day}
   local estInput=${rootPath}/docs/est
 
-  #updateDict  url_count/all_projects/clean/${day}*
-  #mergeDocs  ${multiInput} ${mergeOutput}
-  #transDocUid ${mergeOutput} ${estInput}
-  #hadoop fs -rm -r ${rootPath}/tmpModels/*
-  #estDocs ${estInput}
-  #etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${day}000000
+  updateDict  url_count/all_projects/clean/${day}*
+  mergeDocs  ${multiInput} ${mergeOutput}
+  transDocUid ${mergeOutput} ${estInput}
+  hadoop fs -rm -r ${rootPath}/tmpModels/*
+  estDocs ${estInput}
+  etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${day}000000
 
 }
 
