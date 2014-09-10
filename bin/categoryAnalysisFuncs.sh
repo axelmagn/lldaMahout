@@ -91,7 +91,7 @@ function batchAnaCategoryDist(){
     hadoop fs -cat ${categoryAnaDir}/dist/* > ${resultRoot}/${day}/categoryDist
     cat ${resultRoot}/${day}/categoryDist | mail -s " category dist result ${day}" "yangbo@elex-tech.com"
    done
-   for file in files;do
+   for file in ${files[@]};do
     local day=$file
     local preDay=`date +%Y%m%d -d "$day -1 days"`
     compareCategoryDist $preDay $day
