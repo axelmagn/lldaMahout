@@ -8,11 +8,12 @@ echo "-----------------------------------------------------------------------" >
 echo "                               $now                                    " >> $logFile
 echo "-----------------------------------------------------------------------" >> $logFile
 for((i=0;i<3;i++))do
-  echo " ">>$logFile
+  echo "                                                                        ">>$logFile
 done
 echo "                              est $oneDayAgo                            " >> $logFile
 for((i=0;i<3;i++))do
-  echo " ">>$logFile
+  echo "                                                                       ">>$logFile
+done
 echo "-----------------------------------------------------------------------" >> $logFile
 source $baseDir/bin/infEstFuncs.sh
 echo "                   updateEstByDay $oneDayAgo                     " >> $logFile
