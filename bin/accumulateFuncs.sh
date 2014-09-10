@@ -1,9 +1,9 @@
 #!/bin/bash
 function cleanWord(){
    rootPath=/user/hadoop/user_category/lldaMahout
-   logFile=/data0/log/user_category/processLog/llda/analysis.log
+   local logFile=/data0/log/user_category/processLog/llda/analysis.log
 
-   MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCleanDriver
+   local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.WordCleanDriver
    echo "hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1"
    hadoop jar $JAR $MAIN --input $1 --output $2 >> $logFile 2>&1
 }
@@ -11,10 +11,10 @@ function cleanWord(){
 function countUrl()
 {
 
-   MAIN=com.elex.bigdata.llda.mahout.data.accumulate.Accumulate
-   logFile=/data0/log/user_category/processLog/llda/accumulate.log
-   outputBase=url_count/all_projects
-   content=url
+   local MAIN=com.elex.bigdata.llda.mahout.data.accumulate.Accumulate
+   local logFile=/data0/log/user_category/processLog/llda/accumulate.log
+   local outputBase=url_count/all_projects
+   local content=url
 
    echo "hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $1 --endTime $2 >> $logFile 2>&1"
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $1 --endTime $2  >> $logFile 2>&1
@@ -24,10 +24,10 @@ function countUrl()
 
 function getNt()
 {
-   MAIN=com.elex.bigdata.llda.mahout.data.accumulate.Accumulate
-   logFile=/data0/log/user_category/processLog/llda/accumulate.log
-   outputBase=user_category/lldaMahout/nations
-   content=nt
+   local MAIN=com.elex.bigdata.llda.mahout.data.accumulate.Accumulate
+   local logFile=/data0/log/user_category/processLog/llda/accumulate.log
+   local outputBase=user_category/lldaMahout/nations
+   local content=nt
 
    echo "hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $1 --endTime $2 >> $logFile 2>&1"
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $1 --endTime $2  >> $logFile 2>&1
@@ -45,24 +45,24 @@ function batchGetNt(){
 
 function mergeNations()
 {
-  MAIN=com.elex.bigdata.llda.mahout.data.accumulate.UniqMergeDriver
-  logFile=/data0/log/user_category/processLog/llda/mergeNations.log
+  local MAIN=com.elex.bigdata.llda.mahout.data.accumulate.UniqMergeDriver
+  local logFile=/data0/log/user_category/processLog/llda/mergeNations.log
   echo "hadoop jar $JAR $MAIN --multi_input $1 --output $2 >> $logFile 2>&1 "
   hadoop jar $JAR $MAIN --multi_input $1 --output $2 >> $logFile 2>&1
 }
 
 function transNtUid(){
-  MAIN=com.elex.bigdata.llda.mahout.data.transferUid.TransNtUidDriver
-  logFile=/data0/log/user_category/processLog/llda/transferNtUid.log
+  local MAIN=com.elex.bigdata.llda.mahout.data.transferUid.TransNtUidDriver
+  local logFile=/data0/log/user_category/processLog/llda/transferNtUid.log
   echo "hadoop jar $JAR $MAIN --input $1 --output $2  >> $logFile 2>&1 "
   hadoop jar $JAR $MAIN --input $1 --output $2  >> $logFile 2>&1
 }
 
 function updateNtByDay(){
-  day=$1 ; nextDay=`date +%Y%m%d -d "$day +1 days" ` ;preDay=`date +%Y%m%d -d "$day -1 days" `
-  startTime=${day:0:8}000000; endTime=${nextDay}000000
+  local day=$1 ; local nextDay=`date +%Y%m%d -d "$day +1 days" ` ;local preDay=`date +%Y%m%d -d "$day -1 days" `
+  local startTime=${day:0:8}000000; local endTime=${nextDay}000000
   getNt  $startTime $endTime
-  outputBase=user_category/lldaMahout/nations
+  local outputBase=user_category/lldaMahout/nations
   mergeNations ${outputBase}/${startTime}_${endTime}/*:${outputBase}/to${preDay} ${outputBase}/to${day:0:8}
   transNtUid  ${outputBase}/to${day:0:8} ${outputBase}/transTotal
 }
@@ -73,7 +73,7 @@ function Error()
 }
 
 function batchCountUrl(){
-  pattern=$1
+  local pattern=$1
   echo $pattern
   echo " hadoop fs -ls url_count/all_projects/ | grep ${pattern} "
   files=`hadoop fs -ls url_count/all_projects/ | grep ${pattern} | tr -s " " " " | cut -f8 -d" "`
@@ -88,7 +88,7 @@ function batchCountUrl(){
 }
 
 function batchCleanWord(){
-   pattern=$1
+   local pattern=$1
    echo $pattern
    echo " hadoop fs -ls url_count/all_projects/ | grep ${pattern} "
    files=`hadoop fs -ls url_count/all_projects/ | grep ${pattern} | tr -s " " " " | cut -f8 -d" "`
@@ -103,9 +103,9 @@ function batchCleanWord(){
 }
 
 function reCleanWord(){
-   startDayCount=$1
-   endDayCount=$2
-   textInputRoot=url_count/all_projects
+   local startDayCount=$1
+   local endDayCount=$2
+   local textInputRoot=url_count/all_projects
    for((i=${startDayCount};i<${endDayCount};i++))do
      specialDay=`date +%Y%m%d -d "-${i} days"`
      hadoop fs -rm -r ${textInputRoot}/clean/${specialDay}*
