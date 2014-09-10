@@ -108,7 +108,12 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
      /*
         create a labeledDocument with size of dictSize according to value
      */
-    if (!filtering || uid2CookieId.containsKey(key.toString()))
+    if (!filtering ){
+      context.write(key, value);
+      return;
+    }
+    if(uid2CookieId.containsKey(key.toString())){
       context.write(new Text(uid2CookieId.get(key.toString())), value);
+    }
   }
 }
