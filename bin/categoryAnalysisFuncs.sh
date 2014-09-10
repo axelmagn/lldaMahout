@@ -65,6 +65,10 @@ function updateAnaCategoryDist(){
 
 }
 
+function batchAnaCategoryDist(){
+
+}
+
 function compareCategoryDist(){
   local day=$1;local anoDay=$2
   local resultRoot=/data0/log/user_category_result/pr/total
