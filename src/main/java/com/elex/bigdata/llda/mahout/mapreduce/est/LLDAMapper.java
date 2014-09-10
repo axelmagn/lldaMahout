@@ -31,7 +31,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
   private LabeledTopicModel readModel;
   private LabeledTopicModel writeModel;
   private int maxIters;
-  private int sampleRatio=50000,index=0;
+  //private int sampleRatio=50000,index=0;
   private int[] topics;
 
   protected LabeledModelTrainer getModelTrainer() {
@@ -85,6 +85,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
     int[] labels=doc.getLabels();
     if(labels.length==0)
     labels=topics;
+    /*
     if((index++)>=sampleRatio){
       index=0;
       StringBuilder vectorStr=new StringBuilder();
@@ -98,7 +99,7 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
       for(int label: labels)
         labelStr.append(label+" ");
       log.info("labels is: "+labelStr.toString());
-    }
+    }*/
     modelTrainer.train(doc.getVector(), labels, true);
   }
 
