@@ -187,7 +187,7 @@ function batchFillUpEst(){
   echo $pattern
   local resultRoot=user_category/lldaMahout/docTopics
   local localResultRoot=/data0/log/user_category_result/pr/
-  echo " hadoop fs -ls user_category/lldaMahout/docs/to* | grep ${pattern} "
+  echo " hadoop fs -ls user_category/lldaMahout/docs/ | grep to${pattern} "
   files=`hadoop fs -ls user_category/lldaMahout/docs/to* | grep ${pattern} | tr -s " " " " | cut -f8 -d" "`
   echo ${files[@]}
   for file in ${files[@]};do
