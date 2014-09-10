@@ -17,7 +17,7 @@ done
 echo "-----------------------------------------------------------------------" >> $logFile
 source $baseDir/bin/infEstFuncs.sh
 echo "                   updateEstByDay $oneDayAgo                     " >> $logFile
-#updateEstByDay $oneDayAgo
+updateEstByDay $oneDayAgo
 echo "                   updateEstByDay $oneDayAgo finished            " >> $logFile
 oneDayAgo=`date +%Y%m%d -d "-1 days"`
 source ${baseDir}/bin/categoryAnalysisFuncs.sh
