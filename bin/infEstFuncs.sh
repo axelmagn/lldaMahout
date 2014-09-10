@@ -191,7 +191,9 @@ function batchFillUpEst(){
   files=`hadoop fs -ls user_category/lldaMahout/docs/to* | grep ${pattern} | tr -s " " " " | cut -f8 -d" "`
   echo ${files[@]}
   for file in ${files[@]};do
+    echo "estDocs $file"
     estDocs $file
+    echo "etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${file##*to}000000"
     etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${file##*to}000000
   done
 }
