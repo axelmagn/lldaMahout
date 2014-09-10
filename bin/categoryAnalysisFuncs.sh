@@ -88,7 +88,7 @@ function batchAnaCategoryDist(){
     local day=$file
     anaEstResult $day
     transNtUid ${nationBase}/to${day} ${nationBase}/transTotal
-    anaCategoryDist ${nationDir}/transTotal ${categoryAnaDir}/dist
+    anaCategoryDist ${nationBase}/transTotal ${categoryAnaDir}/dist
     hadoop fs -cat ${categoryAnaDir}/dist/* > ${resultRoot}/${day}/categoryDist
     cat ${resultRoot}/${day}/categoryDist | mail -s " category dist result ${day}" "yangbo@elex-tech.com"
    done
