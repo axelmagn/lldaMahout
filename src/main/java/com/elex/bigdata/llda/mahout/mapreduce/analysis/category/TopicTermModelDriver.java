@@ -1,4 +1,4 @@
-package com.elex.bigdata.llda.mahout.mapreduce.analysis;
+package com.elex.bigdata.llda.mahout.mapreduce.analysis.category;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;

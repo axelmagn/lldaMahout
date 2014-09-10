@@ -27,13 +27,13 @@ function anaEstResult(){
     then
       rm $estResultFile
   fi
-  cat ${estResultDir}/*  | awk '{print $1}'| wc -l >> $estResultFile
+  cat ${estResultDir}/0.0  | awk '{print $1}'| wc -l >> $estResultFile
   if test -e $tmpFile
     then
       rm $tmpFile
   fi
-  echo "cat ${estResultDir}/*  | awk '{sum[\$2]+=1}END{for(key in sum){print key,sum[key]}}'  >> $tmpFile"
-  cat ${estResultDir}/*  | awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}'  >> $tmpFile
+  echo "cat ${estResultDir}/0.0  | awk '{sum[\$2]+=1}END{for(key in sum){print key,sum[key]}}'  >> $tmpFile"
+  cat ${estResultDir}/0.0  | awk '{sum[$2]+=1}END{for(key in sum){print key,sum[key]}}'  >> $tmpFile
   cat ${tmpFile} | grep "^[0-9]\{1,3\} " >> $estResultFile
   cat ${estResultFile} | mail -s " est category analytics to${day}" "yangbo@elex-tech.com"
   hadoop fs -rm ${rootPath}/analysis/category/*
@@ -43,7 +43,7 @@ function anaEstResult(){
 
 function anaCategoryDist(){
   local rootPath=/user/hadoop/user_category/lldaMahout
-  local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.CategoryAnalyzeTool
+  local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.category.CategoryAnalyzeTool
   local logFile=/data0/log/user_category/processLog/llda/analysis/categoryDist.log
   echo "hadoop jar $JAR $MAIN --input $1 --output $2 --category_result_dir ${rootPath}/analysis/category >> $logFile 2>&1"
   hadoop jar $JAR $MAIN --input $1 --output $2 --category_result_dir ${rootPath}/analysis/category >> $logFile 2>&1
@@ -72,7 +72,7 @@ function compareCategoryDist(){
   local resultFile=${resultRoot}/${day}/categoryDistComp
   python $baseDir/bin/compAnaResult.py $file1 $file2 > $resultFile
   yangBoMail=yangbo@elex-tech.com
-  #chenShiHuaMail=chenshihua@elex-tech.com
+  chenShiHuaMail=chenshihua@elex-tech.com
   cat $resultFile | mail -s " category dist comp result ${anoDay}" "$yangBoMail $chenShiHuaMail"
 }
 
