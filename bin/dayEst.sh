@@ -16,6 +16,7 @@ for((i=0;i<3;i++))do
 done
 echo "-----------------------------------------------------------------------" >> $logFile
 source $baseDir/bin/infEstFuncs.sh
+
 echo "                   updateEstByDay $oneDayAgo                     " >> $logFile
 updateEstByDay $oneDayAgo
 echo "                   updateEstByDay $oneDayAgo finished            " >> $logFile
