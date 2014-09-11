@@ -68,7 +68,8 @@ public class IdfDriver extends AbstractJob {
   }
 
   public static class IdfReducer extends Reducer<Text,Text,Text,DoubleWritable> {
-    private double numSum=100*10000;
+    private double numSum=30*10000;
+    double  LOG2=Math.log(2);
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       Set<String> uids=new HashSet<String>();
       int count=0;
@@ -77,8 +78,8 @@ public class IdfDriver extends AbstractJob {
         uids.add(tokens[0]);
         count+=Integer.parseInt(tokens[1]);
       }
-      if (count>DEFAULT_MIN_COUNT)
-        context.write(key,new DoubleWritable(Math.log(numSum/uids.size())/Math.log(2)));
+      if (count>DEFAULT_MIN_COUNT && uids.size()>=5)
+        context.write(new Text(key.toString()+"\t"+count),new DoubleWritable(Math.log(numSum/uids.size())/LOG2));
     }
   }
 
