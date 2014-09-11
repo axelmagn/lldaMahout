@@ -198,10 +198,10 @@ function updateEstByDay(){
   local estInput=${rootPath}/docs/est
 
   getDictWord  url_count/all_projects/clean/${day}* user_category/lldaMahout/analysis/dictOut/${day:4:8}
-  updateDict  url_count/all_projects/clean/${day}*
+  #updateDict  url_count/all_projects/clean/${day}*
   mergeDocs  ${multiInput} ${mergeOutput}
   transDocUid ${mergeOutput} ${estInput}
-  hadoop fs -rm -r ${rootPath}/tmpModels/model-[23]*
+  hadoop fs -rm -r ${rootPath}/tmpModels/model-*
   estDocs ${estInput}
   etl ${resultRoot}/est ${resultRoot}/est_result ${localResultRoot}/total ${day}000000
 
