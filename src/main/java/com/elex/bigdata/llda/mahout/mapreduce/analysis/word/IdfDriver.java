@@ -78,7 +78,7 @@ public class IdfDriver extends AbstractJob {
         count+=Integer.parseInt(tokens[1]);
       }
       if (count>DEFAULT_MIN_COUNT)
-        context.write(key,new DoubleWritable(Math.log(numSum/uids.size())));
+        context.write(key,new DoubleWritable(Math.log(numSum/uids.size())/Math.log(2)));
     }
   }
 
