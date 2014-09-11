@@ -26,6 +26,7 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class IdfDriver extends AbstractJob {
+  public static int DEFAULT_MIN_COUNT=5;
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
@@ -59,9 +60,9 @@ public class IdfDriver extends AbstractJob {
   public static class IdfMapper extends Mapper<Object,Text,Text,Text> {
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
       String[] tokens=value.toString().split("\t");
-      if(tokens.length<2)
+      if(tokens.length<3)
         return;
-      context.write(new Text(tokens[1]),new Text(tokens[0]));
+      context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
     }
 
   }
@@ -70,9 +71,14 @@ public class IdfDriver extends AbstractJob {
     private double numSum=100*10000;
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       Set<String> uids=new HashSet<String>();
-      for(Text value: values)
-        uids.add(value.toString());
-      context.write(key,new DoubleWritable(Math.log(numSum/uids.size())));
+      int count=0;
+      for(Text value: values){
+        String[] tokens=value.toString().split("\t");
+        uids.add(tokens[0]);
+        count+=Integer.parseInt(tokens[1]);
+      }
+      if (count>DEFAULT_MIN_COUNT)
+        context.write(key,new DoubleWritable(Math.log(numSum/uids.size())));
     }
   }
 
