@@ -34,4 +34,8 @@ public class PasswdGenerator {
     }
     */
   }
+  @Test
+  public void testMath(){
+     System.out.println(Math.log10(15));
+  }
 }
