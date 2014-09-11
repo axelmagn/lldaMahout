@@ -5,7 +5,6 @@ import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -68,7 +67,7 @@ public class IdfDriver extends AbstractJob {
   }
 
   public static class IdfReducer extends Reducer<Text,Text,Text,DoubleWritable> {
-    private double numSum=1000*10000;
+    private double numSum=100*10000;
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       Set<String> uids=new HashSet<String>();
       for(Text value: values)
