@@ -40,8 +40,8 @@ function batchGenDocsByDay(){
   local rootPath=/user/hadoop/user_category/lldaMahout
   local textInputRoot=url_count/all_projects
   pattern=$1
-  echo " hadoop fs -ls user_category/lldaMahout/docs | grep ${pattern} "
-  files=`hadoop fs -ls user_category/lldaMahout/docs | grep ${pattern} | tr -s " " " " | cut -f8 -d" "`
+  echo " hadoop fs -ls user_category/lldaMahout/docs | grep /${pattern} "
+  files=`hadoop fs -ls user_category/lldaMahout/docs | grep /${pattern} | tr -s " " " " | cut -f8 -d" "`
   echo ${files[@]}
   for file in ${files[@]};do
     local specialDay=${file##*/}
