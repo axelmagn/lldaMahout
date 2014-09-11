@@ -59,7 +59,7 @@ public class UpdateDictDriver extends AbstractJob{
   public static Job prepareJob(Configuration conf,Path inputPath,Path dictRootPath) throws IOException {
     FileSystemUtil.setCombineInputSplitSize(conf,inputPath);
     conf.set(DICT_ROOT,dictRootPath.toString());
-    Path dictOutputPath=new Path(dictRootPath,"updateDictOut_"+inputPath.getName().substring(0,inputPath.getName().length()-1));
+    Path dictOutputPath=new Path(dictRootPath,"dictOut");
     FileSystem fs=FileSystem.get(conf);
     if(fs.exists(dictOutputPath))
       fs.delete(dictOutputPath,true);

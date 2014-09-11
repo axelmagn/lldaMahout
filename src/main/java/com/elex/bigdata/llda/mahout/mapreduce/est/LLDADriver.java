@@ -235,9 +235,9 @@ public class LLDADriver extends AbstractJob {
     conf.set(MAX_ITERATIONS_PER_DOC, String.valueOf(maxItersPerDoc));
     conf.set(MODEL_WEIGHT, "1"); // TODO
     conf.set(TEST_SET_FRACTION, String.valueOf(testFraction));
-    conf.set("mapred.map.child.java.opts","-Xss3036k -Xmx4596m");
+    conf.set("mapred.map.child.java.opts","-Xss3036k -Xmx4096m");
     conf.set("mapred.reduce.child.java.opts","-Xmx6192m");
-    conf.set("mapred.map.tasks.speculative.execution","false");
+    //conf.set("mapred.map.tasks.speculative.execution","false");
 
     List<Double> perplexities = Lists.newArrayList();
     for (int i = 1; i <= iterationNumber; i++) {
