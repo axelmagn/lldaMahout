@@ -97,11 +97,11 @@ public class IdfDriver extends AbstractJob {
         return;
       switch (action){
         case FILTER:
-          if(prefixTrie.prefixSearch(tokens[1])!=-1||urls.contains(tokens[1]))
+          if(prefixTrie.prefixSearch(tokens[1])==-1&&!urls.contains(tokens[1]))
             context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
           break;
         case GET:
-          if(prefixTrie.prefixSearch(tokens[1])==-1 && !urls.contains(tokens[1]))
+          if(prefixTrie.prefixSearch(tokens[1])!=-1 || urls.contains(tokens[1]))
             context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
           break;
         default:
