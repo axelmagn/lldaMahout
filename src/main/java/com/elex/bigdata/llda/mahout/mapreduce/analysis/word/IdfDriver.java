@@ -78,6 +78,7 @@ public class IdfDriver extends AbstractJob {
        Configuration conf=new Configuration();
        String actionStr=conf.get(CALSSIFIED_URL);
        if(!ACTION.valueStrs().contains(actionStr)){
+         System.out.println(actionStr);
          System.out.println("for option classified_url,you should input filter,get or pass");
          throw new IOException("for option classified_url,you should input filter,get or pass");
        }
