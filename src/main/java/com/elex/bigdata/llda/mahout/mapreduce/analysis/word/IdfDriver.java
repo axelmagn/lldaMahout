@@ -48,7 +48,7 @@ public class IdfDriver extends AbstractJob {
     conf.set(GenerateLDocDriver.RESOURCE_ROOT,resourceRoot);
     String actionStr=getOption(CALSSIFIED_URL);
     System.out.println(resourceRoot+"\t"+actionStr);
-    conf.set(CALSSIFIED_URL,actionStr);
+    conf.set(CALSSIFIED_URL, actionStr);
     Job job=prepareJob(conf,getInputPath(),getOutputPath());
     job.submit();
     job.waitForCompletion(true);
@@ -85,7 +85,7 @@ public class IdfDriver extends AbstractJob {
          System.out.println("for option classified_url,you should input filter,get or pass");
          throw new IOException("for option classified_url,you should input filter,get or pass");
        }
-       action=ACTION.valueOf(actionStr);
+       action=ACTION.valueOf(actionStr.toUpperCase());
        if(action!=ACTION.PASS){
          Pair<Map<String,String>,Map<String,Integer>> pair=GenerateLDocReducer.loadUrlTopics(conf,prefixTrie);
          urls=pair.getFirst().keySet();
@@ -130,9 +130,12 @@ public class IdfDriver extends AbstractJob {
     FILTER("filter"),
     GET("get"),
     PASS("pass");
-    String action;
-    ACTION(String action){
+    private String action;
+    private ACTION(String action){
       this.action=action;
+    }
+    public String getAction(){
+      return action;
     }
     public static Set<String> valueStrs(){
       Set<String> strs=new HashSet<String>();

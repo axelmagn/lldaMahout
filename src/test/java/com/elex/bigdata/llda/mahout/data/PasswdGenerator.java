@@ -2,7 +2,9 @@ package com.elex.bigdata.llda.mahout.data;
 
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,5 +39,31 @@ public class PasswdGenerator {
   @Test
   public void testMath(){
      System.out.println(Math.log10(15));
+  }
+  @Test
+  public void testEnum(){
+    ACTION action=ACTION.valueOf("PASS");
+    System.out.println(action);
+  }
+  public  enum ACTION{
+    FILTER("filter"),
+    GET("get"),
+    PASS("pass");
+    private String action;
+    private ACTION(String action){
+      this.action=action;
+    }
+    public String getAction(){
+      return action;
+    }
+    public void setAction(String action){
+      this.action=action;
+    }
+    public static Set<String> valueStrs(){
+      Set<String> strs=new HashSet<String>();
+      strs.add("filter");strs.add("get");strs.add("pass");
+      return strs;
+    }
+
   }
 }
