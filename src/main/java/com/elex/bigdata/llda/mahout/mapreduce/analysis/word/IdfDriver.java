@@ -44,8 +44,11 @@ public class IdfDriver extends AbstractJob {
     if(parseArguments(args)==null)
       return -1;
     Configuration conf=getConf();
-    conf.set(GenerateLDocDriver.RESOURCE_ROOT,getOption(GenerateLDocDriver.RESOURCE_ROOT));
-    conf.set(CALSSIFIED_URL,getOption(CALSSIFIED_URL));
+    String resourceRoot=getOption(GenerateLDocDriver.RESOURCE_ROOT);
+    conf.set(GenerateLDocDriver.RESOURCE_ROOT,resourceRoot);
+    String actionStr=getOption(CALSSIFIED_URL);
+    System.out.println(resourceRoot+"\t"+actionStr);
+    conf.set(CALSSIFIED_URL,actionStr);
     Job job=prepareJob(conf,getInputPath(),getOutputPath());
     job.submit();
     job.waitForCompletion(true);
