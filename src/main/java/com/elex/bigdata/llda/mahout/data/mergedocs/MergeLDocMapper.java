@@ -64,6 +64,7 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
       while (uidReader.next(uid, nullWritable)) {
         //uids.add(uid.toString());
         uidNum++;
+        uid2CookieId.put(uid.toString(),uid.toString());
         Get get=new Get(Bytes.toBytes("u_"+ uid.toString()));
         get.addColumn(family,idColumn);
         gets.add(get);
@@ -89,8 +90,12 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
     List<Get> uidGets=new ArrayList<Get>();
     byte[] family=Bytes.toBytes("cu"),idColumn=Bytes.toBytes("uid");
     for(Result result: table.get(cookieIdGets)){
+      byte[] rk=result.getRow();
+      String uid=Bytes.toString(Arrays.copyOfRange(rk,2,rk.length));
       for(KeyValue kv :result.raw()){
-        Get uidGet =new Get(Bytes.toBytes("c_"+Bytes.toString(kv.getValue())));
+        String cookieId=Bytes.toString(kv.getValue());
+        uid2CookieId.put(uid,cookieId);
+        Get uidGet =new Get(Bytes.toBytes("c_"+cookieId));
         uidGet.setMaxVersions(50);
         uidGet.addColumn(family,idColumn);
         uidGets.add(uidGet);
