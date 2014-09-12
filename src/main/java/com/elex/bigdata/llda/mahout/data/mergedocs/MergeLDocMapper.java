@@ -90,9 +90,8 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
     List<Get> uidGets=new ArrayList<Get>();
     byte[] family=Bytes.toBytes("cu"),idColumn=Bytes.toBytes("uid");
     for(Result result: table.get(cookieIdGets)){
-      byte[] rk=result.getRow();
-      String uid=Bytes.toString(rk).substring(2);
       for(KeyValue kv :result.raw()){
+        String uid=Bytes.toString(kv.getRow()).substring(2);
         String cookieId=Bytes.toString(kv.getValue());
         uid2CookieId.put(uid,cookieId);
         Get uidGet =new Get(Bytes.toBytes("c_"+cookieId));
