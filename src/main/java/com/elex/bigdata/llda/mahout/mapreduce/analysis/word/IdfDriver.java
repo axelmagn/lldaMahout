@@ -113,6 +113,17 @@ public class IdfDriver extends AbstractJob {
   public static class IdfReducer extends Reducer<Text,Text,Text,DoubleWritable> {
     private double numSum=30*10000;
     double  LOG2=Math.log(2);
+    private ACTION action;
+    public void setup(Context context) throws IOException {
+      Configuration conf=context.getConfiguration();
+      String actionStr=conf.get(CALSSIFIED_URL);
+      System.out.println(actionStr);
+      if(!ACTION.valueStrs().contains(actionStr)){
+        System.out.println("for option classified_url,you should input filter,get or pass");
+        throw new IOException("for option classified_url,you should input filter,get or pass");
+      }
+      action=ACTION.valueOf(actionStr.toUpperCase());
+    }
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       Set<String> uids=new HashSet<String>();
       int count=0;
@@ -121,8 +132,14 @@ public class IdfDriver extends AbstractJob {
         uids.add(tokens[0]);
         count+=Integer.parseInt(tokens[1]);
       }
-      if (count>DEFAULT_MIN_COUNT && uids.size()>=5)
-        context.write(new Text(key.toString()+"\t"+uids.size()+"\t"+count),new DoubleWritable(Math.log(numSum/uids.size())/LOG2));
+      switch (action){
+        case GET:
+          context.write(new Text(key.toString()+"\t"+uids.size()+"\t"+count),new DoubleWritable(Math.log(numSum/uids.size())/LOG2));
+          break;
+        default:
+          if (count>DEFAULT_MIN_COUNT && uids.size()>=5)
+            context.write(new Text(key.toString()+"\t"+uids.size()+"\t"+count),new DoubleWritable(Math.log(numSum/uids.size())/LOG2));
+      }
     }
   }
 
