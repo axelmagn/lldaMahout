@@ -132,9 +132,7 @@ public class IdfDriver extends AbstractJob {
     }
     public static Set<String> valueStrs(){
       Set<String> strs=new HashSet<String>();
-      for(ACTION subAction :ACTION.values()){
-        strs.add(subAction.toString());
-      }
+      strs.add("filter");strs.add("get");strs.add("pass");
       return strs;
     }
 
