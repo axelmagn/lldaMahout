@@ -1,7 +1,11 @@
 package com.elex.bigdata.llda.mahout.mapreduce.analysis.word;
 
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocDriver;
+import com.elex.bigdata.llda.mahout.data.generatedocs.GenerateLDocReducer;
 import com.elex.bigdata.llda.mahout.data.inputformat.CombineTextInputFormat;
+import com.elex.bigdata.llda.mahout.dictionary.UpdateDictReducer;
 import com.elex.bigdata.llda.mahout.util.FileSystemUtil;
+import com.elex.bigdata.llda.mahout.util.PrefixTrie;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
@@ -13,9 +17,11 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ToolRunner;
 import org.apache.mahout.common.AbstractJob;
+import org.apache.mahout.common.Pair;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -27,12 +33,19 @@ import java.util.Set;
  */
 public class IdfDriver extends AbstractJob {
   public static int DEFAULT_MIN_COUNT=5;
+  public static final String CALSSIFIED_URL="classified_url";
+
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();
     addOutputOption();
+    addOption(GenerateLDocDriver.RESOURCE_ROOT,"rDir","specify the resources Dir",true);
+    addOption(CALSSIFIED_URL, "fcu", "specify if filter url classified", true);
     if(parseArguments(args)==null)
       return -1;
+    Configuration conf=getConf();
+    conf.set(GenerateLDocDriver.RESOURCE_ROOT,getOption(GenerateLDocDriver.RESOURCE_ROOT));
+    conf.set(CALSSIFIED_URL,getOption(CALSSIFIED_URL));
     Job job=prepareJob(getConf(),getInputPath(),getOutputPath());
     job.submit();
     job.waitForCompletion(true);
@@ -58,13 +71,39 @@ public class IdfDriver extends AbstractJob {
   }
 
   public static class IdfMapper extends Mapper<Object,Text,Text,Text> {
+    private ACTION action;
+    private PrefixTrie prefixTrie=new PrefixTrie();
+    private Set<String> urls=new HashSet<String>();
+    public void setup(Context context) throws IOException {
+       Configuration conf=new Configuration();
+       String actionStr=conf.get(CALSSIFIED_URL);
+       if(!ACTION.valueStrs().contains(actionStr)){
+         System.out.println("for option classified_url,you should input filter,get or pass");
+         throw new IOException("for option classified_url,you should input filter,get or pass");
+       }
+       action=ACTION.valueOf(actionStr);
+       if(action!=ACTION.PASS){
+         Pair<Map<String,String>,Map<String,Integer>> pair=GenerateLDocReducer.loadUrlTopics(conf,prefixTrie);
+         urls=pair.getFirst().keySet();
+       }
+    }
     public void map(Object key,Text value,Context context) throws IOException, InterruptedException {
       String[] tokens=value.toString().split("\t");
       if(tokens.length<3)
         return;
-      context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
+      switch (action){
+        case FILTER:
+          if(prefixTrie.prefixSearch(tokens[1])!=-1||urls.contains(tokens[1]))
+            context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
+          break;
+        case GET:
+          if(prefixTrie.prefixSearch(tokens[1])==-1 && !urls.contains(tokens[1]))
+            context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
+          break;
+        default:
+          context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
+      }
     }
-
   }
 
   public static class IdfReducer extends Reducer<Text,Text,Text,DoubleWritable> {
@@ -80,6 +119,27 @@ public class IdfDriver extends AbstractJob {
       }
       if (count>DEFAULT_MIN_COUNT && uids.size()>=5)
         context.write(new Text(key.toString()+"\t"+uids.size()+"\t"+count),new DoubleWritable(Math.log(numSum/uids.size())/LOG2));
+    }
+  }
+
+  public static enum ACTION{
+    FILTER("filter"),
+    GET("get"),
+    PASS("pass");
+    String action;
+    ACTION(String action){
+      this.action=action;
+    }
+    public static Set<String> valueStrs(){
+      Set<String> strs=new HashSet<String>();
+      for(ACTION subAction :ACTION.values()){
+        strs.add(subAction.toString());
+      }
+      return strs;
+    }
+
+    public String toString(){
+      return action;
     }
   }
 
