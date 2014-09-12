@@ -78,7 +78,7 @@ public class IdfDriver extends AbstractJob {
     private PrefixTrie prefixTrie=new PrefixTrie();
     private Set<String> urls=new HashSet<String>();
     public void setup(Context context) throws IOException {
-       Configuration conf=new Configuration();
+       Configuration conf=context.getConfiguration();
        String actionStr=conf.get(CALSSIFIED_URL);
        System.out.println(actionStr);
        if(!ACTION.valueStrs().contains(actionStr)){
