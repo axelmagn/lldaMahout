@@ -75,7 +75,7 @@ function anaIdf(){
    rootPath=/user/hadoop/user_category/lldaMahout
    local logFile=/data0/log/user_category/processLog/llda/analysis.log
    local MAIN=com.elex.bigdata.llda.mahout.mapreduce.analysis.word.IdfDriver
-   echo "hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources --classified_url $3 >> $logFile 2>&1"
-   hadoop jar $JAR $MAIN --input $1 --output $2 --resource_root ${rootPath}/resources --classified_url $3 >> $logFile 2>&1
+   echo "hadoop jar $JAR $MAIN --input $1 --output $2 --classified_url $3 --resource_root ${rootPath}/resources  >> $logFile 2>&1"
+   hadoop jar $JAR $MAIN --input $1 --output $2 --classified_url $3 --resource_root ${rootPath}/resources  >> $logFile 2>&1
 }
 
