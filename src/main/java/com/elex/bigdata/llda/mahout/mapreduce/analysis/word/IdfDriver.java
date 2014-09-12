@@ -126,7 +126,7 @@ public class IdfDriver extends AbstractJob {
     }
   }
 
-  public static enum ACTION{
+  public  enum ACTION{
     FILTER("filter"),
     GET("get"),
     PASS("pass");
