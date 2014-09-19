@@ -424,6 +424,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     while (docElementIter.hasNext()) {
       Vector.Element e = docElementIter.next();
       int term = e.index();
+      if(term>getNumTerms())
+        continue;
       double prob = 0;
       for (int topic : topics) {
         double d = (docTopics.getQuick(topic) + alpha) / norm;
