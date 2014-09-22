@@ -9,29 +9,21 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 import java.util.*;
 
-/**
- * Created with IntelliJ IDEA.
- * User: yb
- * Date: 9/2/14
- * Time: 2:22 PM
- * To change this template use File | Settings | File Templates.
- */
 public class AdNtClickTable extends AdTable {
     private byte[] CATEGORY = Bytes.toBytes("c"); //广告
     private byte[] typeCol = Bytes.toBytes("t");
     private byte[] scoreCf = Bytes.toBytes("h");
     //pId_1+nt_2+time_8+uid_
     private int UID_INDEX = 11, NT_INDEX_START = 1, NT_INDEX_END = 3;
-    private Map<Byte,String> projects;
-
-    AdNtClickTable(){
-        super();
+    private static Map<Byte,String> projects;
+    static{
         projects = new HashMap<Byte, String>();
         Map<String,Byte> projectsName = MetricMapping.getInstance().getAllProjectShortNameMapping();
         for(Map.Entry<String,Byte> pn : projectsName.entrySet()){
             projects.put(pn.getValue(),pn.getKey());
         }
     }
+
 
     @Override
     public Scan getScan(long startTime, long endTime) {
