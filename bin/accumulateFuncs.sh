@@ -33,6 +33,20 @@ function getNt()
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $1 --endTime $2  >> $logFile 2>&1
 }
 
+function countNt()
+{
+   local MAIN=com.elex.bigdata.llda.mahout.data.accumulate.Accumulate
+   local logFile=/data0/log/user_nation/query.log
+   local outputBase=user_attribute/nations
+   local content=count
+
+   local day=$1 ; local nextDay=`date +%Y%m%d -d "$day +1 days" ` ;local preDay=`date +%Y%m%d -d "$day -1 days" `
+   local startTime=${day:0:8}000000; local endTime=${nextDay}000000
+
+   echo "hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $startTime --endTime $endTime >> $logFile 2>&1"
+   hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $startTime --endTime $endTime  >> $logFile 2>&1
+}
+
 function batchGetNt(){
   origDay=$1;count=$2
   for((i=0;i<$count;i++));do
