@@ -130,7 +130,7 @@ public class Accumulate extends AbstractJob {
     TableMapReduceUtil.initTableMapperJob(tableName, scan, AccumulateMapper.class, Text.class, Text.class, job);
     if(content.equals("url"))
       job.setNumReduceTasks(0);
-    else if(content.equals("nt")){
+    else if(content.equals("nt") || content.equals("count")){
       job.setReducerClass(AccumulateNtReducer.class);
       job.setNumReduceTasks(4);
     }
