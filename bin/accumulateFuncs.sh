@@ -50,6 +50,7 @@ function countNt()
    hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/ad_all_log/part* ${local_path}/ad/${day}.log
    hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/gm_user_action/part* ${local_path}/game/${day}.log
    hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/yac_user_action/part* ${local_path}/yac/${day}.log
+   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/nav_all/part* ${local_path}/nav/${day}.log
 }
 
 function batchGetNt(){
