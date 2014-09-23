@@ -45,6 +45,11 @@ function countNt()
 
    echo "hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $startTime --endTime $endTime >> $logFile 2>&1"
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $startTime --endTime $endTime  >> $logFile 2>&1
+
+   local local_path=/data1/user_attribute/nation
+   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/ad_all_log/part* ${local_path}/ad/${day}.log
+   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/gm_user_action/part* ${local_path}/game/${day}.log
+   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/yac_user_action/part* ${local_path}/yac/${day}.log
 }
 
 function batchGetNt(){
