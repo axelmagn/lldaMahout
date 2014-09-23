@@ -50,6 +50,9 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class LLDADriver extends AbstractJob {
+  /*
+      driver for est
+   */
   private static final Logger log = LoggerFactory.getLogger(LLDADriver.class);
 
   public static final String NUM_TOPICS = "num_topics";
@@ -121,12 +124,18 @@ public class LLDADriver extends AbstractJob {
 
     int numTopics = Integer.parseInt(getOption(NUM_TOPICS));
     Path inputPath = getInputPath();
+    // final model output path
     Path topicModelOutputPath = getOutputPath();
+    // max est iterations
     int maxIterations = Integer.parseInt(getOption(DefaultOptionCreator.MAX_ITERATIONS_OPTION));
+    //
     int iterationBlockSize = Integer.parseInt(getOption(ITERATION_BLOCK_SIZE));
+    // indicator to test if est reach convergence
     double convergenceDelta = Double.parseDouble(getOption(DefaultOptionCreator.CONVERGENCE_DELTA_OPTION));
+    // super parameters
     double alpha = Double.parseDouble(getOption(DOC_TOPIC_SMOOTHING));
     double eta = Double.parseDouble(getOption(TERM_TOPIC_SMOOTHING));
+    // num of train threads and model update threads
     int numTrainThreads = Integer.parseInt(getOption(NUM_TRAIN_THREADS));
     int numUpdateThreads = Integer.parseInt(getOption(NUM_UPDATE_THREADS));
     int maxItersPerDoc = Integer.parseInt(getOption(MAX_ITERATIONS_PER_DOC));
@@ -134,7 +143,9 @@ public class LLDADriver extends AbstractJob {
     int numTerms = hasOption(NUM_TERMS)
       ? Integer.parseInt(getOption(NUM_TERMS))
       : getNumTerms(getConf(), dictionaryPath);
+    // doc topic distribution output path
     Path docTopicOutputPath = hasOption(DOC_TOPIC_OUTPUT) ? new Path(getOption(DOC_TOPIC_OUTPUT)) : null;
+    // tmp Path to save tmp model
     Path modelTempPath = hasOption(MODEL_TEMP_DIR)
       ? new Path(getOption(MODEL_TEMP_DIR))
       : getTempPath("topicModelState");
@@ -155,7 +166,7 @@ public class LLDADriver extends AbstractJob {
       modelTempPath, seed, testFraction, numTrainThreads, numUpdateThreads, maxItersPerDoc,
       numReduceTasks, backfillPerplexity);
   }
-
+  // get total topics
   public static int[] getTopics(Configuration conf) throws IOException {
 
     Map<Integer,Integer> child2ParentLabels= GenerateLDocReducer.getLabelRelations(conf);
@@ -165,7 +176,7 @@ public class LLDADriver extends AbstractJob {
       topics[i++]=topicLabel;
     return topics;
   }
-
+  // get dictionary size
   private static int getNumTerms(Configuration conf, Path dictionaryPath) throws IOException {
     FileSystem fs = dictionaryPath.getFileSystem(conf);
     Text key = new Text();

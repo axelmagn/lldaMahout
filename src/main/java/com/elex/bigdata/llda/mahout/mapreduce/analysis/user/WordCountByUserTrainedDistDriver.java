@@ -26,6 +26,9 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class WordCountByUserTrainedDistDriver extends AbstractJob{
+  /*
+      analyze the distribution of word count for each user
+   */
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();

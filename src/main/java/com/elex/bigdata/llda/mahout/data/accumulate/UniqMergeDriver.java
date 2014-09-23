@@ -25,6 +25,10 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class UniqMergeDriver extends AbstractJob{
+  /*
+     to merge nation file
+     the result is uid_nation
+   */
   public static final String MULTI_INPUT="multi_input";
   @Override
   public int run(String[] args) throws Exception {

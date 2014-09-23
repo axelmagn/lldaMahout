@@ -31,6 +31,9 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class WordCountDistDriver extends AbstractJob {
+  /*
+     accumulate distribution for urls count
+   */
   public static final BDMD5 bdmd5 = BDMD5.getInstance();
 
   @Override

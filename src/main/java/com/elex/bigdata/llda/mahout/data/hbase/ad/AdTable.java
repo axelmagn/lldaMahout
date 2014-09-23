@@ -57,7 +57,7 @@ public abstract class AdTable implements SuperTable {
 
     return scan;
   }
-
+  // use keyRangeFilter
   protected List<KeyRange> getSortedKeyRanges(long startTime, long endTime) {
     List<KeyRange> keyRanges = new ArrayList<KeyRange>();
     List<String> projects = new ArrayList<String>();
@@ -93,7 +93,7 @@ public abstract class AdTable implements SuperTable {
     */
     return keyRanges;
   }
-
+  //get KeyRanges
   protected List<KeyRange> getKeyRanges(String project, Set<String> nations, long startTime, long endTime) {
     List<KeyRange> keyRangeList = new ArrayList<KeyRange>();
     for (String nation : nations) {

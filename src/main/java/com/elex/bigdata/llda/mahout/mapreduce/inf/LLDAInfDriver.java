@@ -124,6 +124,7 @@ public class LLDAInfDriver extends AbstractJob{
     return 0;  //To change body of implemented methods use File | Settings | File Templates.
   }
 
+  // get dictionary size
   private static int getNumTerms(Configuration conf, Path dictionaryPath) throws IOException {
     FileSystem fs = dictionaryPath.getFileSystem(conf);
     Text key = new Text();

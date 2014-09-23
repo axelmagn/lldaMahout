@@ -26,6 +26,9 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class UpdateDictDriver extends AbstractJob{
+  /*
+     update dict
+   */
   public static final String DICT_ROOT ="dict_root";
   public static final String COUNT_THRESHOLD="count_threshold";
   public static final String COUNT_UPPER_THRESHOLD="count_upper_threshold";

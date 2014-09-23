@@ -19,6 +19,7 @@ public class MergeLDocReducer extends Reducer<Text,MultiLabelVectorWritable,Text
    public void reduce(Text key,Iterable<MultiLabelVectorWritable> values,Context context) throws IOException, InterruptedException {
      /*
         merge multi labeledDocumentWritable and write to file
+        because a cookieId may map to multi uid ,so a cookieId may map to multi vector
      */
      List<MultiLabelVectorWritable> lDocs=new ArrayList<MultiLabelVectorWritable>();
      for(MultiLabelVectorWritable labelVectorWritable:values){

@@ -25,6 +25,9 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class TransNtUidDriver extends AbstractJob{
+  /*
+     transfer uid in uid_nation file to cookieId
+   */
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();

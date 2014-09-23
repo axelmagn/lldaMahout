@@ -27,9 +27,12 @@ import java.util.Set;
  */
 public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
   private Logger log=Logger.getLogger(GenerateLDocMapper.class);
+  // urls which should be removed
   private Set<String> eliminated_urls=new HashSet<String>();
   private int index=0,sampleRatio=100000;
+  // md5 change url to md5Str
   private BDMD5 bdmd5;
+  //word dictionary
   private Dictionary dict;
   public void setup(Context context) throws IOException {
     InputStream inputStream = this.getClass().getResourceAsStream("/eliminated_urls");
@@ -72,6 +75,7 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
     if((++index)>sampleRatio)
       log.info(value.toString() + " count is " + count);
       */
+    //get key part of url
     String url=uidUrlCount[1];
     int index=url.indexOf('?');
     if(index!=-1)
@@ -86,6 +90,7 @@ public class GenerateLDocMapper extends Mapper<Object,Text,Text,Text> {
         }
       }
     }
+    // if dict contains urlMd5,then write
     try {
       String urlMd5=bdmd5.toMD5(url).substring(UpdateDictDriver.MD5_START_INDEX,UpdateDictDriver.MD5_END_INDEX);
       if(!dict.contains(urlMd5))

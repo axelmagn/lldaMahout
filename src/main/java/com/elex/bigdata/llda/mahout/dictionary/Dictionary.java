@@ -45,6 +45,7 @@ public class Dictionary {
 
    */
   private Logger log=Logger.getLogger(Dictionary.class);
+  //word_md5 to index
   private Map<String, Integer> word_id_map;
   private AtomicInteger dictSize;
   private FileSystem fs;
@@ -95,13 +96,13 @@ public class Dictionary {
     }
     System.out.println("load dict. dict size is "+dictSize.intValue());
   }
-
+  //add word to dict
   public void update(String word) {
     if (word_id_map.containsKey(word))
       return;
     word_id_map.put(word, dictSize.getAndIncrement());
   }
-
+  //test if dict contain word
   public boolean contains(String word) {
     if (word_id_map.containsKey(word))
       return true;

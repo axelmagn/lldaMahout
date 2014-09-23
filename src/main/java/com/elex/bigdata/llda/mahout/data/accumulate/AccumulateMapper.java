@@ -23,7 +23,9 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class AccumulateMapper extends TableMapper<Text,Text>{
+  // to parse Result
   private ResultParser resultParser;
+  // to save recordUnit_count
   private Map<RecordUnit,Integer> recordUnit2Count =new HashMap<RecordUnit, Integer>();
   private int num=0;
   public void setup(Context context){
@@ -51,6 +53,7 @@ public class AccumulateMapper extends TableMapper<Text,Text>{
       else
         recordUnit2Count.put(recordUnit, 1);
     }
+
     if(num%50000==0){
       for(Map.Entry<RecordUnit,Integer> entry: recordUnit2Count.entrySet()){
         context.write(new Text(entry.getKey().toString()),new Text(String.valueOf(entry.getValue())));

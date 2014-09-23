@@ -40,6 +40,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
   // save urlTopics
   private Map<String, String> url_category_map = new HashMap<String, String>();
   private Map<String, Integer> category_label_map = new HashMap<String, Integer>();
+  // tree to save destination topic urls
   PrefixTrie prefixTrie = new PrefixTrie();
 
   // for uid saving
@@ -77,6 +78,8 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     }
   }
 
+  //load topic-urls from resource file 'url_topic',
+
   public static Pair<Map<String,String>,Map<String,Integer>> loadUrlTopics(Configuration conf,PrefixTrie prefixTrie) throws IOException {
     int prefixTrieWordCount=0;
     Map<String,String> url2Category=new HashMap<String, String>();
@@ -111,6 +114,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
     return new Pair<Map<String, String>, Map<String, Integer>>(url2Category,category2Label);
   }
 
+  // get destination topics
   public static Set<Integer> getDestParentLabels() throws IOException {
      BufferedReader reader=new BufferedReader(new InputStreamReader(
        GenerateLDocDriver.class.getResourceAsStream("/"+GenerateLDocDriver.DEST_PARENT_LABELS)));
@@ -121,7 +125,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
      }
     return labels;
   }
-
+  // get 2-level topics(label). return Map<childLabel,ParentLabel>
   public static Map<Integer,Integer> getLabelRelations(Configuration conf) throws IOException {
     Map<Integer,Integer> child2ParentLabelMap=new HashMap<Integer, Integer>();
     FileSystem fs = FileSystem.get(conf);

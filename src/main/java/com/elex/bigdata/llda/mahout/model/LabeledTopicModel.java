@@ -154,7 +154,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
   public Vector topicSums() {
     return topicSums;
   }
-
+  // produce random model according to topics and numTerms
   private static Pair<AbstractMatrix, Vector> randomMatrix(int[] topics, int numTerms, Random random) {
     AbstractMatrix topicTermCounts = new SparseRowDenseColumnMatrix(MathUtil.getMax(topics) + 1, numTerms);
     Vector topicSums = new DenseVector(MathUtil.getMax(topics) + 1);
@@ -171,7 +171,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     assert topicTermCounts.rowSize() > 100;
     return Pair.of(topicTermCounts, topicSums);
   }
-
+  // load model from hdfs Paths
   public static Pair<AbstractMatrix, Vector> loadModel(Configuration conf, Path... modelPaths)
     throws IOException {
     int numTerms = -1;
@@ -259,7 +259,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topicSums.assign(1.0);
     }
   }
-
+  // train doc with labels
   public void trainDocTopicModel(Vector original, int[] labels, Matrix docTopicModel) {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)

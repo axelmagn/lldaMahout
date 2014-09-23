@@ -32,7 +32,11 @@ import java.util.*;
  */
 public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text, MultiLabelVectorWritable> {
   private Map<String,String> uid2CookieId = new HashMap<String,String>();
-  private boolean filtering, useCookieId;
+  private boolean
+    // specify if filtering using uid
+    filtering,
+    //specify if transfer uid to CookieId
+    useCookieId;
 
   public void setup(Context context) throws IOException {
     /*
@@ -45,6 +49,7 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
   }
 
   private void initFiltering(Configuration conf) throws IOException {
+    //if not specify uid_file then do not need filter by uid
     String uid_file = conf.get(GenerateLDocDriver.UID_PATH);
     if (uid_file == null) {
       System.out.println("uid file is " + uid_file);
@@ -57,6 +62,7 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
     if (conf.get(MergeLDocDriver.USE_COOKIEID) != null)
       useCookieId = true;
     if (useCookieId) {
+      //put get uid from uid_file and query cookieId from uid ,then put uid and cookieId to uid2cookieId
       HTable table=new HTable(HBaseConfiguration.create(),"cookie_uid_map");
       List<Get> gets=new ArrayList<Get>();
       byte[] family=Bytes.toBytes("cu"),idColumn=Bytes.toBytes("uid");
@@ -76,6 +82,7 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
       getMoreUids(table,gets);
 
     } else {
+      //put uid to uid2CookieId
       while (uidReader.next(uid, nullWritable)) {
         uid2CookieId.put(uid.toString(),uid.toString());
       }
@@ -116,6 +123,7 @@ public class MergeLDocMapper extends Mapper<Text, MultiLabelVectorWritable, Text
       context.write(key, value);
       return;
     }
+    //filter by uid
     if(uid2CookieId.containsKey(key.toString())){
       context.write(new Text(uid2CookieId.get(key.toString())), value);
     }

@@ -28,6 +28,9 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 public class WordCleanDriver extends AbstractJob {
+  /*
+     clean url before generate docs
+   */
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();

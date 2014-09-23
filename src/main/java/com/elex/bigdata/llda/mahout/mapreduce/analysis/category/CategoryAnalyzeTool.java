@@ -31,6 +31,9 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class CategoryAnalyzeTool extends AbstractJob {
+  /*
+     tool to analyze user num for each category-nation
+   */
   public static final String CATEGORY_RESULT_DIR="category_result_dir";
   public static final String CATEGORY_FILE="userCategory";
   public static final String ANALYTIC_FILE="analytics";
@@ -66,6 +69,8 @@ public class CategoryAnalyzeTool extends AbstractJob {
   }
 
   public static class CategoryAnalyzeMapper extends Mapper<Object,Text,Text,IntWritable>{
+    //map from category to bloomFilter
+    //bloomFilter used to test the user category
     private Map<Integer,BloomFilter> category2BloomFilter=new HashMap<Integer,BloomFilter>();
     private Map<Integer,Map<String,Integer>> categoryNation2Count=new HashMap<Integer, Map<String, Integer>>();
     private int sampleNum=0;

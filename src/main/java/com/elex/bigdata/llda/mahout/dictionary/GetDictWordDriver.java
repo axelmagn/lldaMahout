@@ -26,7 +26,9 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class GetDictWordDriver extends AbstractJob {
-
+  /*
+     get words which shoud enter dict
+   */
   @Override
   public int run(String[] args) throws Exception {
     addInputOption();

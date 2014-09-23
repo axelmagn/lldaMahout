@@ -38,6 +38,7 @@ public abstract class NavTable implements SuperTable {
   private Scan getScan(Map<String, List<String>> familyColumns, long startTime, long endTime) {
     List<KeyRange> keyRanges = getSortedKeyRanges(startTime, endTime);
     Scan scan = new Scan();
+    //use SkipScanFilter which use KeyRanges to filter data
     Filter filter = new SkipScanFilter(keyRanges);
     scan.setFilter(filter);
     scan.setStartRow(keyRanges.get(0).getLowerRange());
@@ -53,7 +54,7 @@ public abstract class NavTable implements SuperTable {
 
     return scan;
   }
-
+  //get sorted Key Ranges
   private List<KeyRange> getSortedKeyRanges(long startTime, long endTime) {
     List<KeyRange> keyRanges = new ArrayList<KeyRange>();
     List<String> projects = new ArrayList<String>();

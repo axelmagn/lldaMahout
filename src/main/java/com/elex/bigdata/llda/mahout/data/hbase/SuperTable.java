@@ -12,6 +12,10 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public interface SuperTable {
+  /*
+     interface for multi tables
+     map from tableName to tableClass saved in 'table_type.xml'
+   */
   Scan getScan(long startTime,long endTime);
   ResultParser getResultParser();
 }

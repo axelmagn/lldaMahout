@@ -17,6 +17,9 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class FileSystemUtil {
+  /*
+     functions for hdfs
+   */
   public static long getLen(Configuration conf, Path path) throws IOException {
     FileSystem fs = FileSystem.get(conf);
     return getLen(fs, path);

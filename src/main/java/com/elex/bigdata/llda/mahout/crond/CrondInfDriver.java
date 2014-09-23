@@ -119,12 +119,14 @@ public class CrondInfDriver extends AbstractJob{
     Path uidFilePath=new Path(docsRootPath,GenerateLDocDriver.UID_FILE);
 
     JobControl jobControl=new JobControl("crondInf");
-
+    // generate docs
     conf.set(GenerateLDocDriver.UID_PATH,uidFilePath.toString());
     Job generateLDocJob=GenerateLDocDriver.prepareJob(conf,inputPath,dictRootPath,resourceRootPath,currentDocsPath);
     generateLDocJob.submit();
     generateLDocJob.waitForCompletion(true);
-
+    //----
+    // merge docs generated today with history docs and filter with uids generated just now to get total docs
+    // the uid will be transfered to cookieId too
     List<Path> comJobInputPaths=new ArrayList<Path>();
     comJobInputPaths.add(new Path(todayDocsPath,"*"));
     if(!fs.exists(historyDocsPath))
@@ -148,6 +150,7 @@ public class CrondInfDriver extends AbstractJob{
     controlledTransferUidJob.addDependingJob(controlledComplementJob);
     jobControl.addJob(controlledTransferUidJob);
     */
+    // inf
     Path modelInputPath= new Path(getOption(MODEL_INPUT));
     Path docTopicPath= getOutputPath();
     Job infJob=LLDAInfDriver.prepareJob(conf,docsForInfPath,modelInputPath,docTopicPath);

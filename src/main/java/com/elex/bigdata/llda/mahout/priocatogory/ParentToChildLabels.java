@@ -10,6 +10,9 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * To change this template use File | Settings | File Templates.
  */
 public class ParentToChildLabels {
+  /**
+     parentLabel(topic)---childLabels(topics)
+   */
   private int parentLabel;
   private int[] childLabels;
   public ParentToChildLabels(@JsonProperty("parent") int parentLabel,@JsonProperty("childs") int[] childLabels){

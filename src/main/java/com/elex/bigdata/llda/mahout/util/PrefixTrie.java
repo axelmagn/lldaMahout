@@ -10,6 +10,10 @@ import java.util.Arrays;
  * To change this template use File | Settings | File Templates.
  */
 public class PrefixTrie {
+  /*
+     tree to save preClassified urls
+     if a url is prefix of preClassified url ,it should be considered also Classified
+   */
   private Node root;
   private int size=0;
   public PrefixTrie() {

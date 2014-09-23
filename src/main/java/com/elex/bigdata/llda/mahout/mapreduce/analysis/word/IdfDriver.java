@@ -32,6 +32,9 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class IdfDriver extends AbstractJob {
+  /*
+     calculate word idf distribution to analyze urls
+   */
   public static int DEFAULT_MIN_COUNT=5;
   public static final String CALSSIFIED_URL="classified_url";
 

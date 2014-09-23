@@ -22,7 +22,9 @@ import java.io.IOException;
  * To change this template use File | Settings | File Templates.
  */
 public class TransDocUidDriver extends AbstractJob{
-
+  /*
+     transfer uid in doc for est or inf to cookieId
+   */
   public static void runJob(Configuration conf,Path inputPath,Path outputPath) throws InterruptedException, IOException, ClassNotFoundException {
     Job job=new TransDocUidDriver().prepareJob(conf,inputPath,outputPath);
     job.submit();

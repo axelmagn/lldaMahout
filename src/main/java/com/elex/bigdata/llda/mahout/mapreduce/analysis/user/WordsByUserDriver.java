@@ -29,6 +29,9 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class WordsByUserDriver extends AbstractJob{
+  /*
+     get all urls accessed by specified users
+   */
   public static final String UID_FILE="uid_file";
   @Override
   public int run(String[] args) throws Exception {

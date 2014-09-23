@@ -53,6 +53,7 @@ public class MergeLDocDriver extends AbstractJob {
       return -1;
     }
     String multiInputs=getOption(MULTI_INPUT);
+    //multiInputPaths split by ":"
     String[] inputs=multiInputs.split(":");
     Path[] inputPaths=new Path[inputs.length];
     for(int i=0;i<inputs.length;i++)
@@ -128,6 +129,8 @@ public class MergeLDocDriver extends AbstractJob {
   public static void main(String[] args) throws Exception {
     ToolRunner.run(new Configuration(), new MergeLDocDriver(), args);
   }
+
+  // merge number of docs to a  document
   public static MultiLabelVectorWritable mergeDocs(List<MultiLabelVectorWritable> lDocs){
     Set<Integer> labelSet=new HashSet<Integer>();
     OpenIntDoubleHashMap urlCountMap=new OpenIntDoubleHashMap();

@@ -25,6 +25,11 @@ import java.util.Date;
  * To change this template use File | Settings | File Templates.
  */
 public class ResultEtlDriver extends AbstractJob {
+  /*
+     parse doc topic distribution output file
+     put the result file to local hdfs
+
+   */
   public static String LOCAL_RESULT_ROOT = "local_result_root";
   public static final String RESULT_TIME = "result_time";
   public static final String LABEL_RELATION = "label_relation";

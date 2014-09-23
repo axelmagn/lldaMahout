@@ -32,6 +32,7 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
   private LabeledModelTrainer modelTrainer;
   private LabeledTopicModel readModel;
   private LabeledTopicModel writeModel;
+  // total topic labels
   private int[] topics;
   private int sampleRatio=10000;
   private int numUid=0;
@@ -88,13 +89,16 @@ public class LLDAInferenceMapper extends Mapper<Text, MultiLabelVectorWritable, 
   @Override
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
+    // prepare label for doc
     int[] labels;
     if (doc.getLabels().length > 0)
       labels = doc.getLabels();
     else
       labels = topics;
     LabeledModelTrainer modelTrainer = getModelTrainer();
+    // inf doc
     Vector result = modelTrainer.getReadModel().inf(doc.getVector(), labels);
+    // transfer result to str format
     StringBuilder builder = new StringBuilder();
     Iterator<Element> iter = result.iterateNonZero();
     builder.append("[");

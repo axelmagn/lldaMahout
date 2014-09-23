@@ -82,6 +82,9 @@ public class LLDAMapper extends Mapper<Text, MultiLabelVectorWritable, IntWritab
   @Override
   public void map(Text uid, MultiLabelVectorWritable doc, Context context)
     throws IOException, InterruptedException {
+    /*
+       est docs
+     */
     int[] labels=doc.getLabels();
     if(labels.length==0)
     labels=topics;

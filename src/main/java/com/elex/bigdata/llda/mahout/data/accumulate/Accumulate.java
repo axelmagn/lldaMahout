@@ -49,6 +49,7 @@ public class Accumulate extends AbstractJob {
   private static String CONTENT = "content";
   public static String TABLE_TYPE= "table_type";
 
+  // map from tableName to concrete table type
   private Map<String,SuperTable> table2Type=new HashMap<String, SuperTable>();
   public Accumulate() {
 
@@ -70,6 +71,7 @@ public class Accumulate extends AbstractJob {
     loadTableTypeConfig("/table_type.xml", content);
   }
 
+  //
   private void loadTableTypeConfig(String configFile,String content) throws ParserConfigurationException, IOException, SAXException, ClassNotFoundException, IllegalAccessException, InstantiationException {
     URL url=this.getClass().getResource(configFile);
     System.out.println(url.getPath());
