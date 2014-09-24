@@ -18,7 +18,7 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Gm337NtTable extends Gm337Table {
-  private  byte[] NT = Bytes.toBytes("nt");
+  private  byte[] NT = Bytes.toBytes("na");
   //act_2+time_8+gmId_+\x01+uid_
   private  int GMID_INDEX=10;
   @Override
