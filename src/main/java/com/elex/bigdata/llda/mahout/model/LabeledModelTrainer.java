@@ -81,6 +81,13 @@ public class LabeledModelTrainer {
   public double calculatePerplexity(VectorIterable matrix, Iterable<int[]> docTopicLabels) {
     return calculatePerplexity(matrix,docTopicLabels, 0);
   }
+
+  /**
+   * @param doc
+   * @param labels
+   * @return
+   * 计算某个文档的复杂度，首先计算该文档的主题分布，然后计算其复杂度（信息量）
+   */
   public double calculatePerplexity(Vector doc,int[] labels){
     Vector topicDist=readModel.inf(doc, labels);
     double perplexity = readModel.perplexity(doc, topicDist);
@@ -186,7 +193,7 @@ public class LabeledModelTrainer {
       }
     }
   }
-
+  //训练某篇文档
   public void train(Vector document, int[] labels, boolean update) {
     while (true) {
       try {
@@ -253,7 +260,9 @@ public class LabeledModelTrainer {
 
     @Override
     public void run() {
+      //训练
       readModel.trainDocTopicModel(document, labels, docTopicModel);
+      //更新到writeModel中去
       if (writeModel != null) {
         writeModel.update(docTopicModel);
       }

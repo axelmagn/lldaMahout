@@ -34,26 +34,36 @@ import java.util.concurrent.TimeUnit;
  * Time: 3:42 PM
  * To change this template use File | Settings | File Templates.
  */
+
+/**
+ *  训练和推理的模型
+ */
 public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
   private static final Logger log = LoggerFactory.getLogger(LabeledTopicModel.class);
-
+  // 字典的路径
   private final String[] dictionary;
+  // 最核心的模型，一个以topic_label为行号，以word index为列号的矩阵。
   private final AbstractMatrix topicTermCounts;
+  // 记录各个主题下的单词数
   private final Vector topicSums;
+  // 所有的主题
   private final int[] topics;
   private final int numTopics;
   private final int numTerms;
+  // 两个先验参数
   private final double eta;
   private final double alpha;
 
   private Configuration conf;
 
   private final Sampler sampler;
+  // 训练的线程数
   private final int numThreads;
   private ThreadPoolExecutor threadPool;
+  // 新模型的更新线程
   private Updater[] updaters;
-
+  //指示什么时候能够打log
   private int trainNum = 0;
   private int updateNum = 0;
   public int getNumTerms() {
@@ -100,7 +110,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       topics[i++] = iter.next().index();
     }
     numTopics = MathUtil.getMax(topics) + 1;
-    assert topicSums.size() > 100;
+    //assert topicSums.size() > 100;
     this.numTerms = topicTermCounts.numCols();
     this.eta = eta;
     this.alpha = alpha;
@@ -122,7 +132,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
     return v;
   }
-
+  // 开启训练和模型更新线程
   private synchronized void initializeThreadPool() {
     if (threadPool != null) {
       threadPool.shutdown();
@@ -155,6 +165,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     return topicSums;
   }
   // produce random model according to topics and numTerms
+  // 一般在训练的第一次迭代过程之前，由于没有已经生成的模型，需要随机生成初始模型。
   private static Pair<AbstractMatrix, Vector> randomMatrix(int[] topics, int numTerms, Random random) {
     AbstractMatrix topicTermCounts = new SparseRowDenseColumnMatrix(MathUtil.getMax(topics) + 1, numTerms);
     Vector topicSums = new DenseVector(MathUtil.getMax(topics) + 1);
@@ -171,7 +182,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     assert topicTermCounts.rowSize() > 100;
     return Pair.of(topicTermCounts, topicSums);
   }
-  // load model from hdfs Paths
+  // 从hdfs中载入模型;实际上就是从一个sequenceFile 中载入topicLabel:wordCountVector 序列。
+  // 根据这些组成topicTermCountMatrix，并且计算各个主题中的单词数
   public static Pair<AbstractMatrix, Vector> loadModel(Configuration conf, Path... modelPaths)
     throws IOException {
     int numTerms = -1;
@@ -200,6 +212,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       int topic = pair.getFirst();
       model.assignRow(topic, pair.getSecond());
       //System.out.println("topic:" + topic + ",sum:" + pair.getSecond().norm(1.0));
+      //计算该主题中单词总数
       double sum = model.viewRow(topic).norm(1.0);
       topicSums.setQuick(topic, sum);
       //log.info("topic " + topic + " sum: " + sum);
@@ -238,7 +251,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       initializeThreadPool();
     }
   }
-
+  //停止各个训练和模型更新线程
   public synchronized void stop() {
     for (Updater updater : updaters) {
       updater.shutdown();
@@ -260,11 +273,13 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
   }
   // train doc with labels
-  public void trainDocTopicModel(Vector original, int[] labels, Matrix docTopicModel) {
+  // 每一篇文档（由orignal 和labels组成）都要经过训练后得出该文档中单词的主题分布，即docTopicTermModel
+  public void trainDocTopicModel(Vector original, int[] labels, Matrix docTopicTermModel) {
     // first calculate p(topic|term,document) for all terms in original, and all topics,
     // using p(term|topic) and p(topic|doc)
     trainNum++;
     long t1 = System.nanoTime();
+    // 由于对vector的遍历相对比较慢一点，所以从vector中提取出terms和counts来。
     List<Integer> terms = new ArrayList<Integer>();
     List<Double>  counts= new ArrayList<Double>();
     Iterator<Vector.Element> docElementIter = original.iterateNonZero();
@@ -278,7 +293,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }
     double[] termSums=new double[terms.size()];
     Arrays.fill(termSums,0.0);
-    pTopicGivenTerm(terms, labels, docTopicModel,termSums);
+    //计算term-topic概率分布
+    pTopicGivenTerm(terms, labels, docTopicTermModel,termSums);
     /*
     if(trainNum%100000 == 1){
       log.info(Thread.currentThread().getName()+"  trainNum {} ",trainNum );
@@ -288,7 +304,8 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       }
       //log.info("termSums: "+builder.toString());
     }*/
-    normByTopicAndMultiByCount(counts,termSums,labels,docTopicModel);
+    //对刚刚计算每个单词的概率分布归一化，并乘以单词的数量
+    normByTopicAndMultiByCount(counts,termSums,labels,docTopicTermModel);
     long t2 = System.nanoTime();
     /*
     if (trainNum % 100000 == 1) {
@@ -314,26 +331,49 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
     }*/
   }
 
+  /**
+   * @param orignal
+   * @param labels
+   * @return
+   * 在已有模型的前提下，推理出文档的主题分布
+   * doc.p[topic]=(doc.count[topic]+alpha)/(doc.count+topics.length*alpha)
+   */
   public Vector inf(Vector orignal, int[] labels) {
     Matrix docTopicTermDist = new SparseRowSqSparseColumnMatrix(numTopics, orignal.size());
+    //计算出文档中各单词的主题分布
     trainDocTopicModel(orignal, labels, docTopicTermDist);
     Vector result = new DenseVector(numTopics);
     double docTermCount = orignal.norm(1.0);
+    //计算各个主题的概率
     for (int topic : topics) {
-      result.set(topic, (docTopicTermDist.viewRow(topic).norm(1) + alpha) / (docTermCount + numTerms * alpha));
+      result.set(topic, (docTopicTermDist.viewRow(topic).norm(1) + alpha) / (docTermCount + topics.length * alpha));
     }
+    //概率归一化
     result.assign(Functions.mult(1 / result.norm(1)));
     return result;
   }
 
-  public void update(Matrix docTopicCounts) {
-    Iterator<MatrixSlice> iter = docTopicCounts.iterator();
+  /**
+   * @param docTopicTermCounts
+   * 将推理出来的单词概率矩阵更新到矩阵topicTermCount中去。
+   * 在实际的训练过程中，我们在依据数据训练时所根据的模型矩阵叫做readModel，而更新的那个模型叫做writeModel，见LabeledModelTrainer
+   * update的过程如下：首先将topic（即matrixSlice.index())，termCountsVector(即matrixSlice.vector()）放入队列中，
+   * 然后Updater将取出来并调用updateTopic函数更新到矩阵中去。
+   */
+  public void update(Matrix docTopicTermCounts) {
+    Iterator<MatrixSlice> iter = docTopicTermCounts.iterator();
     updateNum++;
     while (iter.hasNext()) {
       MatrixSlice matrixSlice = iter.next();
       updaters[updateNum % updaters.length].update(matrixSlice.index(), matrixSlice.vector());
     }
   }
+
+  /**
+   * @param topic
+   * @param termCounts
+   * 更新模型矩阵topicTermCounts中的topic这一行。termCounts是训练某一个文档的结果，
+   */
 
   public void updateTopic(int topic, Vector termCounts) {
     //log.info("get iterateNonZero");
@@ -391,6 +431,16 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
      then the inf can be executed more than once,but there is unsafety because notLabeled url's count may be bigger than labeled
  */
 
+  /**
+   *
+   * @param terms
+   * @param topicLabels
+   * @param termTopicDist
+   * @param termSum
+   * 计算terms中各个单词的主题概率分布情况，计算的公式为
+   * p[topicIndex]（即termTopicLikelihood)正比于(weight[topic]+alpha)*(doc.count[topic]+beta)/(totalCount[topic]+V*beta)
+   * 因为上面计算出来的概率值还需要归一化才能算作真正的概率，所以计算termSum是为了下一步normByTopicAndMultiByCount 对term-topic prob进行归一化做准备。
+   */
   private void pTopicGivenTerm(List<Integer> terms, int[] topicLabels, Matrix termTopicDist,double[] termSum) {
     double Vbeta = eta * numTerms;
     for (Integer topicIndex : topicLabels) {
@@ -415,6 +465,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
 
 
   /**
+   * 在已知文档主题分布的情况下，计算某篇文档的复杂度(perplexity)
    * \(sum_x sum_a (c_ai * log(p(x|i) * p(a|x)))\)
    */
   public double perplexity(Vector document, Vector docTopics) {
@@ -426,18 +477,32 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       int term = e.index();
       if(term>getNumTerms())
         continue;
+      //prob为选择单词term的概率
+      //计算办法为p(term)=sum(p(topic,term) for each topic )
       double prob = 0;
       for (int topic : topics) {
+        //d为选择主题topic的概率
         double d = (docTopics.getQuick(topic) + alpha) / norm;
+        //p为选择主题topic且在topic下选择单词term的概率
         double p = d * (topicTermCounts.viewRow(topic).get(term) + eta)
           / (topicSums.get(topic) + eta * numTerms);
         prob += p;
       }
+      //该单词的复杂度为-count(即e.get())×log(prob）
       perplexity += e.get() * Math.log(prob);
     }
     return -perplexity;
   }
 
+  /**
+   *
+   * @param counts
+   * @param termSums
+   * @param labels
+   * @param perTopicSparseDistributions
+   * perTopicSparseDistributions 和termSums都是在上一步中计算来的
+   * 这个函数用来对perTopicSparseDistributions 进行归一化和
+   */
   private void normByTopicAndMultiByCount(List<Double> counts, double[] termSums,int[] labels,Matrix perTopicSparseDistributions) {
     // then make sure that each of these is properly normalized by topic: sum_x(p(x|t,d)) = 1
     for(int topic: labels){
@@ -446,6 +511,7 @@ public class LabeledTopicModel implements Configurable, Iterable<MatrixSlice> {
       Iterator<Vector.Element> iter=termDist.iterateNonZero();
       while(iter.hasNext()){
         Vector.Element e=iter.next();
+        //除以termSums[i]是归一化，而乘以counts.get(i)则是为了使得这个值表示处于该主题的单词的个数
         e.set(e.get()*counts.get(i)/termSums[i]);
         i++;
       }
