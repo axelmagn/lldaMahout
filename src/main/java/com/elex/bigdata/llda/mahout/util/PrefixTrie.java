@@ -20,7 +20,7 @@ public class PrefixTrie {
     root = new Node();
     size+=1;
   }
-
+  //插入url和相应的类别
   public void insert(String word, int category) {
     if (search(word) != -1) return;
 
@@ -54,7 +54,7 @@ public class PrefixTrie {
     // Set isEnd to indicate end of the word
     current.category = category;
   }
-
+  //查询单词word的类别，如果word不在tree中，则返回-1
   public int search(String word) {
     Node current = root;
 
@@ -76,7 +76,7 @@ public class PrefixTrie {
         */
     return current.category;
   }
-
+  //查询word的类别，但是即使word不在tree中，只要word的某个前缀在tree中（即等于之前插入的word），则就将等于最长前缀的单词的类别赋予它。
   public int prefixSearch(String word) {
     Node current = root;
     int category=-1;
