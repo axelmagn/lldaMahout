@@ -31,8 +31,12 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class CategoryAnalyzeTool extends AbstractJob {
-  /*
+  /**
      tool to analyze user num for each category-nation
+     这个类用来分析各个类别中各个国家的用户数
+     在将推理的结果etl到本地文件（0.0）中后，对其进行分析，得到分析结果（即各个类别各有多少用户）。
+     将这两个文件copy到hdfs中的CATEGORY_RESULT_DIR中，文件名为userCategory和analytics。
+     根据这两个文件和早已计算出的用户国家（或语言）数据得到各个类别中各个国家的用户数量。
    */
   public static final String CATEGORY_RESULT_DIR="category_result_dir";
   public static final String CATEGORY_FILE="userCategory";
@@ -41,6 +45,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
   @Override
   public int run(String[] args) throws Exception {
     addOption(CATEGORY_RESULT_DIR,"crd","specify category result directory ",true);
+    //用户——国家数据
     addInputOption();
     addOutputOption();
     if(parseArguments(args)==null)
@@ -70,8 +75,9 @@ public class CategoryAnalyzeTool extends AbstractJob {
 
   public static class CategoryAnalyzeMapper extends Mapper<Object,Text,Text,IntWritable>{
     //map from category to bloomFilter
-    //bloomFilter used to test the user category
+    //bloomFilter 中存储了该类别所对应的用户的cookieId
     private Map<Integer,BloomFilter> category2BloomFilter=new HashMap<Integer,BloomFilter>();
+    //存储结果的map
     private Map<Integer,Map<String,Integer>> categoryNation2Count=new HashMap<Integer, Map<String, Integer>>();
     private int sampleNum=0;
     public void setup(Context context) throws IOException {
@@ -117,6 +123,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
         return;
       Integer category=null;
       sampleNum++;
+      //找到该用户的类别
       for(Map.Entry<Integer,BloomFilter> entry:category2BloomFilter.entrySet()){
         if(entry.getValue().membershipTest(new Key(Bytes.toBytes(tokens[0])))){
           category=entry.getKey();
@@ -128,6 +135,7 @@ public class CategoryAnalyzeTool extends AbstractJob {
         System.out.println(" not hit "+tokens[0]);
         return;
       }
+      //将该类别中该用户所对应的国家中用户数量加1
       Map<String,Integer> nation2Count=categoryNation2Count.get(category);
       if(nation2Count==null){
         nation2Count=new HashMap<String, Integer>();
