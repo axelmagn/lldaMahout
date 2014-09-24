@@ -32,6 +32,10 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class PreClassifiedWordDriver extends AbstractJob {
+  /**
+   * 从计算出的uid-url-count数据中获取文件url_topic中存储的已经分好类的url及其相关url(即是存储的url的前缀）
+   * 这个类需要更新，已经基本上不怎么使用了
+   */
   @Override
   public int run(String[] args) throws Exception {
     addOutputOption();

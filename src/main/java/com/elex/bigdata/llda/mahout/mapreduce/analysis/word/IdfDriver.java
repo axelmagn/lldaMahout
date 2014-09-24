@@ -32,9 +32,11 @@ import java.util.Set;
  * To change this template use File | Settings | File Templates.
  */
 public class IdfDriver extends AbstractJob {
-  /*
+  /**
      calculate word idf distribution to analyze urls
+     分析单词的idf值（与tf对应),以此鉴别有哪些url质量比较高
    */
+  //访问的用户数少于5的url不予分析
   public static int DEFAULT_MIN_COUNT=5;
   public static final String CALSSIFIED_URL="classified_url";
 
@@ -51,6 +53,7 @@ public class IdfDriver extends AbstractJob {
     conf.set(GenerateLDocDriver.RESOURCE_ROOT,resourceRoot);
     String actionStr=getOption(CALSSIFIED_URL);
     System.out.println(resourceRoot+"\t"+actionStr);
+    //用来指明是要获取与事先分类的url相关的url的idf还是要过滤掉这些url。
     conf.set(CALSSIFIED_URL, actionStr);
     Job job=prepareJob(conf,getInputPath(),getOutputPath());
     job.submit();
@@ -100,14 +103,17 @@ public class IdfDriver extends AbstractJob {
         return;
       switch (action){
         case FILTER:
+          //过滤掉与事先分好类的url相关的url
           if(prefixTrie.prefixSearch(tokens[1])==-1&&!urls.contains(tokens[1]))
             context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
           break;
         case GET:
+          //分析与事先分好类的url相关的url
           if(prefixTrie.prefixSearch(tokens[1])!=-1 || urls.contains(tokens[1]))
             context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
           break;
         default:
+          //对所有url都进行分析
           context.write(new Text(tokens[1]),new Text(tokens[0]+"\t"+tokens[2]));
       }
     }
@@ -129,6 +135,7 @@ public class IdfDriver extends AbstractJob {
     }
     public void reduce(Text key,Iterable<Text> values,Context context) throws IOException, InterruptedException {
       Set<String> uids=new HashSet<String>();
+      //获得访问过该url的用户数
       int count=0;
       for(Text value: values){
         String[] tokens=value.toString().split("\t");
@@ -140,7 +147,7 @@ public class IdfDriver extends AbstractJob {
           context.write(new Text(key.toString()+"\t"+uids.size()+"\t"+count),new DoubleWritable(Math.log(numSum/uids.size())/LOG2));
           break;
         default:
-          if (count>DEFAULT_MIN_COUNT && uids.size()>=5)
+          if (uids.size()>=DEFAULT_MIN_COUNT)
             context.write(new Text(key.toString()+"\t"+uids.size()+"\t"+count),new DoubleWritable(Math.log(numSum/uids.size())/LOG2));
       }
     }

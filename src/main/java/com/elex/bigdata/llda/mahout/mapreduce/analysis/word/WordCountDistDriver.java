@@ -31,8 +31,9 @@ import java.util.Iterator;
  * To change this template use File | Settings | File Templates.
  */
 public class WordCountDistDriver extends AbstractJob {
-  /*
+  /**
      accumulate distribution for urls count
+     计算好单词访问次数的分布后，可以判断哪一批url是质量相对比较高的
    */
   public static final BDMD5 bdmd5 = BDMD5.getInstance();
 
