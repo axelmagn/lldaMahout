@@ -18,13 +18,13 @@ import java.util.List;
  * To change this template use File | Settings | File Templates.
  */
 public class Gm337NtTable extends Gm337Table {
-  private  byte[] NT = Bytes.toBytes("nt");
+  private  byte[] NA = Bytes.toBytes("na");
   //act_2+time_8+gmId_+\x01+uid_
   private  int GMID_INDEX=10;
   @Override
   public Scan getScan(long startTime, long endTime) {
     List<String> columns=new ArrayList<String>();
-    columns.add(Bytes.toString(NT));
+    columns.add(Bytes.toString(NA));
     return getScan(startTime, endTime,columns);
   }
 
@@ -45,7 +45,7 @@ public class Gm337NtTable extends Gm337Table {
         }
       }
       String uid = Bytes.toString(Arrays.copyOfRange(rk, index + 1, rk.length));
-      String nt=Bytes.toString(result.getValue(family,NT));
+      String nt=Bytes.toString(result.getValue(family,NA));
       List<RecordUnit> recordUnits=new ArrayList<RecordUnit>();
       recordUnits.add(new RecordUnit(uid,nt));
       return recordUnits;

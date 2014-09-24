@@ -38,6 +38,7 @@ function countNt()
    local MAIN=com.elex.bigdata.llda.mahout.data.accumulate.Accumulate
    local logFile=/data0/log/user_nation/query.log
    local outputBase=user_attribute/nations
+   local origoutput=user_category/lldaMahout/nations/
    local content=count
 
    local day=$1 ; local nextDay=`date +%Y%m%d -d "$day +1 days" ` ;local preDay=`date +%Y%m%d -d "$day -1 days" `
@@ -47,10 +48,13 @@ function countNt()
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $startTime --endTime $endTime  >> $logFile 2>&1
 
    local local_path=/data1/user_attribute/nation
-   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/ad_all_log/part* ${local_path}/ad/${day}.log
-   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/gm_user_action/part* ${local_path}/game/${day}.log
-   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/yac_user_action/part* ${local_path}/yac/${day}.log
-   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/nav_all/part* ${local_path}/nav/${day}.log
+   for table in ad_all_log gm_user_action yac_user_action nav_all
+   do
+       transNtUid ${origoutput}/${startTime}_${endTime}/${table}/ ${outputBase}/trans/${day}/${table}/
+       hadoop fs -getmerge ${outputBase}/trans/${day}/${table}/part* ${local_path}/${table}/${day}.log
+   done
+
+   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/ad_all_log/part* ${local_path}/ad_click/${day}.log
 }
 
 function batchGetNt(){

@@ -16,8 +16,5 @@
     </nt>
     <count>
         <ad_all_log>com.elex.bigdata.llda.mahout.data.hbase.ad.AdNtClickTable</ad_all_log>
-        <nav_all>com.elex.bigdata.llda.mahout.data.hbase.nav.NavNtTable</nav_all>
-        <yac_user_action>com.elex.bigdata.llda.mahout.data.hbase.custom.CustomNtTable</yac_user_action>
-        <gm_user_action>com.elex.bigdata.llda.mahout.data.hbase.gm337.Gm337NtTable</gm_user_action>
     </count>
 </contens>
