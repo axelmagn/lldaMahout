@@ -28,7 +28,8 @@ public class ResultEtlDriver extends AbstractJob {
   /*
      parse doc topic distribution output file
      put the result file to local hdfs
-
+     将推理得出的放在hdfs中的用户分类文件解析后输出到本地文件夹（由参数local_result_root指定）中。
+     在给本地文件命名是要依据result_time，如result_time是20140929000000 则输出的文件名为20140929（day)/0.0(hour.minute)
    */
   public static String LOCAL_RESULT_ROOT = "local_result_root";
   public static final String RESULT_TIME = "result_time";

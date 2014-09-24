@@ -67,7 +67,7 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
 
   public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
     Map<Integer, Double> labelProbMap = parseResultLine(value.toString());
-
+    //计算各个大类的概率
     Map<Integer, Double> parentLabelProbMap = new HashMap<Integer, Double>();
     for (Map.Entry<Integer, Double> entry : labelProbMap.entrySet()) {
       Integer parentLabel = child2ParentLabels.get(entry.getKey());
@@ -78,6 +78,7 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
       parentLabelProbMap.put(parentLabel, probValue);
     }
 
+    //求出目标大类中概率最大的类别
     Integer maxProbParentLabel = 0;
     Double maxProbValue = new Double(0.0);
     for (Map.Entry<Integer, Double> entry : parentLabelProbMap.entrySet()) {
@@ -86,6 +87,7 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
         maxProbValue = entry.getValue();
       }
     }
+    //求出该大类中概率最大的子类
     String uid = value.toString().split("\t")[0];
     int[] labels = parent2ChildLabels.get(maxProbParentLabel);
     int maxProbChildLabel = 0;
@@ -97,13 +99,16 @@ public class ResultEtlMapper extends Mapper<Object, Text, Text, Text> {
         maxProbValue = probValue;
       }
     }
+    //如果这个子类的概率< 平均概率的1/2，则认为概率太小，其他类别概率比较大，因此结果输出为0（即除目标概率以外的其他概率）
     if (maxProbValue < 1 / ((double) labelProbMap.size() * 2)) {
       context.write(new Text(uid), new Text(String.valueOf(0)));
       context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(0)));
     } else if (maxProbValue < 1 / ((double) labelProbMap.size())) {
+      //如果这个子类的概率< 平均概率,则取该子类的父类
       context.write(new Text(uid), new Text(String.valueOf(maxProbParentLabel)));
       context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(maxProbParentLabel)));
     } else {
+      //输出这个子类
       context.write(new Text(uid), new Text(String.valueOf(maxProbChildLabel)));
       context.write(new Text(uid.toUpperCase()), new Text(String.valueOf(maxProbChildLabel)));
     }
