@@ -48,7 +48,7 @@ function countNt()
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $startTime --endTime $endTime  >> $logFile 2>&1
 
    local local_path=/data1/user_attribute/nation
-   for table in ad_all_log gm_user_action yac_user_action nav_all
+   for table in ad_all_log gm_user_action yac_user_action nav_all dmp_user_action
    do
        transNtUid ${origoutput}/${startTime}_${endTime}/${table}/ ${outputBase}/trans/${day}/${table}/
        hadoop fs -getmerge ${outputBase}/trans/${day}/${table}/part* ${local_path}/${table}/${day}.log
