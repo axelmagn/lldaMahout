@@ -186,6 +186,7 @@ public class GenerateLDocReducer extends Reducer<Text, Text, Text, MultiLabelVec
       }
       // update word count
       if (hit) {
+        //对于那些能够预先判别出分类的Url增加其权重
         count=count+5;
       }
       if (urlCounts.containsKey(id))
