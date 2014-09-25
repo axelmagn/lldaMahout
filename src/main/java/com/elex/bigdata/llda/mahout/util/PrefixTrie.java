@@ -135,6 +135,7 @@ public class PrefixTrie {
   public static class Node {
     int category;
     int count;  // the number of words sharing this character
+    //url只保留小写字母和数字
     Node[] nextNodes = new Node[10 + 26];
 
     public Node() {
