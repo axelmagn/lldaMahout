@@ -26,7 +26,7 @@ def parse_ad(filename):
                 ad[uid]["miss"] = ad[uid]["miss"] +1
             ad[uid]["p"] = attr[1]
             ad[uid]["na"] = attr[2].lower()
-            ad[uid]["total"] = ad[uid]["click"] +1
+            ad[uid]["click"] = ad[uid]["click"] +1
     return ad
 
 def parse_common_user(filename,ad,p=None):
