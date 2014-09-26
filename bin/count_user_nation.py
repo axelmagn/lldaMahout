@@ -119,7 +119,7 @@ def analysis(day):
         for line in f:
             attr = line.strip().split("\t")
             if len(attr) == 2:
-                user_category[attr[0]] = attr[1]
+                user_category[attr[0].lower()] = attr[1]
 
     for (uid, v) in ad_info.items():
         na = ad_info[uid]["na"]
