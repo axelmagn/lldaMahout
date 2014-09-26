@@ -23,43 +23,48 @@ import java.util.Map;
  * To change this template use File | Settings | File Templates.
  */
 public class TransNtUidMapper extends TransUidMapper<Object, Text, Text, Text> {
-  private Map<String, String> uid2Nation = new HashMap<String, String>();
-  private int sampleRatio = 1;
-  public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-    String[] tokens = value.toString().split("\t");
-    uid2Nation.put(tokens[0], tokens[1]);
-    uidNum++;
-    if (uidNum % 10000 == 1) {
-      getCookieIds(uid2Nation.keySet());
+    private Map<String, String> uid2Nation = new HashMap<String, String>();
+    private int sampleRatio = 1;
 
-      for (Map.Entry<String, String> entry : uid2Nation.entrySet()) {
-        sampleRatio++;
-        String cookieId = uid2CookieId.get(entry.getKey());
-        if (cookieId == null)
-          cookieId = entry.getKey();
-        context.write(new Text(cookieId), new Text(entry.getValue()));
-        if (sampleRatio % 20000 == 0) {
-          System.out.println("cookieId:" + cookieId +" uid: "+entry.getKey());
+    public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+        String[] tokens = value.toString().split("\t");
+        String fields = tokens[1];
+        if (tokens.length > 2) {
+            fields = value.toString().substring(tokens[0].length()+1);
         }
-      }
-      uid2CookieId = new HashMap<String, String>();
-      uid2Nation = new HashMap<String, String>();
-    }
-  }
+        uid2Nation.put(tokens[0], fields);
+        uidNum++;
+        if (uidNum % 10000 == 1) {
+            getCookieIds(uid2Nation.keySet());
 
-  public void cleanup(Context context) throws IOException {
-    getCookieIds(uid2Nation.keySet());
-    for (Map.Entry<String, String> entry : uid2Nation.entrySet()) {
-      String cookieId = uid2CookieId.get(entry.getKey());
-      if (cookieId == null)
-        cookieId = entry.getKey();
-      try {
-        context.write(new Text(cookieId), new Text(entry.getValue()));
-      } catch (InterruptedException e) {
-        e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-      }
+            for (Map.Entry<String, String> entry : uid2Nation.entrySet()) {
+                sampleRatio++;
+                String cookieId = uid2CookieId.get(entry.getKey());
+                if (cookieId == null)
+                    cookieId = entry.getKey();
+                context.write(new Text(cookieId), new Text(entry.getValue()));
+                if (sampleRatio % 20000 == 0) {
+                    System.out.println("cookieId:" + cookieId + " uid: " + entry.getKey());
+                }
+            }
+            uid2CookieId = new HashMap<String, String>();
+            uid2Nation = new HashMap<String, String>();
+        }
     }
-    super.cleanup(context);
-  }
+
+    public void cleanup(Context context) throws IOException {
+        getCookieIds(uid2Nation.keySet());
+        for (Map.Entry<String, String> entry : uid2Nation.entrySet()) {
+            String cookieId = uid2CookieId.get(entry.getKey());
+            if (cookieId == null)
+                cookieId = entry.getKey();
+            try {
+                context.write(new Text(cookieId), new Text(entry.getValue()));
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+        super.cleanup(context);
+    }
 
 }
