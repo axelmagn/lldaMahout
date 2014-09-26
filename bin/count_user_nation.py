@@ -45,7 +45,7 @@ def parse_common_user(filename,ad,p=None):
                 ad[uid]["na"] = na
 
 
-def sendMail(subject,content, file1):
+def sendMail(subject,content, filename):
     me="xamonitor@xingcloud.com"
     msg = email.MIMEMultipart.MIMEMultipart()
     msg['Subject'] = "user range " + subject
@@ -55,7 +55,8 @@ def sendMail(subject,content, file1):
         text_msg = email.MIMEText.MIMEText(content)
         msg.attach(text_msg)
 
-        msg.attach(attach_file(file1))
+        for f in filename:
+            msg.attach(attach_file(f))
 
         s = smtplib.SMTP()
         s.connect(mail_host)
@@ -127,8 +128,10 @@ def analysis(day):
 
     print "write to file..."
     result = {"nation": nation_count, "project": project_count, "nation_project": nation_project}
+    filenames = []
     for (t, collect) in result.items():
         user_file_name = "/data1/user_attribute/nation/" + day + "_" + t + ".csv"
+        filenames.append(user_file_name)
         user_file = open(user_file_name,"w")
         for k in sorted(collect):
             v = result[k]
@@ -140,7 +143,7 @@ def analysis(day):
                 user_file.write("%s,%s,%s,%s,%s,%s\n"%(k,v["hit"],v["miss"],v["click"],v["cover"],v["total"]))
         user_file.close()
 
-    sendMail(day, "result", user_file_name)
+    sendMail(day, "result", filenames)
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
