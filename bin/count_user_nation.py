@@ -7,7 +7,7 @@ import email.MIMEMultipart
 import email.MIMEText
 import email.MIMEBase
 
-mailto_list = ["liqiang@xingcloud.com"]
+mailto_list = ["liqiang@xingcloud.com","yanglin@elex-tech.com","yinlong@elex-tech.com","chenshihua@elex-tech.com"]
 mail_host = "smtp.qq.com"
 mail_user = "xamonitor@xingcloud.com"
 mail_pass = "22C1NziwxZI5F"
@@ -17,6 +17,8 @@ def parse_ad(filename):
     with open(filename) as f:
         for line in f:
             attr = line.strip().split("\t")
+            if not len(attr[2]) == 2:
+                continue
             uid = attr[0].lower()
             if uid not in ad:
                 ad[uid] = {"hit": 0, "miss": 0, "click": 0}
@@ -35,14 +37,15 @@ def parse_common_user(filename,ad,p=None):
             attr = line.strip().split("\t")
             uid = attr[0].lower()
             if uid not in ad:
-                ad[uid] = {"hit": 0, "miss": 0, "click": 0}
                 if p:
                     na = attr[1].lower()
                 else:
                     p = attr[1]
                     na = attr[2].lower()
-                ad[uid]["p"] = p
-                ad[uid]["na"] = na
+                if len(na) == 2:
+                    ad[uid] = {"hit": 0, "miss": 0, "click": 0}
+                    ad[uid]["p"] = p
+                    ad[uid]["na"] = na
 
 
 def sendMail(subject,content, filename):
@@ -124,7 +127,7 @@ def analysis(day):
     for (uid, v) in ad_info.items():
         na = ad_info[uid]["na"]
         p = ad_info[uid]["p"]
-        union = na + "_" + p
+        union = p + "_" + na
 
         user_type = None
         if uid in user_category:
