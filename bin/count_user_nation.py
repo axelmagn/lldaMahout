@@ -1,5 +1,3 @@
-#coding:utf-8
-
 import sys
 import os
 import smtplib
@@ -116,7 +114,8 @@ def analysis(day):
     print "write to file..."
     user_file_name = "/data1/user_attribute/nation/user_" + day + ".csv"
     user_file = open(user_file_name,"w")
-    for (k,v) in result.items():
+    for k in sorted(result):
+        v = result[k]
         pn = k.split("_")
         user_file.write("%s,%s,%s,%s"%(pn[0],pn[1],v["cover"]/2,v["total"]/2))
         user_file.write("\n")
@@ -124,8 +123,9 @@ def analysis(day):
 
     ad_file_name = "/data1/user_attribute/nation/ad_" + day + ".csv"
     ad_file = open(ad_file_name,"w")
-    for (k,v) in ad_info.items():
+    for k in sorted(ad_info):
         pn = k.split("_")
+        v = ad_info[k]
         ad_file.write("%s,%s,%s,%s,%s"%(pn[0],pn[1],v["hit"],v["miss"],v["total"]))
         ad_file.write("\n")
     ad_file.close()
