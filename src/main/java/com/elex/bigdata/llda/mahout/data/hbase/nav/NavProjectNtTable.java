@@ -19,7 +19,7 @@ import java.util.*;
 public class NavProjectNtTable extends NavTable {
     private byte[] URL = Bytes.toBytes("url");
     //pId_1+nt_2+time_14(yyyyMMddHHmmss)+uid_
-    private int UID_INDEX = 17, NT_INDEX_START = 1, NT_INDEX_END = 3;
+    private int UID_INDEX = 17, NT_INDEX_START = 1, NT_INDEX_END = 2;
     private static Map<Byte, String> projects;
 
     static {
