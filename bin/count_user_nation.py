@@ -35,7 +35,7 @@ def parse_common_user(filename,ad,p=None):
             attr = line.strip().split("\t")
             uid = attr[0].lower()
             if uid not in ad:
-                ad[uid] = {"hit": 0, "miss": 0, "total": 0}
+                ad[uid] = {"hit": 0, "miss": 0, "click": 0}
                 if p:
                     na = attr[1].lower()
                 else:
