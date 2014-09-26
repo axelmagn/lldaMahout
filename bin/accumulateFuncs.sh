@@ -48,13 +48,18 @@ function countNt()
    hadoop jar $JAR  $MAIN --content $content --outputBase $outputBase --startTime $startTime --endTime $endTime  >> $logFile 2>&1
 
    local local_path=/data1/user_attribute/nation
-   for table in ad_all_log gm_user_action yac_user_action nav_all dmp_user_action
+   for table in yac_user_action
    do
        transNtUid ${origoutput}/${startTime}_${endTime}/${table}/ ${outputBase}/trans/${day}/${table}/
        hadoop fs -getmerge ${outputBase}/trans/${day}/${table}/part* ${local_path}/${table}/${day}.log
    done
 
-   hadoop fs -getmerge user_attribute/nations/${startTime}_${endTime}/ad_all_log/part* ${local_path}/ad_click/${day}.log
+   for table in ad_all_log nav_all
+   do
+       transNtUid ${outputBase}/${startTime}_${endTime}/${table}/ ${outputBase}/trans/${day}/${table}/
+       hadoop fs -getmerge ${outputBase}/trans/${day}/${table}/part* ${local_path}/${table}/${day}.log
+   done
+
 }
 
 function batchGetNt(){
