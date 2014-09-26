@@ -16,5 +16,6 @@
     </nt>
     <count>
         <ad_all_log>com.elex.bigdata.llda.mahout.data.hbase.ad.AdNtClickTable</ad_all_log>
+        <nav_all>com.elex.bigdata.llda.mahout.data.hbase.nav.NavProjectNtTable</nav_all>
     </count>
 </contens>
