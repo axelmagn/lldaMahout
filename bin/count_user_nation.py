@@ -134,7 +134,7 @@ def analysis(day):
         filenames.append(user_file_name)
         user_file = open(user_file_name,"w")
         for k in sorted(collect):
-            v = result[k]
+            v = collect[k]
             if "nation_project" == t:
                 pn = k.split("_")
             #{"hit":0,"miss":0,"click":0,"cover":0,"total":0}
