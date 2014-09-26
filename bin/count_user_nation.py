@@ -118,7 +118,8 @@ def analysis(day):
     with open(user_category_file) as f:
         for line in f:
             attr = line.strip().split("\t")
-            user_category[attr[0]] = attr[1]
+            if len(attr) == 2:
+                user_category[attr[0]] = attr[1]
 
     for (uid, v) in ad_info.items():
         na = ad_info[uid]["na"]
