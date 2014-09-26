@@ -90,7 +90,7 @@ def countPN(key, value, usertype, collect):
     collect[key]["miss"] = collect[key]["miss"] + value["miss"]
     collect[key]["click"] = collect[key]["click"] + value["click"]
 
-    if not usertype == "0":
+    if usertype and not usertype == "0":
         collect[key]["cover"] = collect[key]["cover"] +1
     collect[key]["total"] = collect[key]["total"] + 1
 
@@ -105,26 +105,33 @@ def analysis(day):
     ad_info = parse_ad(ad_file)
 
     print "parse yac..."
-    parse_common_user(yac_file, ad_info, "worderror")
+    parse_common_user(yac_file, ad_info, "worlderror")
     print "parse nav..."
     parse_common_user(nav_file,ad_info)
 
     nation_count = {}
     project_count = {}
     nation_project = {}
+
     print "compare with category..."
+    user_category = {}
     with open(user_category_file) as f:
         for line in f:
             attr = line.strip().split("\t")
-            uid = attr[0]
+            user_category[attr[0]] = attr[1]
 
-            if uid in ad_info:
-                na = ad_info[uid]["na"]
-                p = ad_info[uid]["p"]
-                union = na + "_" + p
-                countPN(na, ad_info[uid], attr[1],nation_count)
-                countPN(p, ad_info[uid],attr[1],project_count)
-                countPN(union, ad_info[uid],attr[1],nation_project)
+    for (uid, v) in ad_info.items():
+        na = ad_info[uid]["na"]
+        p = ad_info[uid]["p"]
+        union = na + "_" + p
+
+        user_type = None
+        if uid in user_category:
+            user_type = user_category[uid]
+
+        countPN(na, ad_info[uid], user_type, nation_count)
+        countPN(p, ad_info[uid], user_type, project_count)
+        countPN(union, ad_info[uid], user_type, nation_project)
 
     print "write to file..."
     result = {"nation": nation_count, "project": project_count, "nation_project": nation_project}
