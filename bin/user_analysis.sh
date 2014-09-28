@@ -7,9 +7,9 @@ if [ $# = 1 ] ; then
 else
     day = `date -d "1 days ago" +%Y%m%d`
 fi
-countNt $day
+countNt ${day}
 
-python $baseDir/bin/count_user_nation.py $day
+python $baseDir/bin/count_user_nation.py ${day}
 
 
 
