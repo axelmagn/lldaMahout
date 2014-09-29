@@ -106,11 +106,11 @@ def analysis(day):
 
     print "parse ad ..."
     ad_info = parse_ad(ad_file)
-
-    print "parse yac..."
-    parse_common_user(yac_file, ad_info, "worlderror")
+    # nav first
     print "parse nav..."
     parse_common_user(nav_file, ad_info)
+    print "parse yac..."
+    parse_common_user(yac_file, ad_info, "worlderror")
 
     nation_count = {}
     project_count = {}
