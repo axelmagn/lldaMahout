@@ -146,7 +146,7 @@ def analysis(day):
         filenames.append(user_file_name)
         user_file = open(user_file_name,"w")
         if "nation_project" == t:
-            user_file.write("%s,%s,%s,%s,%s,%s,%s\n"%("nation","project","ad hit","ad miss","total ad click","cover user","total user"))
+            user_file.write("%s,%s,%s,%s,%s,%s,%s\n"%("project","nation","ad hit","ad miss","total ad click","cover user","total user"))
         else:
             user_file.write("%s,%s,%s,%s,%s,%s\n"%(t,"ad hit","ad miss","total ad click","cover user","total user"))
         for k in sorted(collect):
