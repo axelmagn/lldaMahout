@@ -31,17 +31,19 @@ def parse_ad(filename):
             ad[uid]["click"] = ad[uid]["click"] +1
     return ad
 
-def parse_common_user(filename, ad, p=None):
+def parse_common_user(filename, ad, pid=None):
     with open(filename) as f:
         for line in f:
             attr = line.strip().split("\t")
             uid = attr[0].lower()
             if uid not in ad:
-                if p:
+                if pid:
+                    p = pid
                     na = attr[1].lower()
                 else:
                     p = attr[1]
                     na = attr[2].lower()
+
                 if len(na) == 2:
                     ad[uid] = {"hit": 0, "miss": 0, "click": 0, "p": p, "na": na}
 
@@ -135,6 +137,7 @@ def analysis(day):
         countPN(p, ad_info[uid], user_type, project_count)
         countPN(union, ad_info[uid], user_type, nation_project)
 
+    print project_count.keys()
     print "write to file..."
     result = {"nation": nation_count, "project": project_count, "nation_project": nation_project}
     filenames = []
