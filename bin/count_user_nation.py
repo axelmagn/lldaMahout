@@ -31,7 +31,7 @@ def parse_ad(filename):
             ad[uid]["click"] = ad[uid]["click"] +1
     return ad
 
-def parse_common_user(filename,ad,p=None):
+def parse_common_user(filename, ad, p=None):
     with open(filename) as f:
         for line in f:
             attr = line.strip().split("\t")
@@ -43,9 +43,7 @@ def parse_common_user(filename,ad,p=None):
                     p = attr[1]
                     na = attr[2].lower()
                 if len(na) == 2:
-                    ad[uid] = {"hit": 0, "miss": 0, "click": 0}
-                    ad[uid]["p"] = p
-                    ad[uid]["na"] = na
+                    ad[uid] = {"hit": 0, "miss": 0, "click": 0, "p": p, "na": na}
 
 
 def sendMail(subject,content, filename):
@@ -110,7 +108,7 @@ def analysis(day):
     print "parse yac..."
     parse_common_user(yac_file, ad_info, "worlderror")
     print "parse nav..."
-    parse_common_user(nav_file,ad_info)
+    parse_common_user(nav_file, ad_info)
 
     nation_count = {}
     project_count = {}
