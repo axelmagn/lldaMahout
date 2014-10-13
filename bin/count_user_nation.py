@@ -34,18 +34,21 @@ def parse_ad(filename):
 def parse_common_user(filename, ad, pid=None):
     with open(filename) as f:
         for line in f:
-            attr = line.strip().split("\t")
-            uid = attr[0].lower()
-            if uid not in ad:
-                if pid:
-                    p = pid
-                    na = attr[1].lower()
-                else:
-                    p = attr[1]
-                    na = attr[2].lower()
+            try:
+                attr = line.strip().split("\t")
+                uid = attr[0].lower()
+                if uid not in ad:
+                    if pid:
+                        p = pid
+                        na = attr[1].lower()
+                    else:
+                        p = attr[1]
+                        na = attr[2].lower()
 
-                if len(na) == 2:
-                    ad[uid] = {"hit": 0, "miss": 0, "click": 0, "p": p, "na": na}
+                    if len(na) == 2:
+                        ad[uid] = {"hit": 0, "miss": 0, "click": 0, "p": p, "na": na}
+            except Exception, e:
+                print line
 
 
 def sendMail(subject,content, filename):
