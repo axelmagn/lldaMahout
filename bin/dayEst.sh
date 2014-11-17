@@ -31,7 +31,7 @@ echo "                   updateAnaCategoryDist $oneDayAgo              " >> $log
 updateAnaCategoryDist $oneDayAgo
 echo "                   updateAnaCategoryDist   $oneDayAgo  finished            "  >> $logFile
 
-expired_day=`date +%Y%m%d -d "-20 days"`
+expired_day=`date +%Y%m%d -d "-10 days"`
 hadoop fs -rm -r url_count/all_projects/${expired_day}*
 
 
