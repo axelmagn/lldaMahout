@@ -33,5 +33,7 @@ echo "                   updateAnaCategoryDist   $oneDayAgo  finished           
 
 expired_day=`date +%Y%m%d -d "-10 days"`
 hadoop fs -rm -r url_count/all_projects/${expired_day}*
+hadoop fs -rm -r user_category/lldaMahout/docs/${expired_day}*
+hadoop fs -rm -r user_category/lldaMahout/docs/to${expired_day}*
 
 
